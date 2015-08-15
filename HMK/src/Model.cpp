@@ -1,0 +1,169 @@
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include "Model.h"
+#include "Material.h"
+#include "Utility.h"
+
+using namespace hmk;
+
+Model::Model()
+{
+	mTranslation = glm::mat4(1.0f);
+	mRotation = glm::mat4(1.0f);
+	mScale = glm::mat4(1.0f);
+}
+
+Model::~Model()
+{
+}
+
+bool Model::Load(std::string modelName)
+{
+	Assimp::Importer importer;
+	const aiScene *scene = importer.ReadFile(MODEL_PATH + modelName, aiProcess_Triangulate | aiProcess_FlipUVs |
+		aiProcess_CalcTangentSpace | aiProcess_FlipWindingOrder);
+
+	if (!scene)
+	{
+		HMK_LOG_ERROR("Could not load model: ", modelName);
+		return false;
+	}
+
+	// Handle scene
+	unsigned int numMeshes = scene->mNumMeshes;
+	for (unsigned int i = 0; i < numMeshes; ++i)
+	{
+		const aiMesh *mesh = scene->mMeshes[i];
+		const aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+
+		// Handle mesh
+		std::vector<unsigned int> indices;
+		for (unsigned int j = 0; j < mesh->mNumFaces; ++j)
+		{
+			aiFace *face = &mesh->mFaces[j];
+			indices.push_back(face->mIndices[0]);
+			indices.push_back(face->mIndices[1]);
+			indices.push_back(face->mIndices[2]);
+		}
+
+		std::vector<Vertex> vertices(mesh->mNumVertices);
+		for (unsigned int j = 0; j < mesh->mNumVertices; ++j)
+		{
+			aiVector3D pos = mesh->mVertices[j];
+			vertices[j].Position = glm::vec3(pos.x, pos.y, pos.z);
+
+			aiVector3D one3D(1.0f, 1.0f, 1.0f);
+			aiVector3D zero3D(0.0f, 0.0f, 0.0f);
+
+			aiVector3D norm = mesh->HasNormals() ? mesh->mNormals[j] : one3D;
+			vertices[j].Normal = glm::vec3(norm.x, norm.y, norm.z);
+
+			aiVector3D texCoord = mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][j] : zero3D;
+			vertices[j].TexCoord0 = glm::vec2(texCoord.x, texCoord.y);
+
+			aiVector3D tangent = mesh->HasTangentsAndBitangents() ? mesh->mTangents[j] : zero3D;
+			vertices[j].Tangent = glm::vec3(tangent.x, tangent.y, tangent.z);
+		}
+
+		// Handle material
+		Material mat;
+		aiColor4D color;
+		if (material->Get(AI_MATKEY_COLOR_AMBIENT, color) == aiReturn_SUCCESS)
+		{
+			mat.mAmbient = glm::vec3(color.r, color.g, color.b);
+		}
+		if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == aiReturn_SUCCESS)
+		{
+			mat.mBaseColor = glm::vec3(color.r, color.g, color.b);
+		}
+		if (material->Get(AI_MATKEY_COLOR_SPECULAR, color) == aiReturn_SUCCESS)
+		{
+			mat.mSpecularColor = glm::vec3(color.r, color.g, color.b);
+		}
+
+		float value;
+		if (material->Get(AI_MATKEY_REFRACTI, value) == aiReturn_SUCCESS)
+		{
+			mat.mIor = value;
+		}
+
+		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+		{
+			aiString filename;
+			material->GetTexture(aiTextureType_DIFFUSE, 0, &filename);
+			mat.mAlbedoTexName = HandleTextureName(filename.C_Str());
+			mat.HasTextures.x = 1;
+		}
+
+		if (material->GetTextureCount(aiTextureType_HEIGHT) > 0) // Normal map
+		{
+			aiString filename;
+			material->GetTexture(aiTextureType_HEIGHT, 0, &filename);
+			mat.mNormalTexName = HandleTextureName(filename.C_Str());
+			mat.HasTextures.y = 1;
+		}
+
+		if (material->GetTextureCount(aiTextureType_SHININESS) > 0)
+		{
+			aiString filename;
+			material->GetTexture(aiTextureType_SHININESS, 0, &filename);
+			mat.mRoughnessTexName = HandleTextureName(filename.C_Str());
+			mat.HasTextures.z = 1;
+		}
+
+		if (material->GetTextureCount(aiTextureType_SPECULAR) > 0)
+		{
+			aiString filename;
+			material->GetTexture(aiTextureType_SPECULAR, 0, &filename);
+			mat.mMetallicTexName = HandleTextureName(filename.C_Str());
+			mat.HasTextures.w = 1;
+		}
+
+		// Initialize mesh
+		std::shared_ptr<Mesh> mesh1 = std::make_shared<Mesh>(vertices, mat, indices);
+		mMeshes.push_back(mesh1);
+	}
+
+	importer.FreeScene();
+	return true;
+}
+
+void Model::Render()
+{
+	for(auto &mesh : mMeshes)
+	{
+		mesh->Render();
+	}
+}
+
+glm::mat4 Model::GetModelMatrix() const
+{
+	return mScale * mRotation * mTranslation;
+}
+
+void Model::Translate(glm::vec3 t)
+{
+	mTranslation = glm::translate(mTranslation, t);
+}
+
+void Model::Rotate(float degree, glm::vec3 axis)
+{
+	mRotation = glm::rotate(mRotation, glm::radians(degree), axis);
+}
+
+void Model::Scale(glm::vec3 s)
+{
+	mScale = glm::scale(mScale, s);
+}
+
+std::string Model::HandleTextureName(const char *filename)
+{
+	std::string name(filename);
+	int index = name.find_last_of('\\');
+	if(index != -1)
+	{
+		name.erase(name.begin(), name.begin() + index + 1);
+	}
+	return name;
+}

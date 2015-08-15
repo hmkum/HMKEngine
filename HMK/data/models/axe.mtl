@@ -1,0 +1,16 @@
+newmtl Axe
+illum 4
+Kd 0.50 0.50 0.50
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.50 0.50 0.50
+Ns 8.00
+
+map_Kd Axe_BaseColor.png
+map_Ks Axe_Metallic.png
+map_Bump Axe_Normal1.png
+map_bump Axe_Normal1.png
+bump Axe_Normal1.png
+map_Ns Axe_Roughness.png
+map_d Axe_Roughness.png
