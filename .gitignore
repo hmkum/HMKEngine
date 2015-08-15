@@ -1,3 +1,6 @@
 Debug/
 *.sdf
 /HMK/HMK
+/HMK/src/*.o
+/HMK/external/gl3w/src/*.o
+/HMK/external/stb/*.o
