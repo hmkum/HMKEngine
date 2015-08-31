@@ -17,6 +17,54 @@ void ErrorCallback(int error, const char *description)
 	HMK_LOG_ERROR(description);
 }
 
+void APIENTRY glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, 
+	const GLchar *message, const void *userParam)
+{
+	std::string errorMessage = "GL ";
+
+	switch (severity)
+	{
+	case GL_DEBUG_SEVERITY_LOW:
+		errorMessage += "LOW ->\t";
+		break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		errorMessage += "MEDIUM ->\t";
+		break;
+	case GL_DEBUG_SEVERITY_HIGH:
+		errorMessage += "HIGH ->\t";
+		break;
+	default:
+		break;
+	}
+
+	switch (type)
+	{
+	case GL_DEBUG_TYPE_ERROR:
+		errorMessage += "ERROR:\t";
+		break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+		errorMessage += "DEPRECATED BEHAVIOR:\t";
+		break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+		errorMessage += "UNDEFINED BEHAVIOR:\t";
+		break;
+	case GL_DEBUG_TYPE_PERFORMANCE:
+		errorMessage += "PERFORMANCE:\t";
+		break;
+	case GL_DEBUG_TYPE_PORTABILITY:
+		errorMessage += "PORTABILITY:\t";
+		break;
+	default:
+		errorMessage += "OTHER:\t";
+		break;
+	}
+
+	errorMessage += message;
+
+	HMK_LOG_ERROR(errorMessage);
+	HMK_PRINT(errorMessage);
+}
+
 int main()
 {
 	hmk::Logger::Inst().Initialize("engine.txt");
@@ -61,6 +109,16 @@ int main()
 		return -1;
 	}
 
+#if _DEBUG
+	if (glDebugMessageCallback)
+	{
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+		glDebugMessageCallback(glErrorCallback, nullptr);
+		GLuint unused = 0;
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &unused, true);
+	}
+#endif
+
 	Game *game = new Game();
 	game->Init();
 
@@ -103,7 +161,6 @@ int main()
 		acc += delta;
 		if (acc > 1.0)
 		{
-			std::cout << fps << std::endl;
 			acc = 0.0;
 			fps = 0.0;
 		}
