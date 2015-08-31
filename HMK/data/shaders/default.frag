@@ -19,6 +19,97 @@ layout(binding = 4) uniform samplerCube EnvMap;
 #define EPSILON 10e-5f
 #define saturate(value) clamp(value, 0.0f, 1.0f);
 
+// Disney diffuse model
+vec4 Diffuse(vec4 albedoColor)
+{
+	return albedoColor / PI;
+}
+
+float D_GGX(float a, float NdotH)
+{
+	float a2 = a * a;
+	float NdotH2 = NdotH * NdotH;
+
+	float d = NdotH2 * (a2 - 1.0f) + 1.0f;
+	return a2 / (d * d * PI);
+}
+
+float G_SmithSchlickGGX(float a, float NdotV, float NdotL)
+{
+	float k = a * 0.5f;
+	float v = NdotV / (NdotV * (1 - k) + k);
+	float l = NdotL / (NdotL * (1 - k) + k);
+
+	return v * l;
+}
+
+vec3 F_Schlick(vec3 specularColor, float VdotH)
+{
+	return(specularColor + (vec3(1.0f) - specularColor) * pow(1.0f - VdotH, 5.0f));
+}
+
+vec3 Specular_F_Roughness(vec3 specularColor, float a, float VdotH)
+{
+    // Sclick using roughness to attenuate fresnel.
+    return (specularColor + (max(vec3(1.0f - a), specularColor) - specularColor) * pow((1.0f - VdotH), 5.0f));
+}
+
+vec3 Specular(vec3 specularColor, float NdotL, float NdotV, float NdotH, float VdotH, float a)
+{
+	float D = D_GGX(a, NdotH);
+	float G = G_SmithSchlickGGX(a, NdotV, NdotL);
+	vec3 F  = F_Schlick(specularColor, VdotH);
+
+	return (D * G * F) / (4.0f * NdotL * NdotV + EPSILON);
+}
+
+void main()
+{
+	vec3 normal = normalize(Normal);
+	/*
+	vec3 normal = texture(NormalTexture, TexCoord0).rgb;
+	normal = 2.0f * normal - 1.0f;
+	normal = normalize(normal);
+	*/
+
+	vec3 LightDirection = normalize((vec3(0, 0, 4) - Position));
+	vec3 ViewDirection = normalize((uCameraPosition - Position));
+	vec3 HalfVector = normalize(ViewDirection + LightDirection);	
+
+	float LdotN = saturate(dot(LightDirection, normal));
+	float VdotN = saturate(dot(ViewDirection, normal));
+	float NdotH = saturate(dot(normal, HalfVector));
+	float VdotH = saturate(dot(ViewDirection, HalfVector));
+	
+	float Roughness = texture(RoughnessTexture, TexCoord0).r;
+	float Metalness = texture(MetalnessTexture, TexCoord0).r;
+	float Alpha = max(0.001f, Roughness * Roughness);
+
+	vec3 Reflected = reflect(-ViewDirection, normal);
+	vec4 ReflectedColor = pow(texture(EnvMap, Reflected), vec4(2.2f));
+
+	vec4 LightColor = vec4(1.0f, 0.9762f, 0.86f, 1.0f);
+
+	// Gamma corrected albedo color
+	vec4 AlbedoColor = pow(texture(AlbedoTexture, TexCoord0), vec4(2.2f));
+	vec4 BaseColor = Diffuse(AlbedoColor);
+	BaseColor = BaseColor - BaseColor * Metalness;
+	vec3 SpecularColor = mix(vec3(0.04f), AlbedoColor.rgb, Metalness);
+
+	vec3 Spec = Specular(SpecularColor, LdotN, VdotN, NdotH, VdotH, Alpha);
+	vec3 envFresnel = Specular_F_Roughness(SpecularColor, Alpha, VdotH);
+
+
+	vec4 Result = vec4(0.0f);
+	Result += LightColor * LdotN * (BaseColor * (1.0f - vec4(Spec, 1.0f)) + vec4(Spec, 1.0f));
+	Result += ReflectedColor * vec4(envFresnel, 1.0f) * 0.5f;
+
+	FinalColor = Result;
+	//FinalColor = pow(Result, vec4(1.0f / 2.2f));
+}
+
+
+/*
 vec4 BRDF_DisneyDiffuse(vec4 baseColor)
 {
 	return baseColor / PI;
@@ -70,57 +161,4 @@ float BRDF_Specular(float NdotV, float NdotL, float NdotH, float LdotH, float Ro
 	float G = BRDF_G_Unreal(NdotL, NdotV, Roughness); //BRDF_G_SmithGGXCorrelated(NdotL, NdotV, Roughness);
 	return (D * F * G) / 4 * NdotL * NdotV;
 }
-
-void main()
-{
-	vec3 normal = normalize(Normal);
-/*
-	vec3 N = normalize(texture(NormalTexture, TexCoord0).rgb);
-	N = normalize(2.0f * N - 1.0f);
-	vec3 T = normalize(Tangent - dot(Tangent, N) * N);
-	vec3 B = cross(T, N);
-	mat3 TBN = mat3(T, B, N);
-	vec3 normal = normalize(TBN * N); */
-
-	vec3 LightDirection = normalize((vec3(0, 0, 4) - Position));
-	vec3 ViewDirection = normalize((uCameraPosition - Position));
-	vec3 HalfVector = normalize(ViewDirection + LightDirection);	
-
-	float NdotL = saturate(dot(LightDirection, normal));
-	float NdotV = saturate(dot(ViewDirection, normal));
-	float LdotH = saturate(dot(LightDirection, HalfVector));
-	float NdotH = saturate(dot(normal, HalfVector));
-	float VdotH = saturate(dot(ViewDirection, HalfVector));
-	
-	float Roughness = texture(RoughnessTexture, TexCoord0).r;
-	float Metalness = texture(MetalnessTexture, TexCoord0).r;
-
-	vec3 Reflected = reflect(-ViewDirection, normal);
-	vec4 ReflectedColor = texture(EnvMap, Reflected);
-
-	vec4 AlbedoColor = pow(texture(AlbedoTexture, TexCoord0), vec4(2.2f));
-	vec4 BaseColor = AlbedoColor;
-	vec4 SpecularColor = AlbedoColor;
-
-	float F0 = 0.04f;
-	vec3 lum = vec3(0.2126f + 0.7152f + 0.0722f);
-	if(Metalness >= 0.6f)
-	{  
-		BaseColor = BaseColor - BaseColor * Metalness;
-		SpecularColor = vec4(1.0f, 0.976f, 0.86f, 1.0f); //vec4(0.04f - 0.04f * Metalness) + BaseColor * Metalness;
-		F0 = dot(lum, BaseColor.rgb);
-	}
-	
-	if(Metalness <= 0.2f)
-	{
-		BaseColor = BRDF_DisneyDiffuse(BaseColor);
-		F0 = 0.04f;
-	}
-
-	vec4 AmbientColor = BaseColor * 0.1f;
-
-	float DiffuseFactor = NdotL;
-	float SpecularFactor = BRDF_Specular(NdotV, NdotL, NdotH, LdotH, Roughness, F0);
-	FinalColor = AmbientColor + BaseColor * DiffuseFactor + SpecularColor * SpecularFactor * 20.0f;
-	//FinalColor = vec4(normal, 1.0f);
-}
+*/
