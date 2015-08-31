@@ -29,6 +29,6 @@ private:
 	Material mMaterial;
 	unsigned int mIndicesSize;
 
-	std::shared_ptr<Texture> mAlbedoTexture, mRoughnessTexture, mMetalnessTexture;
+	std::shared_ptr<Texture> mAlbedoTexture, mNormalTexture, mRoughnessTexture, mMetalnessTexture;
 };
 }

@@ -41,6 +41,12 @@ Mesh::Mesh(std::vector<Vertex> vertices, Material &material, std::vector<unsigne
 		mAlbedoTexture->Create(material.mAlbedoTexName);
 	}
 
+	if (material.HasTextures.y)
+	{
+		mNormalTexture = std::make_shared<Texture>();
+		mNormalTexture->Create(material.mNormalTexName);
+	}
+
 	if (material.HasTextures.z)
 	{
 		mRoughnessTexture = std::make_shared<Texture>();
@@ -62,37 +68,17 @@ void Mesh::Render()
 {
 	glBindVertexArray(mVAO);
 	
-	if (mAlbedoTexture)
-	{
-		mAlbedoTexture->Bind();
-	}
-
-	if (mRoughnessTexture)
-	{
-		mRoughnessTexture->Bind(1);
-	}
-
-	if (mMetalnessTexture)
-	{
-		mMetalnessTexture->Bind(2);
-	}
+	if (mAlbedoTexture) mAlbedoTexture->Bind();
+	if (mNormalTexture) mNormalTexture->Bind(1);
+	if (mRoughnessTexture) mRoughnessTexture->Bind(2);
+	if (mMetalnessTexture) mMetalnessTexture->Bind(3);
 	
 	glDrawElements(GL_TRIANGLES, mIndicesSize, GL_UNSIGNED_INT, 0);
 
-	if (mAlbedoTexture)
-	{
-		mAlbedoTexture->Unbind();
-	}
-
-	if (mRoughnessTexture)
-	{
-		mRoughnessTexture->Unbind();
-	}
-
-	if (mMetalnessTexture)
-	{
-		mMetalnessTexture->Unbind();
-	}
+	if (mAlbedoTexture)	mAlbedoTexture->Unbind();
+	if (mNormalTexture) mNormalTexture->Unbind();
+	if (mRoughnessTexture)	mRoughnessTexture->Unbind();
+	if (mMetalnessTexture) mMetalnessTexture->Unbind();
 
 	glBindVertexArray(0);
 }
