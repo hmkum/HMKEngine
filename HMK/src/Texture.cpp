@@ -22,7 +22,7 @@ bool Texture::Create(std::string name, int wrapMode, int minFilter, int magFilte
 
 	GLint imageFormat = GL_RGB;
 	if (mComponent == 1)
-		imageFormat = GL_ALPHA;
+		imageFormat = GL_RED;
 	else if (mComponent == 3)
 		imageFormat = GL_RGB;
 	else
