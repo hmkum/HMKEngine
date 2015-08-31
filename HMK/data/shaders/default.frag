@@ -10,8 +10,9 @@ out vec4 FinalColor;
 uniform vec3 uCameraPosition;
 
 layout(binding = 0) uniform sampler2D AlbedoTexture;
-layout(binding = 1) uniform sampler2D RoughnessTexture;
-layout(binding = 2) uniform sampler2D MetalnessTexture;
+layout(binding = 1) uniform sampler2D NormalTexture;
+layout(binding = 2) uniform sampler2D RoughnessTexture;
+layout(binding = 3) uniform sampler2D MetalnessTexture;
 layout(binding = 4) uniform samplerCube EnvMap;
 
 #define PI 3.1415926f
@@ -73,9 +74,16 @@ float BRDF_Specular(float NdotV, float NdotL, float NdotH, float LdotH, float Ro
 void main()
 {
 	vec3 normal = normalize(Normal);
+/*
+	vec3 N = normalize(texture(NormalTexture, TexCoord0).rgb);
+	N = normalize(2.0f * N - 1.0f);
+	vec3 T = normalize(Tangent - dot(Tangent, N) * N);
+	vec3 B = cross(T, N);
+	mat3 TBN = mat3(T, B, N);
+	vec3 normal = normalize(TBN * N); */
 
-	vec3 LightDirection = normalize(vec3(0, 0, 4) - Position);
-	vec3 ViewDirection = normalize(uCameraPosition - Position);
+	vec3 LightDirection = normalize((vec3(0, 0, 4) - Position));
+	vec3 ViewDirection = normalize((uCameraPosition - Position));
 	vec3 HalfVector = normalize(ViewDirection + LightDirection);	
 
 	float NdotL = saturate(dot(LightDirection, normal));
@@ -85,26 +93,34 @@ void main()
 	float VdotH = saturate(dot(ViewDirection, HalfVector));
 	
 	float Roughness = texture(RoughnessTexture, TexCoord0).r;
-	float Metalness = 0.0f;//texture(MetalnessTexture, TexCoord0).r;
-
-	float F0 = 0.04f;
-	if(Metalness != 0.0f)
-	{
-		float RefractiveIndex = 1.5f; // RI for Gold materials. I got this from http://refractiveindex.info/
-		F0 = pow(((1.0f - RefractiveIndex) / (1.0f + RefractiveIndex)), 2);
-	}
+	float Metalness = texture(MetalnessTexture, TexCoord0).r;
 
 	vec3 Reflected = reflect(-ViewDirection, normal);
 	vec4 ReflectedColor = texture(EnvMap, Reflected);
 
-	vec4 BaseColor = pow(texture(AlbedoTexture, TexCoord0), vec4(2.2f));
-	vec4 SpecularColor = vec4(1.0f);
+	vec4 AlbedoColor = pow(texture(AlbedoTexture, TexCoord0), vec4(2.2f));
+	vec4 BaseColor = AlbedoColor;
+	vec4 SpecularColor = AlbedoColor;
 
-	BaseColor = BRDF_DisneyDiffuse(BaseColor);
+	float F0 = 0.04f;
+	vec3 lum = vec3(0.2126f + 0.7152f + 0.0722f);
+	if(Metalness >= 0.6f)
+	{  
+		BaseColor = BaseColor - BaseColor * Metalness;
+		SpecularColor = vec4(1.0f, 0.976f, 0.86f, 1.0f); //vec4(0.04f - 0.04f * Metalness) + BaseColor * Metalness;
+		F0 = dot(lum, BaseColor.rgb);
+	}
+	
+	if(Metalness <= 0.2f)
+	{
+		BaseColor = BRDF_DisneyDiffuse(BaseColor);
+		F0 = 0.04f;
+	}
+
 	vec4 AmbientColor = BaseColor * 0.1f;
 
 	float DiffuseFactor = NdotL;
 	float SpecularFactor = BRDF_Specular(NdotV, NdotL, NdotH, LdotH, Roughness, F0);
-	FinalColor = AmbientColor + BaseColor * DiffuseFactor + ReflectedColor * SpecularFactor;
-	//FinalColor = pow(FinalColor, vec4(2.2f));
+	FinalColor = AmbientColor + BaseColor * DiffuseFactor + SpecularColor * SpecularFactor * 20.0f;
+	//FinalColor = vec4(normal, 1.0f);
 }
