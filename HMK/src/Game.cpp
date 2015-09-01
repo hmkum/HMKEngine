@@ -28,12 +28,15 @@ bool Game::Init()
 	
 	mSphere = std::make_shared<hmk::Model>();
 	mSphere->Load("sphere.obj");
-	mSphere->Translate(glm::vec3(-3.0f, 0.0f, 0.0f));
+	mSphere->Translate(glm::vec3(-5.0f, 0.0f, 0.0f));
+	//mSphere->Scale(glm::vec3(0.1f));
+	//mSphere->Rotate(180.0f, glm::vec3(0, 1, 0));
 
 	mAxe = std::make_shared<hmk::Model>();
 	mAxe->Load("axe.obj");
 	mAxe->Scale(glm::vec3(0.1f));
 	mAxe->Rotate(90.0f, glm::vec3(1, 0, 0));
+	mAxe->Rotate(180.0f, glm::vec3(0, 0, 1));
 
 	mSkybox = std::make_shared<hmk::Skybox>();
 	mSkybox->Load("LancellottiChapel/");
@@ -52,6 +55,27 @@ void Game::Update(float dt)
 	if (hmk::KeyManager::GetKey(HMK_KEY_D))
 		mCamera->MoveRight(dt);
 
+	if (hmk::KeyManager::GetKey(HMK_KEY_KP_1))
+	{
+		mSphere->SetRoughness(mSphere->GetRoughness() - dt);
+		HMK_PRINT("Roughness: ", mSphere->GetRoughness());
+	}
+	if (hmk::KeyManager::GetKey(HMK_KEY_KP_3))
+	{
+		mSphere->SetRoughness(mSphere->GetRoughness() + dt);
+		HMK_PRINT("Roughness: ", mSphere->GetRoughness());
+	}
+	if (hmk::KeyManager::GetKey(HMK_KEY_KP_4))
+	{
+		mSphere->SetMetallic(mSphere->GetMetallic() - dt);
+		HMK_PRINT("Metallic: ", mSphere->GetMetallic());
+	}
+	if (hmk::KeyManager::GetKey(HMK_KEY_KP_6))
+	{
+		mSphere->SetMetallic(mSphere->GetMetallic() + dt);
+		HMK_PRINT("Metallic: ", mSphere->GetMetallic());
+	}
+	
 	mAxe->Rotate(35.0f * dt, glm::vec3(0, 0, 1));
 }
 
@@ -66,10 +90,10 @@ void Game::Render()
 	mBasicShader.SetUniform("uViewMatrix", mCamera->GetViewMatrix());
 	mBasicShader.SetUniform("uProjMatrix", mCamera->GetProjMatrix());
 	mBasicShader.SetUniform("uCameraPosition", mCamera->GetPosition());
-	mSphere->Render();
+	mSphere->Render(mBasicShader);
 	
 	mBasicShader.SetUniform("uModel", mAxe->GetModelMatrix());
-	mAxe->Render();
+	mAxe->Render(mBasicShader);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 

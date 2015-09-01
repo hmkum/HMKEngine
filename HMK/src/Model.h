@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "Mesh.h"
+#include "ShaderProgram.h"
 #include "Utility.h"
 
 namespace hmk
@@ -19,13 +20,20 @@ public:
 	Model();
 	~Model();
 	bool Load(std::string modelName);
-	void Render();
+	void Render(ShaderProgram &shader);
 
 	glm::mat4 GetModelMatrix() const;
 
 	void Translate(glm::vec3 t);
 	void Rotate(float degree, glm::vec3 axis);
 	void Scale(glm::vec3 s);
+
+	void SetRoughness(float r);
+	float GetRoughness();
+
+	void SetMetallic(float m);
+	float GetMetallic();
+
 private:
 	std::string HandleTextureName(const char *filename);
 private:

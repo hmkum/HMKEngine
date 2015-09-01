@@ -69,31 +69,18 @@ bool Model::Load(std::string modelName)
 		// Handle material
 		Material mat;
 		aiColor4D color;
-		if (material->Get(AI_MATKEY_COLOR_AMBIENT, color) == aiReturn_SUCCESS)
-		{
-			mat.mAmbient = glm::vec3(color.r, color.g, color.b);
-		}
 		if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == aiReturn_SUCCESS)
 		{
 			mat.mBaseColor = glm::vec3(color.r, color.g, color.b);
 		}
-		if (material->Get(AI_MATKEY_COLOR_SPECULAR, color) == aiReturn_SUCCESS)
-		{
-			mat.mSpecularColor = glm::vec3(color.r, color.g, color.b);
-		}
 
-		float value;
-		if (material->Get(AI_MATKEY_REFRACTI, value) == aiReturn_SUCCESS)
-		{
-			mat.mIor = value;
-		}
-
+		float value = 0.0f;
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
 		{
 			aiString filename;
 			material->GetTexture(aiTextureType_DIFFUSE, 0, &filename);
 			mat.mAlbedoTexName = HandleTextureName(filename.C_Str());
-			mat.HasTextures.x = 1;
+			mat.mHasTextures.x = 1;
 		}
 
 		if (material->GetTextureCount(aiTextureType_HEIGHT) > 0) // Normal map
@@ -101,7 +88,7 @@ bool Model::Load(std::string modelName)
 			aiString filename;
 			material->GetTexture(aiTextureType_HEIGHT, 0, &filename);
 			mat.mNormalTexName = HandleTextureName(filename.C_Str());
-			mat.HasTextures.y = 1;
+			mat.mHasTextures.y = 1;
 		}
 
 		if (material->GetTextureCount(aiTextureType_SHININESS) > 0)
@@ -109,7 +96,7 @@ bool Model::Load(std::string modelName)
 			aiString filename;
 			material->GetTexture(aiTextureType_SHININESS, 0, &filename);
 			mat.mRoughnessTexName = HandleTextureName(filename.C_Str());
-			mat.HasTextures.z = 1;
+			mat.mHasTextures.z = 1;
 		}
 
 		if (material->GetTextureCount(aiTextureType_SPECULAR) > 0)
@@ -117,7 +104,7 @@ bool Model::Load(std::string modelName)
 			aiString filename;
 			material->GetTexture(aiTextureType_SPECULAR, 0, &filename);
 			mat.mMetallicTexName = HandleTextureName(filename.C_Str());
-			mat.HasTextures.w = 1;
+			mat.mHasTextures.w = 1;
 		}
 
 		// Initialize mesh
@@ -129,11 +116,11 @@ bool Model::Load(std::string modelName)
 	return true;
 }
 
-void Model::Render()
+void Model::Render(ShaderProgram &shader)
 {
 	for(auto &mesh : mMeshes)
 	{
-		mesh->Render();
+		mesh->Render(shader);
 	}
 }
 
@@ -155,6 +142,36 @@ void Model::Rotate(float degree, glm::vec3 axis)
 void Model::Scale(glm::vec3 s)
 {
 	mScale = glm::scale(mScale, s);
+}
+
+void Model::SetRoughness(float r)
+{
+	if (r >= 1.0f) r = 1.0f;
+	if (r <= 0.0f) r = 0.0f;
+	for (auto &mesh : mMeshes)
+	{
+		mesh->SetRoughness(r);
+	}
+}
+
+float Model::GetRoughness()
+{
+	return mMeshes[0]->GetRoughness();
+}
+
+void Model::SetMetallic(float m)
+{
+	if (m >= 1.0f) m = 1.0f;
+	if (m <= 0.0f) m = 0.0f;
+	for (auto &mesh : mMeshes)
+	{
+		mesh->SetMetallic(m);
+	}
+}
+
+float Model::GetMetallic()
+{
+	return mMeshes[0]->GetMetallic();
 }
 
 std::string Model::HandleTextureName(const char *filename)

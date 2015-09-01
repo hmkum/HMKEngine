@@ -35,36 +35,38 @@ Mesh::Mesh(std::vector<Vertex> vertices, Material &material, std::vector<unsigne
 
 	glBindVertexArray(0);
 
-	if(material.HasTextures.x)
+	if(material.mHasTextures.x)
 	{
 		mAlbedoTexture = std::make_shared<Texture>();
 		mAlbedoTexture->Create(material.mAlbedoTexName);
 	}
 
-	if (material.HasTextures.y)
+	if (material.mHasTextures.y)
 	{
 		mNormalTexture = std::make_shared<Texture>();
 		mNormalTexture->Create(material.mNormalTexName);
 	}
 
-	if (material.HasTextures.z)
+	if (material.mHasTextures.z)
 	{
 		mRoughnessTexture = std::make_shared<Texture>();
 		mRoughnessTexture->Create(material.mRoughnessTexName);
 	}
 
-	if(material.HasTextures.w)
+	if(material.mHasTextures.w)
 	{
 		mMetalnessTexture = std::make_shared<Texture>();
 		mMetalnessTexture->Create(material.mMetallicTexName);
 	}
+
+	mMaterialUniform.mBaseColor = glm::vec4(mMaterial.mBaseColor, 1.0f);
 }
 
 Mesh::~Mesh()
 {
 }
 
-void Mesh::Render()
+void Mesh::Render(ShaderProgram &shader)
 {
 	glBindVertexArray(mVAO);
 	
@@ -73,6 +75,8 @@ void Mesh::Render()
 	if (mRoughnessTexture) mRoughnessTexture->Bind(2);
 	if (mMetalnessTexture) mMetalnessTexture->Bind(3);
 	
+	shader.SetUniform("uHasTextures", mMaterial.mHasTextures);
+	shader.SetUniform("uMaterial", mMaterialUniform);
 	glDrawElements(GL_TRIANGLES, mIndicesSize, GL_UNSIGNED_INT, 0);
 
 	if (mAlbedoTexture)	mAlbedoTexture->Unbind();
@@ -81,4 +85,24 @@ void Mesh::Render()
 	if (mMetalnessTexture) mMetalnessTexture->Unbind();
 
 	glBindVertexArray(0);
+}
+
+void Mesh::SetRoughness(float r)
+{
+	mMaterialUniform.mRoughness = r;
+}
+
+float Mesh::GetRoughness()
+{
+	return mMaterialUniform.mRoughness;
+}
+
+void Mesh::SetMetallic(float m)
+{
+	mMaterialUniform.mMetallic = m;
+}
+
+float Mesh::GetMetallic()
+{
+	return mMaterialUniform.mMetallic;
 }
