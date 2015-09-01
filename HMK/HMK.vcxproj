@@ -46,7 +46,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>E:\Projeler\HMK\HMK\external\glm\glm;E:\Projeler\HMK\HMK\external\assimp;E:\Projeler\HMK\HMK\external\gl3w\include;E:\Projeler\HMK\HMK\external\glfw3.1-32\include;$(IncludePath)</IncludePath>
+    <IncludePath>E:\Projeler\HMK\HMK\external\glm;E:\Projeler\HMK\HMK\external;E:\Projeler\HMK\HMK\external\gl3w\include;E:\Projeler\HMK\HMK\external\glfw3.1-32\include;$(IncludePath)</IncludePath>
     <LibraryPath>E:\Projeler\HMK\HMK\external\assimp\lib;E:\Projeler\HMK\HMK\external\glfw3.1-32\lib-vc2013;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

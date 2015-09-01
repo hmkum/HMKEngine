@@ -5,3 +5,4 @@ Debug/
 /HMK/external/gl3w/src/*.o
 /HMK/external/stb/*.o
 *.opensdf
+*.tlog
