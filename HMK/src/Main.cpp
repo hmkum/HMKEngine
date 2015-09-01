@@ -141,6 +141,7 @@ int main()
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CW);
 	glEnable(GL_FRAMEBUFFER_SRGB);
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // https://www.opengl.org/wiki/Cubemap_Texture#Seamless_cubemap
 	glClearColor(0.2f, 0.3f, 0.2f, 1.0f);
 
 	double fps = 0.0;
