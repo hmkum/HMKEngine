@@ -53,6 +53,18 @@
     <ClCompile Include="external\stb\stb_image.c">
       <Filter>external</Filter>
     </ClCompile>
+    <ClCompile Include="external\imgui-1.45\imgui\imgui.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui-1.45\imgui\imgui_demo.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui-1.45\imgui\imgui_draw.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
+    <ClCompile Include="external\imgui-1.45\imgui\imgui_impl_gl3.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">

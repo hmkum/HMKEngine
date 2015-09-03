@@ -1,9 +1,12 @@
 #include "Game.h"
+#include <imgui/imgui.h>
 #include "KeyManager.h"
 #include "Utility.h"
 
 Game::Game()
 {
+	mMouseRightPressed = false;
+	mLightPosition = glm::vec3(0, 0, 4);
 }
 
 Game::~Game()
@@ -28,18 +31,18 @@ bool Game::Init()
 	
 	mSphere = std::make_shared<hmk::Model>();
 	mSphere->Load("sphere.obj");
-	mSphere->Translate(glm::vec3(-5.0f, 0.0f, 0.0f));
+	//mSphere->Translate(glm::vec3(-5.0f, 0.0f, 0.0f));
 	//mSphere->Scale(glm::vec3(0.1f));
 	//mSphere->Rotate(180.0f, glm::vec3(0, 1, 0));
 
-	mAxe = std::make_shared<hmk::Model>();
-	mAxe->Load("axe.obj");
-	mAxe->Scale(glm::vec3(0.1f));
-	mAxe->Rotate(90.0f, glm::vec3(1, 0, 0));
-	mAxe->Rotate(180.0f, glm::vec3(0, 0, 1));
+	//mAxe = std::make_shared<hmk::Model>();
+	//mAxe->Load("axe.obj");
+	//mAxe->Scale(glm::vec3(0.1f));
+	//mAxe->Rotate(90.0f, glm::vec3(1, 0, 0));
+	//mAxe->Rotate(180.0f, glm::vec3(0, 0, 1));
 
 	mSkybox = std::make_shared<hmk::Skybox>();
-	mSkybox->Load("LancellottiChapel/");
+	mSkybox->Load("Bridge/");
 
 	return true;
 }
@@ -55,54 +58,43 @@ void Game::Update(float dt)
 	if (hmk::KeyManager::GetKey(HMK_KEY_D))
 		mCamera->MoveRight(dt);
 
-	if (hmk::KeyManager::GetKey(HMK_KEY_KP_1))
-	{
-		mSphere->SetRoughness(mSphere->GetRoughness() - dt);
-		HMK_PRINT("Roughness: ", mSphere->GetRoughness());
-	}
-	if (hmk::KeyManager::GetKey(HMK_KEY_KP_3))
-	{
-		mSphere->SetRoughness(mSphere->GetRoughness() + dt);
-		HMK_PRINT("Roughness: ", mSphere->GetRoughness());
-	}
-	if (hmk::KeyManager::GetKey(HMK_KEY_KP_4))
-	{
-		mSphere->SetMetallic(mSphere->GetMetallic() - dt);
-		HMK_PRINT("Metallic: ", mSphere->GetMetallic());
-	}
-	if (hmk::KeyManager::GetKey(HMK_KEY_KP_6))
-	{
-		mSphere->SetMetallic(mSphere->GetMetallic() + dt);
-		HMK_PRINT("Metallic: ", mSphere->GetMetallic());
-	}
+	static float r = 0.0f, m = 0.0f;
+	ImGui::Begin("Material");
+	ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f);
+	ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f);
+	ImGui::Separator();
+	ImGui::DragFloat3("Light Position", (float*)&mLightPosition.x, 0.1f);
+	ImGui::End();
+	mSphere->SetRoughness(r);
+	mSphere->SetMetallic(m);
 	
-	mAxe->Rotate(35.0f * dt, glm::vec3(0, 0, 1));
+	//mAxe->Rotate(35.0f * dt, glm::vec3(0, 0, 1));
 }
 
 void Game::Render()
-{
-	mBasicShader.Use();
-
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, mSkybox->GetTextureID());
-
-	mBasicShader.SetUniform("uModel", mSphere->GetModelMatrix());
-	mBasicShader.SetUniform("uViewMatrix", mCamera->GetViewMatrix());
-	mBasicShader.SetUniform("uProjMatrix", mCamera->GetProjMatrix());
-	mBasicShader.SetUniform("uCameraPosition", mCamera->GetPosition());
-	mSphere->Render(mBasicShader);
-	
-	mBasicShader.SetUniform("uModel", mAxe->GetModelMatrix());
-	mAxe->Render(mBasicShader);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
+{	
 	mSkyboxShader.Use();
 	glm::mat4 skyboxModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f));
 	mSkyboxShader.SetUniform("uModel", skyboxModelMatrix);
 	mSkyboxShader.SetUniform("uViewMatrix", mCamera->GetViewMatrix());
 	mSkyboxShader.SetUniform("uProjMatrix", mCamera->GetProjMatrix());
 	mSkybox->Render();
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, mSkybox->GetTextureID());
+
+	mBasicShader.Use();
+	mBasicShader.SetUniform("uModel", mSphere->GetModelMatrix());
+	mBasicShader.SetUniform("uViewMatrix", mCamera->GetViewMatrix());
+	mBasicShader.SetUniform("uProjMatrix", mCamera->GetProjMatrix());
+	mBasicShader.SetUniform("uCameraPosition", mCamera->GetPosition());
+	mBasicShader.SetUniform("uLightPosition", mLightPosition);
+	mSphere->Render(mBasicShader);
+	
+	//mBasicShader.SetUniform("uModel", mAxe->GetModelMatrix());
+	//mAxe->Render(mBasicShader);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 void Game::KeyInput(int key, int scancode, int action, int mods)
@@ -126,9 +118,14 @@ void Game::CursorPosInput(double xPos, double yPos)
 	double yOffset = mCursorState.last.y - yPos;
 	mCursorState.last = glm::vec2(xPos, yPos);
 
-	mCamera->Rotate((float)xOffset, (float)yOffset);
+	if(mMouseRightPressed)
+		mCamera->Rotate((float)xOffset, (float)yOffset);
 }
 
 void Game::MouseButtonInput(int button, int action, int mods)
 {
+	if (button == HMK_MOUSE_BUTTON_RIGHT && action == HMK_PRESS)
+		mMouseRightPressed = true;
+	else
+		mMouseRightPressed = false;
 }

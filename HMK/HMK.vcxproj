@@ -41,12 +41,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\Projeler\HMK\HMK\external\glm;E:\Projeler\HMK\HMK\external;E:\Projeler\HMK\HMK\external\gl3w\include;E:\Projeler\HMK\HMK\external\glfw3.1-32\include;$(IncludePath)</IncludePath>
+    <IncludePath>E:\Projeler\HMK\HMK\external\imgui-1.45;E:\Projeler\HMK\HMK\external\glm;E:\Projeler\HMK\HMK\external;E:\Projeler\HMK\HMK\external\gl3w\include;E:\Projeler\HMK\HMK\external\glfw3.1-32\include;$(IncludePath)</IncludePath>
     <LibraryPath>E:\Projeler\HMK\HMK\external\assimp\lib;E:\Projeler\HMK\HMK\external\glfw3.1-32\lib-vc2013;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>E:\Projeler\HMK\HMK\external\glm;E:\Projeler\HMK\HMK\external;E:\Projeler\HMK\HMK\external\gl3w\include;E:\Projeler\HMK\HMK\external\glfw3.1-32\include;$(IncludePath)</IncludePath>
+    <IncludePath>E:\Projeler\HMK\HMK\external\imgui-1.45;E:\Projeler\HMK\HMK\external\glm;E:\Projeler\HMK\HMK\external;E:\Projeler\HMK\HMK\external\gl3w\include;E:\Projeler\HMK\HMK\external\glfw3.1-32\include;$(IncludePath)</IncludePath>
     <LibraryPath>E:\Projeler\HMK\HMK\external\assimp\lib;E:\Projeler\HMK\HMK\external\glfw3.1-32\lib-vc2013;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -83,6 +83,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="external\gl3w\src\gl3w.c" />
+    <ClCompile Include="external\imgui-1.45\imgui\imgui.cpp" />
+    <ClCompile Include="external\imgui-1.45\imgui\imgui_demo.cpp" />
+    <ClCompile Include="external\imgui-1.45\imgui\imgui_draw.cpp" />
+    <ClCompile Include="external\imgui-1.45\imgui\imgui_impl_gl3.cpp" />
     <ClCompile Include="external\stb\stb_image.c" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Game.cpp" />

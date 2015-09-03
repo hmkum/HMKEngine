@@ -1,6 +1,10 @@
 #include <iostream>
 #include <GL/gl3w.h>
+#define GLFW_EXPOSE_NATIVE_WGL
+#define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+#include <imgui/imgui_impl_gl3.h>
 #include "Game.h"
 #include "Utility.h"
 
@@ -119,10 +123,11 @@ int main()
 	}
 #endif
 
+	ImGui_ImplGlfwGL3_Init(window, false);
+
 	Game *game = new Game();
 	game->Init();
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetKeyCallback(window, KeyCallback);
 	glfwSetCursorPosCallback(window, CursorPosCallback);
 	glfwSetMouseButtonCallback(window, MouseButtonCallback);
@@ -148,13 +153,14 @@ int main()
 	double acc = 0.0;
 	while (!glfwWindowShouldClose(window))
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glfwPollEvents();
+		ImGui_ImplGlfwGL3_NewFrame();
 
 		double now = glfwGetTime();
 		double delta = now - lastTime;
 		lastTime = now;
 
-		glfwPollEvents();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		game->Update((float)delta);
 		game->Render();
 
@@ -166,12 +172,14 @@ int main()
 			fps = 0.0;
 		}
 
+		ImGui::Render();
 		glfwSwapBuffers(window);
 	}
 
 	delete game;
 	hmk::Logger::Inst().Shutdown();
 	glfwDestroyWindow(window);
+	ImGui_ImplGlfwGL3_Shutdown();
 	glfwTerminate();
 	return 0;
 }

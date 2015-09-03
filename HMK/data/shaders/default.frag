@@ -15,6 +15,7 @@ struct Material
 };
 
 uniform vec3 uCameraPosition;
+uniform vec3 uLightPosition;
 uniform ivec4 uHasTextures;
 uniform Material uMaterial;
 
@@ -74,6 +75,9 @@ vec3 Specular(vec3 specularColor, float NdotL, float NdotV, float NdotH, float V
 
 void main()
 {
+	const float Gamma = 2.2f;
+	const float InvGamma = 1.0f / Gamma;
+
 	vec3 normal = normalize(Normal);
 	if(uHasTextures.y > 0)
 	{
@@ -87,7 +91,7 @@ void main()
 	}
 	
 	vec4 LightColor = vec4(1.0f, 0.9762f, 0.86f, 1.0f);
-	vec3 LightDirection = normalize((vec3(0, 0, 4) - Position));
+	vec3 LightDirection = normalize(uLightPosition - Position);
 	vec3 ViewDirection = normalize((uCameraPosition - Position));
 	vec3 HalfVector = normalize(ViewDirection + LightDirection);	
 
@@ -109,15 +113,15 @@ void main()
 		Metallic = texture(MetalnessTexture, TexCoord0).r;
 	}
 
-	vec4 AlbedoColor = uMaterial.BaseColor;
+	vec4 AlbedoColor = pow(uMaterial.BaseColor, vec4(Gamma, Gamma, Gamma, 1.0f));
 	if(uHasTextures.x > 0)
 	{
 		// Gamma corrected albedo color
-		AlbedoColor = pow(texture(AlbedoTexture, TexCoord0), vec4(2.2f));
+		AlbedoColor = pow(texture(AlbedoTexture, TexCoord0), vec4(Gamma, Gamma, Gamma, 1.0f));
 	}
 
 	vec4 BaseColor = Diffuse(AlbedoColor);
-	BaseColor = mix(BaseColor, vec4(0.0f), Metallic);
+	BaseColor = mix(BaseColor, vec4(0.0f, 0.0f, 0.0f, 1.0f), Metallic);
 	vec3 SpecularColor = mix(vec3(0.04f), AlbedoColor.rgb, Metallic);
 
 	vec3 Spec = Specular(SpecularColor, LdotN, VdotN, NdotH, VdotH, Alpha);
@@ -125,12 +129,12 @@ void main()
 
 	vec3 Reflected = reflect(-ViewDirection, normal);
 	float mipIndex = Roughness * Roughness * 8.0f;
-	vec4 ReflectedColor = pow(textureLod(EnvMap, Reflected, mipIndex), vec4(2.2f));
+	vec4 ReflectedColor = pow(textureLod(EnvMap, Reflected, mipIndex), vec4(Gamma, Gamma, Gamma, 1.0f));
 
-	vec4 Result = vec4(0.0f);
+	vec4 Result = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	Result += BaseColor * 0.1f; // Ambient
 	Result += LightColor * LdotN * (BaseColor * (1.0f - vec4(Spec, 1.0f)) + vec4(Spec, 1.0f));
-	Result += ReflectedColor * vec4(envFresnel, 1.0f) * 0.8f;
+	Result += ReflectedColor * vec4(envFresnel, 1.0f) * 0.7f;
 
-	FinalColor = Result;
+	FinalColor = pow(Result, vec4(InvGamma, InvGamma, InvGamma, 1.0f));
 }

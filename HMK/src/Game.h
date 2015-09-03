@@ -28,6 +28,8 @@ private:
 	std::shared_ptr<hmk::Skybox> mSkybox;
 	hmk::ShaderProgram mBasicShader, mSkyboxShader;
 	std::shared_ptr<hmk::Camera> mCamera;
+	
+	glm::vec3 mLightPosition;
 
 private:
 	struct CursorState_t
@@ -35,4 +37,5 @@ private:
 		bool firstMouse = true;
 		glm::vec2 last = glm::vec2(400.0f, 300.0f);
 	} mCursorState;
+	bool mMouseRightPressed;
 };
