@@ -24,6 +24,7 @@ class Mesh
 public:
 	Mesh(std::vector<Vertex> vertices, Material &material, std::vector<unsigned int> indices);
 	~Mesh();
+	void Render();
 	void Render(ShaderProgram &shader);
 
 	void SetRoughness(float r);

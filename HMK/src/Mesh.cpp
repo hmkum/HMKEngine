@@ -66,6 +66,13 @@ Mesh::~Mesh()
 {
 }
 
+void Mesh::Render()
+{
+	glBindVertexArray(mVAO);
+	glDrawElements(GL_TRIANGLES, mIndicesSize, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+}
+
 void Mesh::Render(ShaderProgram &shader)
 {
 	glBindVertexArray(mVAO);

@@ -20,6 +20,7 @@ public:
 	Model();
 	~Model();
 	bool Load(std::string modelName);
+	void Render();
 	void Render(ShaderProgram &shader);
 
 	glm::mat4 GetModelMatrix() const;

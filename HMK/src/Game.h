@@ -8,6 +8,7 @@
 #include "ShaderProgram.h"
 #include "Model.h"
 #include "Skybox.h"
+#include "ShadowMap.h"
 
 class Game
 {
@@ -24,12 +25,14 @@ public:
 	void Render();
 
 private:
-	std::shared_ptr<hmk::Model> mAxe, mSphere;
+	std::shared_ptr<hmk::Model> mAxe, mSphere, mSphere2, mPlane;
 	std::shared_ptr<hmk::Skybox> mSkybox;
-	hmk::ShaderProgram mBasicShader, mSkyboxShader;
+	hmk::ShaderProgram mBasicShader, mSkyboxShader, mSimpleDepthShader;
 	std::shared_ptr<hmk::Camera> mCamera;
-	
+	std::shared_ptr<hmk::ShadowMap> mShadowMap;
 	glm::vec3 mLightPosition;
+	glm::mat4 mLightProj;
+	glm::mat4 mLightSpaceMatrix;
 
 private:
 	struct CursorState_t

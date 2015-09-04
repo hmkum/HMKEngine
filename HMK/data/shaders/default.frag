@@ -5,6 +5,7 @@ in vec3 Position;
 in vec2 TexCoord0;
 in vec3 Normal;
 in vec3 Tangent;
+in vec4 FragPosLightSpace;
 out vec4 FinalColor;
 
 struct Material
@@ -24,6 +25,7 @@ layout(binding = 1) uniform sampler2D NormalTexture;
 layout(binding = 2) uniform sampler2D RoughnessTexture;
 layout(binding = 3) uniform sampler2D MetalnessTexture;
 layout(binding = 4) uniform samplerCube EnvMap;
+layout(binding = 5) uniform sampler2D DepthTexture;
 
 #define PI 3.1415926f
 #define EPSILON 10e-5f
@@ -71,6 +73,34 @@ vec3 Specular(vec3 specularColor, float NdotL, float NdotV, float NdotH, float V
 	vec3 F  = F_Schlick(specularColor, VdotH);
 
 	return (D * G * F) / (4.0f * NdotL * NdotV + EPSILON);
+}
+
+float CalculateShadow(vec4 fragPosLightSpace)
+{
+	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+	projCoords = projCoords * 0.5f + 0.5f;
+
+	float closestDepth = texture(DepthTexture, projCoords.xy).r;
+	float currentDepth = projCoords.z;
+
+	float shadow = 0.0f;
+	vec2 texelSize = 1.0f / textureSize(DepthTexture, 0);
+	for(float x = -1.5f; x <= 1.5f; ++x)
+	{
+		for(float y = -1.5f; y <= 1.5f; ++y)
+		{
+			float pcfDepth = texture(DepthTexture, projCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += pcfDepth < currentDepth ? 0.0f : 1.0f;
+		}
+	}
+
+	shadow /= 16.0f;
+
+	if(projCoords.z > 1.0f)
+		shadow = 1.0f;
+
+	return shadow;
 }
 
 void main()
@@ -131,9 +161,11 @@ void main()
 	float mipIndex = Roughness * Roughness * 8.0f;
 	vec4 ReflectedColor = pow(textureLod(EnvMap, Reflected, mipIndex), vec4(Gamma, Gamma, Gamma, 1.0f));
 
+	float Shadow = CalculateShadow(FragPosLightSpace);
+
 	vec4 Result = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	Result += BaseColor * 0.1f; // Ambient
-	Result += LightColor * LdotN * (BaseColor * (1.0f - vec4(Spec, 1.0f)) + vec4(Spec, 1.0f));
+	Result += BaseColor * 0.05f; // Ambient
+	Result += Shadow * LightColor * LdotN * (BaseColor * (1.0f - vec4(Spec, 1.0f)) + vec4(Spec, 1.0f));
 	Result += ReflectedColor * vec4(envFresnel, 1.0f) * 0.7f;
 
 	FinalColor = pow(Result, vec4(InvGamma, InvGamma, InvGamma, 1.0f));

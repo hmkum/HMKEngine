@@ -116,6 +116,14 @@ bool Model::Load(std::string modelName)
 	return true;
 }
 
+void Model::Render()
+{
+	for (auto &mesh : mMeshes)
+	{
+		mesh->Render();
+	}
+}
+
 void Model::Render(ShaderProgram &shader)
 {
 	for(auto &mesh : mMeshes)

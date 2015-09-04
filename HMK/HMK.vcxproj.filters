@@ -65,6 +65,9 @@
     <ClCompile Include="external\imgui-1.45\imgui\imgui_impl_gl3.cpp">
       <Filter>external</Filter>
     </ClCompile>
+    <ClCompile Include="src\ShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -112,6 +115,9 @@
     <ClInclude Include="src\Material.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ShadowMap.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\default.frag">
@@ -124,6 +130,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="data\shaders\skybox.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\simple_depth.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\simple_depth.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
