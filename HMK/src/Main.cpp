@@ -85,6 +85,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_SAMPLES, 8);
 
 	auto window = glfwCreateWindow(800, 600, "HMK", nullptr, nullptr);
 	if (window == nullptr)
@@ -147,6 +148,7 @@ int main()
 	glFrontFace(GL_CW);
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // https://www.opengl.org/wiki/Cubemap_Texture#Seamless_cubemap
+	glEnable(GL_MULTISAMPLE);
 	glClearColor(0.2f, 0.3f, 0.2f, 1.0f);
 
 	double fps = 0.0;

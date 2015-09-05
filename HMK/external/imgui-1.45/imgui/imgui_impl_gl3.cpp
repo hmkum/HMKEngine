@@ -115,6 +115,7 @@ static void ImGui_ImplGlfwGL3_RenderDrawLists(ImDrawData* draw_data)
 	glFrontFace(GL_CW);
 	glEnable(GL_FRAMEBUFFER_SRGB);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // https://www.opengl.org/wiki/Cubemap_Texture#Seamless_cubemap
+	glEnable(GL_MULTISAMPLE);
 }
 
 static const char* ImGui_ImplGlfwGL3_GetClipboardText()
