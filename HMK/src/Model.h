@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include "Mesh.h"
+#include "BoundingBox.h"
 #include "ShaderProgram.h"
 #include "Utility.h"
 
@@ -35,11 +36,17 @@ public:
 	void SetMetallic(float m);
 	float GetMetallic();
 
+	void DrawBoundingBox(bool draw);
+	BoundingBox GetBoundingBox() const;
+
 private:
 	std::string HandleTextureName(const char *filename);
 private:
 	// Holds meshes of models.
 	std::vector<std::shared_ptr<Mesh>> mMeshes;
+	BoundingBox mBoundingBox;
+	GLuint mBBVAO, mBBVBO;
+	bool mDrawBoundingBox;
 
 	glm::mat4 mTranslation;
 	glm::mat4 mRotation;

@@ -9,9 +9,10 @@ using namespace hmk;
 
 Model::Model()
 {
+	mDrawBoundingBox = true;
 	mTranslation = glm::mat4(1.0f);
-	mRotation = glm::mat4(1.0f);
-	mScale = glm::mat4(1.0f);
+	mRotation	 = glm::mat4(1.0f);
+	mScale		 = glm::mat4(1.0f);
 }
 
 Model::~Model()
@@ -53,6 +54,14 @@ bool Model::Load(std::string modelName)
 			aiVector3D pos = mesh->mVertices[j];
 			vertices[j].Position = glm::vec3(pos.x, pos.y, pos.z);
 
+			mBoundingBox.mMin.x = min(mBoundingBox.mMin.x, pos.x);
+			mBoundingBox.mMin.y = min(mBoundingBox.mMin.y, pos.y);
+			mBoundingBox.mMin.z = min(mBoundingBox.mMin.z, pos.z);
+
+			mBoundingBox.mMax.x = max(mBoundingBox.mMax.x, pos.x);
+			mBoundingBox.mMax.y = max(mBoundingBox.mMax.y, pos.y);
+			mBoundingBox.mMax.z = max(mBoundingBox.mMax.z, pos.z);
+
 			aiVector3D one3D(1.0f, 1.0f, 1.0f);
 			aiVector3D zero3D(0.0f, 0.0f, 0.0f);
 
@@ -65,6 +74,37 @@ bool Model::Load(std::string modelName)
 			aiVector3D tangent = mesh->HasTangentsAndBitangents() ? mesh->mTangents[j] : zero3D;
 			vertices[j].Tangent = glm::vec3(tangent.x, tangent.y, tangent.z);
 		}
+
+		glGenVertexArrays(1, &mBBVAO);
+		glBindVertexArray(mBBVAO);
+
+		GLfloat bbVertices[] = {
+			mBoundingBox.mMax.x, mBoundingBox.mMax.y, mBoundingBox.mMin.z,
+			mBoundingBox.mMin.x, mBoundingBox.mMax.y, mBoundingBox.mMin.z,
+			mBoundingBox.mMin.x, mBoundingBox.mMin.y, mBoundingBox.mMin.z,
+			mBoundingBox.mMax.x, mBoundingBox.mMin.y, mBoundingBox.mMin.z,
+			mBoundingBox.mMax.x, mBoundingBox.mMin.y, mBoundingBox.mMax.z,
+			mBoundingBox.mMax.x, mBoundingBox.mMax.y, mBoundingBox.mMax.z,
+			mBoundingBox.mMin.x, mBoundingBox.mMax.y, mBoundingBox.mMax.z,
+			mBoundingBox.mMin.x, mBoundingBox.mMin.y, mBoundingBox.mMax.z,
+			mBoundingBox.mMax.x, mBoundingBox.mMax.y, mBoundingBox.mMin.z,
+			mBoundingBox.mMax.x, mBoundingBox.mMax.y, mBoundingBox.mMax.z,
+			mBoundingBox.mMin.x, mBoundingBox.mMax.y, mBoundingBox.mMax.z,
+			mBoundingBox.mMin.x, mBoundingBox.mMax.y, mBoundingBox.mMin.z,
+			mBoundingBox.mMax.x, mBoundingBox.mMin.y, mBoundingBox.mMax.z,
+			mBoundingBox.mMin.x, mBoundingBox.mMin.y, mBoundingBox.mMax.z,
+			mBoundingBox.mMin.x, mBoundingBox.mMin.y, mBoundingBox.mMin.z,
+			mBoundingBox.mMax.x, mBoundingBox.mMin.y, mBoundingBox.mMin.z
+		};
+
+		glGenBuffers(1, &mBBVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, mBBVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(bbVertices), bbVertices, GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		glBindVertexArray(0);
 
 		// Handle material
 		Material mat;
@@ -126,6 +166,13 @@ void Model::Render()
 
 void Model::Render(ShaderProgram &shader)
 {
+	if(mDrawBoundingBox)
+	{
+		glBindVertexArray(mBBVAO);
+		glDrawArrays(GL_LINE_LOOP, 0, 16 * 3);
+		glBindVertexArray(0);
+	}
+
 	for(auto &mesh : mMeshes)
 	{
 		mesh->Render(shader);
@@ -180,6 +227,19 @@ void Model::SetMetallic(float m)
 float Model::GetMetallic()
 {
 	return mMeshes[0]->GetMetallic();
+}
+
+void Model::DrawBoundingBox(bool draw)
+{
+	mDrawBoundingBox = draw;
+}
+
+BoundingBox Model::GetBoundingBox() const
+{
+	BoundingBox box;
+	box.mMin = glm::vec3(GetModelMatrix() * glm::vec4(mBoundingBox.mMin, 1.0f));
+	box.mMax = glm::vec3(GetModelMatrix() * glm::vec4(mBoundingBox.mMax, 1.0f));
+	return box;
 }
 
 std::string Model::HandleTextureName(const char *filename)

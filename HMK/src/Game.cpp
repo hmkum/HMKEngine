@@ -6,6 +6,7 @@
 Game::Game()
 {
 	mMouseRightPressed = false;
+	mMouseLeftPressed  = false;
 	mLightPosition = glm::vec3(0, 4, 4);
 }
 
@@ -16,7 +17,7 @@ Game::~Game()
 bool Game::Init()
 {
 	mCamera = std::make_shared<hmk::Camera>(800, 600);
-	mCamera->CreateLookAt(glm::vec3(0.0f, 0.0f, 5.0f));
+	mCamera->CreateLookAt(glm::vec3(0.0f, 2.0f, 10.0f));
 	mCamera->CreatePerspectiveProj(120.0f, 0.1f, 100.0f);
 
 	mShadowMap = std::make_shared<hmk::ShadowMap>();
@@ -26,20 +27,21 @@ bool Game::Init()
 	vert.Init(GL_VERTEX_SHADER, "default.vert");
 	frag.Init(GL_FRAGMENT_SHADER, "default.frag");
 	mBasicShader.AddShader(vert).AddShader(frag).Link();
+
+	vert.Init(GL_VERTEX_SHADER, "skybox.vert");
+	frag.Init(GL_FRAGMENT_SHADER, "skybox.frag");
+	mSkyboxShader.AddShader(vert).AddShader(frag).Link();
 	
-	hmk::Shader vert2, frag2;
-	vert2.Init(GL_VERTEX_SHADER, "skybox.vert");
-	frag2.Init(GL_FRAGMENT_SHADER, "skybox.frag");
-	mSkyboxShader.AddShader(vert2).AddShader(frag2).Link();
-	
-	hmk::Shader vert3, frag3;
-	vert3.Init(GL_VERTEX_SHADER, "simple_depth.vert");
-	frag3.Init(GL_FRAGMENT_SHADER, "simple_depth.frag");
-	mSimpleDepthShader.AddShader(vert3).AddShader(frag3).Link();
+	vert.Init(GL_VERTEX_SHADER, "simple_depth.vert");
+	frag.Init(GL_FRAGMENT_SHADER, "simple_depth.frag");
+	mSimpleDepthShader.AddShader(vert).AddShader(frag).Link();
 
 	glm::mat4 lightView = glm::lookAt(mLightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	mLightProj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 50.0f);
 	mLightSpaceMatrix = mLightProj * lightView;
+
+	mSelectedModel = std::make_shared<hmk::Model>();
+	mSelectedModel.reset();
 
 	mPlane = std::make_shared<hmk::Model>();
 	mPlane->Load("plane.obj");
@@ -52,13 +54,11 @@ bool Game::Init()
 
 	mSphere2 = std::make_shared<hmk::Model>();
 	mSphere2->Load("sphere.obj");
-	mSphere2->Translate(glm::vec3(-2.0f, 0.0f, -2.0f));
-	//mSphere->Scale(glm::vec3(0.1f));
-	//mSphere->Rotate(180.0f, glm::vec3(0, 1, 0));
+	mSphere2->Translate(glm::vec3(-3.0f, 0.0f, -2.0f));
 
 	mAxe = std::make_shared<hmk::Model>();
 	mAxe->Load("axe.obj");
-	mAxe->Translate(glm::vec3(-20.0f, 0.0f, 0.0f));
+	mAxe->Translate(glm::vec3(-30.0f, 0.0f, 0.0f));
 	mAxe->Scale(glm::vec3(0.1f));
 	mAxe->Rotate(90.0f, glm::vec3(1, 0, 0));
 	mAxe->Rotate(180.0f, glm::vec3(0, 0, 1));
@@ -81,14 +81,22 @@ void Game::Update(float dt)
 		mCamera->MoveRight(dt);
 
 	static float r = 0.0f, m = 0.0f;
+	if (mSelectedModel.get() != nullptr)
+	{
+		r = mSelectedModel->GetRoughness();
+		m = mSelectedModel->GetMetallic();
+	}
 	ImGui::Begin("Material");
 	ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f);
 	ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f);
 	ImGui::Separator();
 	ImGui::DragFloat3("Light Position", (float*)&mLightPosition.x, 0.1f);
 	ImGui::End();
-	mSphere->SetRoughness(r);
-	mSphere->SetMetallic(m);
+	if (mSelectedModel.get() != nullptr)
+	{
+		mSelectedModel->SetRoughness(r);
+		mSelectedModel->SetMetallic(m);
+	}
 	
 	glm::mat4 lightView = glm::lookAt(mLightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	mLightSpaceMatrix = mLightProj * lightView;
@@ -153,6 +161,37 @@ void Game::Render()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
+void Game::ProcessSelection(int x, int y)
+{
+	glm::vec3 rayNear = glm::unProject(glm::vec3(x, 600 - y, 0.0f), mCamera->GetViewMatrix(), mCamera->GetProjMatrix(), glm::vec4(0, 0, 800, 600));
+	glm::vec3 rayFar = glm::unProject(glm::vec3(x, 600 - y, 1.0f), mCamera->GetViewMatrix(), mCamera->GetProjMatrix(), glm::vec4(0, 0, 800, 600));
+	
+	hmk::Ray ray(mCamera->GetPosition(), normalize(rayFar - rayNear));
+
+	// TODO: Get model's bounding box from ModelManager
+	std::vector<hmk::BoundingBox> boxes;
+	boxes.push_back(mSphere->GetBoundingBox());
+	boxes.push_back(mSphere2->GetBoundingBox());
+	boxes.push_back(mAxe->GetBoundingBox());
+
+	for (unsigned int i = 0; i < boxes.size(); ++i)
+	{
+		hmk::BoundingBox box = boxes[i];
+		if(ray.IntersectAABB(box))
+		{
+			// TODO: Implement ModelManager and select model with index
+			switch(i)
+			{
+				case 0: mSelectedModel = mSphere; break;
+				case 1: mSelectedModel = mSphere2; break;
+				case 2: mSelectedModel = mAxe; break;
+				default:
+					break;
+			}
+		}
+	}
+}
+
 void Game::KeyInput(int key, int scancode, int action, int mods)
 {
 	hmk::KeyManager::SetKey(key, (action == HMK_RELEASE) ? false : true);
@@ -176,6 +215,13 @@ void Game::CursorPosInput(double xPos, double yPos)
 
 	if(mMouseRightPressed)
 		mCamera->Rotate((float)xOffset, (float)yOffset);
+
+	if(mMouseLeftPressed)
+	{
+		int x = (int)xPos;
+		int y = (int)yPos;
+		ProcessSelection(x, y);
+	}
 }
 
 void Game::MouseButtonInput(int button, int action, int mods)
@@ -184,4 +230,9 @@ void Game::MouseButtonInput(int button, int action, int mods)
 		mMouseRightPressed = true;
 	else
 		mMouseRightPressed = false;
+
+	if (button == HMK_MOUSE_BUTTON_LEFT && action == HMK_PRESS)
+		mMouseLeftPressed = true;
+	else
+		mMouseLeftPressed = false;
 }

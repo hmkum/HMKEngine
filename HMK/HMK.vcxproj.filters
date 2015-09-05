@@ -68,6 +68,9 @@
     <ClCompile Include="src\ShadowMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Ray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -116,6 +119,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ShadowMap.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BoundingBox.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ray.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

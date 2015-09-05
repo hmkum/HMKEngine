@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
+#include "AlignedAllocation.h"
+#include "BoundingBox.h"
 #include "Camera.h"
 #include "Keys.h"
 #include "Shader.h"
@@ -9,8 +11,9 @@
 #include "Model.h"
 #include "Skybox.h"
 #include "ShadowMap.h"
+#include "Ray.h"
 
-class Game
+class Game : public AlignedAllocation<16>
 {
 public:
 	Game();
@@ -25,9 +28,13 @@ public:
 	void Render();
 
 private:
+	void ProcessSelection(int x, int y);
+
+private:
+	std::shared_ptr<hmk::Model> mSelectedModel;
 	std::shared_ptr<hmk::Model> mAxe, mSphere, mSphere2, mPlane;
 	std::shared_ptr<hmk::Skybox> mSkybox;
-	hmk::ShaderProgram mBasicShader, mSkyboxShader, mSimpleDepthShader;
+	hmk::ShaderProgram mBasicShader, mSkyboxShader, mSimpleDepthShader, mPickingShader;
 	std::shared_ptr<hmk::Camera> mCamera;
 	std::shared_ptr<hmk::ShadowMap> mShadowMap;
 	glm::vec3 mLightPosition;
@@ -40,5 +47,5 @@ private:
 		bool firstMouse = true;
 		glm::vec2 last = glm::vec2(400.0f, 300.0f);
 	} mCursorState;
-	bool mMouseRightPressed;
+	bool mMouseRightPressed, mMouseLeftPressed;
 };
