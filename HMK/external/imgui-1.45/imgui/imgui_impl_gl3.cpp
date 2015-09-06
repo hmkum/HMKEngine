@@ -105,8 +105,9 @@ static void ImGui_ImplGlfwGL3_RenderDrawLists(ImDrawData* draw_data)
 	glBindVertexArray(last_vertex_array);
 	glDisable(GL_SCISSOR_TEST);
 	
-	// HMK: Restoring my states
+	// HMK: Restoring my states. Imgui fucks my states :(
 	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LEQUAL);
 	glDepthRange(0.0f, 1.0f);
