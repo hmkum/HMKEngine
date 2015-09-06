@@ -8,7 +8,12 @@ uniform sampler2D PostProcessBuffer;
 void main()
 {
    vec3 texColor = texture(PostProcessBuffer, TexCoords).rgb;
-   // Just gamma correction
+
+   // Simple Reinhard tonemapping
+   texColor *= 2.0f; // Hardcoded exposure
+   texColor = texColor / (1.0f + texColor);
+
+   // Gamma correction
    texColor = pow(texColor, vec3(1.0f / 2.2f));
    FinalColor = vec4(texColor, 1.0f);
 }
