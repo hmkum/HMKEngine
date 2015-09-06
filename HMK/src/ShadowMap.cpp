@@ -2,10 +2,21 @@
 
 using namespace hmk;
 
+ShadowMap::ShadowMap()
+{
+	mFBO = 0;
+	mDepthMap = 0;
+	mWidth = 1024;
+	mHeight = 1024;
+}
+
+ShadowMap::~ShadowMap()
+{
+	glDeleteFramebuffers(1, &mFBO);
+}
+
 bool ShadowMap::Init(const GLuint width, const GLuint height)
 {
-	mFBO	  = 0;
-	mDepthMap = 0;
 	mWidth    = width;
 	mHeight   = height;
 
