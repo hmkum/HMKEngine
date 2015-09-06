@@ -168,5 +168,5 @@ void main()
 	Result += Shadow * LightColor * LdotN * (BaseColor * (1.0f - vec4(Spec, 1.0f)) + vec4(Spec, 1.0f));
 	Result += ReflectedColor * vec4(envFresnel, 1.0f) * 0.7f;
 
-	FinalColor = pow(Result, vec4(InvGamma, InvGamma, InvGamma, 1.0f));
+	FinalColor = Result;
 }
