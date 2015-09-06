@@ -118,10 +118,11 @@ void PostProcess::DoMonochrome()
 	mMonochrome.Unbind();
 }
 
-void PostProcess::DoHDR()
+void PostProcess::DoHDR(float exposure)
 {
 	mHDR.Bind();
 	mHDRShader.Use();
+	mHDRShader.SetUniform("uExposure", exposure);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
 	glBindVertexArray(mVAO);

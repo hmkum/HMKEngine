@@ -98,6 +98,8 @@ void Game::Update(float dt)
 	ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f);
 	ImGui::Separator();
 	ImGui::DragFloat3("Light Position", (float*)&mLightPosition.x, 0.1f);
+	ImGui::Separator();
+	ImGui::SliderFloat("Tonemap Exposure", &mTonemapExposure, 0.0f, 16.0f);
 	ImGui::End();
 	if (mSelectedModel.get() != nullptr)
 	{
@@ -169,7 +171,7 @@ void Game::Render()
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	mPostProcess->End();
 	//mPostProcess->DoMonochrome();
-	mPostProcess->DoHDR();
+	mPostProcess->DoHDR(mTonemapExposure);
 	mPostProcess->Render(mPPShader);
 }
 

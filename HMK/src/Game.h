@@ -43,6 +43,8 @@ private:
 	glm::mat4 mLightProj;
 	glm::mat4 mLightSpaceMatrix;
 
+	float mTonemapExposure = 1.0f;
+
 private:
 	struct CursorState_t
 	{

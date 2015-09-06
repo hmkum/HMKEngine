@@ -16,7 +16,7 @@ public:
 	void Render(ShaderProgram &shader);
 
 	void DoMonochrome();
-	void DoHDR();
+	void DoHDR(float exposure = 1.0f);
 
 private:
 	DrawableTexture mDefault;
