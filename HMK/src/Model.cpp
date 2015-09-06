@@ -9,7 +9,7 @@ using namespace hmk;
 
 Model::Model()
 {
-	mDrawBoundingBox = true;
+	mDrawBoundingBox = false;
 	mTranslation = glm::mat4(1.0f);
 	mRotation	 = glm::mat4(1.0f);
 	mScale		 = glm::mat4(1.0f);
