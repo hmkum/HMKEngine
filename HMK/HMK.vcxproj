@@ -89,11 +89,13 @@
     <ClCompile Include="external\imgui-1.45\imgui\imgui_impl_gl3.cpp" />
     <ClCompile Include="external\stb\stb_image.c" />
     <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\DrawableTexture.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\KeyManager.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Model.cpp" />
+    <ClCompile Include="src\PostProcess.cpp" />
     <ClCompile Include="src\Ray.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
@@ -106,6 +108,7 @@
     <ClInclude Include="src\BoundingBox.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Debug.h" />
+    <ClInclude Include="src\DrawableTexture.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\KeyManager.h" />
     <ClInclude Include="src\Keys.h" />
@@ -113,6 +116,7 @@
     <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Model.h" />
+    <ClInclude Include="src\PostProcess.h" />
     <ClInclude Include="src\Ray.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\ShaderProgram.h" />
@@ -124,6 +128,11 @@
   <ItemGroup>
     <None Include="data\shaders\default.frag" />
     <None Include="data\shaders\default.vert" />
+    <None Include="data\shaders\post_process.frag" />
+    <None Include="data\shaders\post_process.vert" />
+    <None Include="data\shaders\pp_hdr.frag" />
+    <None Include="data\shaders\pp_default.vert" />
+    <None Include="data\shaders\pp_monochrome.frag" />
     <None Include="data\shaders\simple_depth.frag" />
     <None Include="data\shaders\simple_depth.vert" />
     <None Include="data\shaders\skybox.frag" />

@@ -11,6 +11,7 @@
 #include "Model.h"
 #include "Skybox.h"
 #include "ShadowMap.h"
+#include "PostProcess.h"
 #include "Ray.h"
 
 class Game : public AlignedAllocation<16>
@@ -34,9 +35,10 @@ private:
 	std::shared_ptr<hmk::Model> mSelectedModel;
 	std::shared_ptr<hmk::Model> mAxe, mSphere, mSphere2, mPlane;
 	std::shared_ptr<hmk::Skybox> mSkybox;
-	hmk::ShaderProgram mBasicShader, mSkyboxShader, mSimpleDepthShader, mPickingShader;
+	hmk::ShaderProgram mBasicShader, mSkyboxShader, mSimpleDepthShader, mPickingShader, mPPShader;
 	std::shared_ptr<hmk::Camera> mCamera;
 	std::shared_ptr<hmk::ShadowMap> mShadowMap;
+	std::shared_ptr<hmk::PostProcess> mPostProcess;
 	glm::vec3 mLightPosition;
 	glm::mat4 mLightProj;
 	glm::mat4 mLightSpaceMatrix;

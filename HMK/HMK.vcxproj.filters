@@ -71,6 +71,12 @@
     <ClCompile Include="src\Ray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\DrawableTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PostProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -127,6 +133,12 @@
     <ClInclude Include="src\Ray.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\DrawableTexture.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PostProcess.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\default.frag">
@@ -145,6 +157,21 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="data\shaders\simple_depth.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\post_process.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\post_process.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\pp_hdr.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\pp_monochrome.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\pp_default.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

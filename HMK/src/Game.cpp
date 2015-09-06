@@ -23,6 +23,9 @@ bool Game::Init()
 	mShadowMap = std::make_shared<hmk::ShadowMap>();
 	mShadowMap->Init(2048, 2048);
 
+	mPostProcess = std::make_shared<hmk::PostProcess>();
+	mPostProcess->Init();
+
 	hmk::Shader vert, frag;
 	vert.Init(GL_VERTEX_SHADER, "default.vert");
 	frag.Init(GL_FRAGMENT_SHADER, "default.frag");
@@ -35,6 +38,10 @@ bool Game::Init()
 	vert.Init(GL_VERTEX_SHADER, "simple_depth.vert");
 	frag.Init(GL_FRAGMENT_SHADER, "simple_depth.frag");
 	mSimpleDepthShader.AddShader(vert).AddShader(frag).Link();
+
+	vert.Init(GL_VERTEX_SHADER, "post_process.vert");
+	frag.Init(GL_FRAGMENT_SHADER, "post_process.frag");
+	mPPShader.AddShader(vert).AddShader(frag).Link();
 
 	glm::mat4 lightView = glm::lookAt(mLightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	mLightProj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 50.0f);
@@ -124,41 +131,46 @@ void Game::Render()
 	mShadowMap->Unbind();
 	
 	glViewport(0, 0, 800, 600);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	mSkyboxShader.Use();
-	glm::mat4 skyboxModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f));
-	mSkyboxShader.SetUniform("uModel", skyboxModelMatrix);
-	mSkyboxShader.SetUniform("uViewMatrix", mCamera->GetViewMatrix());
-	mSkyboxShader.SetUniform("uProjMatrix", mCamera->GetProjMatrix());
-	mSkybox->Render();
+	mPostProcess->Begin();
+		mSkyboxShader.Use();
+		glm::mat4 skyboxModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f));
+		mSkyboxShader.SetUniform("uModel", skyboxModelMatrix);
+		mSkyboxShader.SetUniform("uViewMatrix", mCamera->GetViewMatrix());
+		mSkyboxShader.SetUniform("uProjMatrix", mCamera->GetProjMatrix());
+		mSkybox->Render();
 
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, mSkybox->GetTextureID());
+		mBasicShader.Use();
 
-	glActiveTexture(GL_TEXTURE5);
-	glBindTexture(GL_TEXTURE_2D, mShadowMap->GetDepthMap());
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, mSkybox->GetTextureID());
 
-	mBasicShader.Use();
-	mBasicShader.SetUniform("uViewMatrix", mCamera->GetViewMatrix());
-	mBasicShader.SetUniform("uProjMatrix", mCamera->GetProjMatrix());
-	mBasicShader.SetUniform("uCameraPosition", mCamera->GetPosition());
-	mBasicShader.SetUniform("uLightPosition", mLightPosition);
-	mBasicShader.SetUniform("uLightSpaceMatrix", mLightSpaceMatrix);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, mShadowMap->GetDepthMap());
+		
+		mBasicShader.SetUniform("uViewMatrix", mCamera->GetViewMatrix());
+		mBasicShader.SetUniform("uProjMatrix", mCamera->GetProjMatrix());
+		mBasicShader.SetUniform("uCameraPosition", mCamera->GetPosition());
+		mBasicShader.SetUniform("uLightPosition", mLightPosition);
+		mBasicShader.SetUniform("uLightSpaceMatrix", mLightSpaceMatrix);
 
-	mBasicShader.SetUniform("uModel", mPlane->GetModelMatrix());
-	mPlane->Render(mBasicShader);
+		mBasicShader.SetUniform("uModel", mPlane->GetModelMatrix());
+		mPlane->Render(mBasicShader);
 
-	mBasicShader.SetUniform("uModel", mSphere->GetModelMatrix());
-	mSphere->Render(mBasicShader);
+		mBasicShader.SetUniform("uModel", mSphere->GetModelMatrix());
+		mSphere->Render(mBasicShader);
 
-	mBasicShader.SetUniform("uModel", mSphere2->GetModelMatrix());
-	mSphere2->Render(mBasicShader);
+		mBasicShader.SetUniform("uModel", mSphere2->GetModelMatrix());
+		mSphere2->Render(mBasicShader);
 
-	mBasicShader.SetUniform("uModel", mAxe->GetModelMatrix());
-	mAxe->Render(mBasicShader);
+		mBasicShader.SetUniform("uModel", mAxe->GetModelMatrix());
+		mAxe->Render(mBasicShader);
 
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	mPostProcess->End();
+	//mPostProcess->DoMonochrome();
+	mPostProcess->DoHDR();
+	mPostProcess->Render(mPPShader);
 }
 
 void Game::ProcessSelection(int x, int y)
