@@ -4,7 +4,7 @@ using namespace hmk;
 
 DrawableTexture::DrawableTexture()
 {
-	mFBO = mRBO = 0;
+	mFBO = 0;
 	mDepthMap = 0;
 	mColorMap = 0;
 	mWidth = 1024;
@@ -24,10 +24,14 @@ bool DrawableTexture::Init(bool hasColorMap, const GLuint width, const GLuint he
 	glGenFramebuffers(1, &mFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, mFBO);
 
-	glGenRenderbuffers(1, &mRBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, mRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, mWidth, mHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mRBO);
+	glGenTextures(1, &mDepthMap);
+	glBindTexture(GL_TEXTURE_2D, mDepthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mWidth, mHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthMap, 0);
+	glDrawBuffer(GL_NONE);
+	//glReadBuffer(GL_NONE);
 
 	if(hasColorMap)
 	{

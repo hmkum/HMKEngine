@@ -16,7 +16,7 @@ public:
 	GLuint GetDepthMap() const;
 	GLuint GetColorMap() const;
 private:
-	GLuint mFBO, mRBO;
+	GLuint mFBO;
 	GLuint mDepthMap;
 	GLuint mColorMap;
 	GLuint mWidth, mHeight;
