@@ -68,16 +68,24 @@ bool PostProcess::Init()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glBindVertexArray(0);
 
-	hmk::Shader vert, frag;
-	vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-	frag.Init(GL_FRAGMENT_SHADER, "pp_monochrome.frag");
-	mMonochromeShader.AddShader(vert).AddShader(frag).Link();
-
-	frag.Init(GL_FRAGMENT_SHADER, "pp_hdr.frag");
-	mHDRShader.AddShader(vert).AddShader(frag).Link();
-
-	frag.Init(GL_FRAGMENT_SHADER, "pp_motion_blur.frag");
-	mMotionBlurShader.AddShader(vert).AddShader(frag).Link();
+	{
+		hmk::Shader vert, frag;
+		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
+		frag.Init(GL_FRAGMENT_SHADER, "pp_monochrome.frag");
+		mMonochromeShader.AddShader(vert).AddShader(frag).Link();
+	}
+	{
+		hmk::Shader vert, frag;
+		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
+		frag.Init(GL_FRAGMENT_SHADER, "pp_hdr.frag");
+		mHDRShader.AddShader(vert).AddShader(frag).Link();
+	}
+	{
+		hmk::Shader vert, frag;
+		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
+		frag.Init(GL_FRAGMENT_SHADER, "pp_motion_blur.frag");
+		mMotionBlurShader.AddShader(vert).AddShader(frag).Link();
+	}
 
 	bool result = true;
 	result &= mDefault.Init(true, 800, 600, GL_RGBA16F);
@@ -141,12 +149,11 @@ void PostProcess::DoHDR(float exposure)
 void PostProcess::DoMotionBlur(const glm::mat4 &viewProjMatrix)
 {
 	const glm::mat4 invMatrix = glm::inverse(viewProjMatrix);
-	mPrevViewProjMatrix		  = viewProjMatrix;
 
 	mMotionBlur.Bind();
 	mMotionBlurShader.Use();
-	mMotionBlurShader.SetUniform("uInvViewProjMatrix", invMatrix);
-	mMotionBlurShader.SetUniform("uPrevViewProjMatrix", mPrevViewProjMatrix);
+	mMotionBlurShader.SetUniform("uInvViewProj", invMatrix);
+	mMotionBlurShader.SetUniform("uPrevViewProj", mPrevViewProjMatrix);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
 
@@ -157,4 +164,6 @@ void PostProcess::DoMotionBlur(const glm::mat4 &viewProjMatrix)
 	glBindVertexArray(0);
 	mLastColorMap = mMotionBlur.GetColorMap();
 	mMotionBlur.Unbind();
+
+	mPrevViewProjMatrix = viewProjMatrix;
 }
