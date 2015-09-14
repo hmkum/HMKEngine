@@ -11,6 +11,8 @@ class ShaderProgram
 {
 public:
     ShaderProgram();
+	~ShaderProgram();
+
     ShaderProgram &AddShader(const Shader &shader);
     void Link();
     void Use();

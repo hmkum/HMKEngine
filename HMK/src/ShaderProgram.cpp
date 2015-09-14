@@ -8,6 +8,11 @@ ShaderProgram::ShaderProgram()
 {
 }
 
+ShaderProgram::~ShaderProgram()
+{
+	glDeleteProgram(mProgramID);
+}
+
 ShaderProgram &ShaderProgram::AddShader(const Shader &shader)
 {
     mShaders.push_back(shader);
@@ -22,6 +27,7 @@ void ShaderProgram::Link()
         glAttachShader(mProgramID, shader.GetID());
     }
     glLinkProgram(mProgramID);
+	glValidateProgram(mProgramID);
 
     GLint success;
     glGetProgramiv(mProgramID, GL_LINK_STATUS, &success);
@@ -29,11 +35,14 @@ void ShaderProgram::Link()
     {
         GLchar log[512];
         glGetProgramInfoLog(mProgramID, 512, nullptr, log);
+		HMK_PRINT(log)
+		HMK_LOG_ERROR(log)
     }
 
     for(auto &shader : mShaders)
     {
-        //glDeleteShader(shader.GetID());
+		glDetachShader(mProgramID, shader.GetID());
+        glDeleteShader(shader.GetID());
     }
 }
 
