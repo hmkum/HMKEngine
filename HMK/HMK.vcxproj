@@ -134,6 +134,7 @@
     <None Include="data\shaders\pp_default.vert" />
     <None Include="data\shaders\pp_monochrome.frag" />
     <None Include="data\shaders\pp_motion_blur.frag" />
+    <None Include="data\shaders\pp_negative.frag" />
     <None Include="data\shaders\simple_depth.frag" />
     <None Include="data\shaders\simple_depth.vert" />
     <None Include="data\shaders\skybox.frag" />

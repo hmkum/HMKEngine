@@ -18,12 +18,13 @@ public:
 	void DoMonochrome();
 	void DoHDR(float exposure = 1.0f);
 	void DoMotionBlur(const glm::mat4 &viewProjMatrix);
+	void DoNegative();
 
 private:
 	DrawableTexture mDefault;
-	DrawableTexture mMonochrome, mHDR, mMotionBlur;
+	DrawableTexture mMonochrome, mHDR, mMotionBlur, mNegative;
 
-	ShaderProgram mMonochromeShader, mHDRShader, mMotionBlurShader;
+	ShaderProgram mMonochromeShader, mHDRShader, mMotionBlurShader, mNegativeShader;
 
 private:
 	glm::mat4 mPrevViewProjMatrix;
