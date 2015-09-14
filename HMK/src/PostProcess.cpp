@@ -6,6 +6,7 @@ PostProcess::PostProcess()
 {
 	mVAO = mVBO = 0;
 	mLastColorMap = 0;
+	mPrevViewProjMatrix = glm::mat4(1.0f);
 }
 
 bool PostProcess::Init()
@@ -75,10 +76,14 @@ bool PostProcess::Init()
 	frag.Init(GL_FRAGMENT_SHADER, "pp_hdr.frag");
 	mHDRShader.AddShader(vert).AddShader(frag).Link();
 
-	bool result = false;
+	frag.Init(GL_FRAGMENT_SHADER, "pp_motion_blur.frag");
+	mMotionBlurShader.AddShader(vert).AddShader(frag).Link();
+
+	bool result = true;
 	result &= mDefault.Init(true, 800, 600, GL_RGBA16F);
-	result &= mMonochrome.Init(true, 800, 600);
+	result &= mMonochrome.Init(true, 800, 600, GL_RGBA16F);
 	result &= mHDR.Init(true, 800, 600);
+	result &= mMotionBlur.Init(true, 800, 600, GL_RGBA16F);
 
 	return result;
 }
@@ -113,6 +118,7 @@ void PostProcess::DoMonochrome()
 	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
 	glBindVertexArray(mVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindVertexArray(0);
 	mLastColorMap = mMonochrome.GetColorMap();
 	mMonochrome.Unbind();
@@ -132,3 +138,23 @@ void PostProcess::DoHDR(float exposure)
 	mHDR.Unbind();
 }
 
+void PostProcess::DoMotionBlur(const glm::mat4 &viewProjMatrix)
+{
+	const glm::mat4 invMatrix = glm::inverse(viewProjMatrix);
+	mPrevViewProjMatrix		  = viewProjMatrix;
+
+	mMotionBlur.Bind();
+	mMotionBlurShader.Use();
+	mMotionBlurShader.SetUniform("uInvViewProjMatrix", invMatrix);
+	mMotionBlurShader.SetUniform("uPrevViewProjMatrix", mPrevViewProjMatrix);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, mDefault.GetDepthMap());
+	glBindVertexArray(mVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	mLastColorMap = mMotionBlur.GetColorMap();
+	mMotionBlur.Unbind();
+}
