@@ -171,6 +171,7 @@ void Game::Render()
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	mPostProcess->End();
 	//mPostProcess->DoMonochrome();
+	mPostProcess->DoBlur();
 	const glm::mat4 viewProjMatrix = mCamera->GetProjMatrix() * mCamera->GetViewMatrix();
 	mPostProcess->DoMotionBlur(viewProjMatrix);
 	mPostProcess->DoHDR(mTonemapExposure);

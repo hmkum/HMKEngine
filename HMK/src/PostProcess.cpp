@@ -92,6 +92,12 @@ bool PostProcess::Init()
 		frag.Init(GL_FRAGMENT_SHADER, "pp_negative_grayscale.frag");
 		mNegativeGrayscaleShader.AddShader(vert).AddShader(frag).Link();
 	}
+	{
+		hmk::Shader vert, frag;
+		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
+		frag.Init(GL_FRAGMENT_SHADER, "pp_blur.frag");
+		mBlurShader.AddShader(vert).AddShader(frag).Link();
+	}
 
 	bool result = true;
 	result &= mDefault.Init(true, 800, 600, GL_RGBA16F);
@@ -99,6 +105,7 @@ bool PostProcess::Init()
 	result &= mHDR.Init(true, 800, 600);
 	result &= mMotionBlur.Init(true, 800, 600, GL_RGBA16F);
 	result &= mNegativeGrayscale.Init(true, 800, 600);
+	result &= mBlur.Init(true, 800, 600, GL_RGBA16F);
 
 	return result;
 }
@@ -201,4 +208,17 @@ void PostProcess::DoGrayScale()
 	glBindVertexArray(0);
 	mLastColorMap = mNegativeGrayscale.GetColorMap();
 	mNegativeGrayscale.Unbind();
+}
+
+void PostProcess::DoBlur()
+{
+	mBlur.Bind();
+	mBlurShader.Use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+	glBindVertexArray(mVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	mLastColorMap = mBlur.GetColorMap();
+	mBlur.Unbind();
 }
