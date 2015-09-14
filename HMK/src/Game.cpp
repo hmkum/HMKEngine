@@ -174,7 +174,8 @@ void Game::Render()
 	const glm::mat4 viewProjMatrix = mCamera->GetProjMatrix() * mCamera->GetViewMatrix();
 	mPostProcess->DoMotionBlur(viewProjMatrix);
 	mPostProcess->DoHDR(mTonemapExposure);
-	mPostProcess->DoNegative();
+	//mPostProcess->DoNegative();
+	//mPostProcess->DoGrayScale();
 	mPostProcess->Render(mPPShader);
 }
 

@@ -177,7 +177,7 @@
     <None Include="data\shaders\pp_motion_blur.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="data\shaders\pp_negative.frag">
+    <None Include="data\shaders\pp_negative_grayscale.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
