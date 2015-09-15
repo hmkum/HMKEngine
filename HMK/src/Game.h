@@ -43,7 +43,8 @@ private:
 	glm::mat4 mLightProj;
 	glm::mat4 mLightSpaceMatrix;
 
-	float mTonemapExposure = 1.0f;
+	float mTonemapExposure = 1.0f, mBloomIntensity = 1.0f;
+	bool mIsBloomActive = true;
 
 private:
 	struct CursorState_t

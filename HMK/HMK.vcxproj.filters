@@ -180,7 +180,19 @@
     <None Include="data\shaders\pp_negative_grayscale.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="data\shaders\pp_blur.frag">
+    <None Include="data\shaders\pp_down_filter.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\pp_bloom.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\pp_bright_pass.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\pp_blur_v.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\pp_blur_h.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

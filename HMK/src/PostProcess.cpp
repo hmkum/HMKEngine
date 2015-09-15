@@ -95,8 +95,32 @@ bool PostProcess::Init()
 	{
 		hmk::Shader vert, frag;
 		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.Init(GL_FRAGMENT_SHADER, "pp_blur.frag");
-		mBlurShader.AddShader(vert).AddShader(frag).Link();
+		frag.Init(GL_FRAGMENT_SHADER, "pp_blur_v.frag");
+		mBlurShader[0].AddShader(vert).AddShader(frag).Link();
+	}
+	{
+		hmk::Shader vert, frag;
+		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
+		frag.Init(GL_FRAGMENT_SHADER, "pp_blur_h.frag");
+		mBlurShader[1].AddShader(vert).AddShader(frag).Link();
+	}
+	{
+		hmk::Shader vert, frag;
+		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
+		frag.Init(GL_FRAGMENT_SHADER, "pp_down_filter.frag");
+		mDownFilterShader.AddShader(vert).AddShader(frag).Link();
+	}
+	{
+		hmk::Shader vert, frag;
+		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
+		frag.Init(GL_FRAGMENT_SHADER, "pp_bloom.frag");
+		mBloomShader.AddShader(vert).AddShader(frag).Link();
+	}
+	{
+		hmk::Shader vert, frag;
+		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
+		frag.Init(GL_FRAGMENT_SHADER, "pp_bright_pass.frag");
+		mBrightPassShader.AddShader(vert).AddShader(frag).Link();
 	}
 
 	bool result = true;
@@ -105,7 +129,11 @@ bool PostProcess::Init()
 	result &= mHDR.Init(true, 800, 600);
 	result &= mMotionBlur.Init(true, 800, 600, GL_RGBA16F);
 	result &= mNegativeGrayscale.Init(true, 800, 600);
-	result &= mBlur.Init(true, 800, 600, GL_RGBA16F);
+	result &= mBlur[0].Init(true, 800, 600, GL_RGBA16F);
+	result &= mBlur[1].Init(true, 800, 600, GL_RGBA16F);
+	result &= mDownFilter.Init(true, 800, 600, GL_RGBA16F);
+	result &= mBrightPass.Init(true, 800, 600, GL_RGBA16F);
+	result &= mBloom.Init(true, 800, 600, GL_RGBA16F);
 
 	return result;
 }
@@ -212,13 +240,75 @@ void PostProcess::DoGrayScale()
 
 void PostProcess::DoBlur()
 {
-	mBlur.Bind();
-	mBlurShader.Use();
+	mBlur[0].Bind();
+	mBlurShader[0].Use();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
 	glBindVertexArray(mVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
-	mLastColorMap = mBlur.GetColorMap();
-	mBlur.Unbind();
+	mLastColorMap = mBlur[0].GetColorMap();
+	mBlur[0].Unbind();
+
+	mBlur[1].Bind();
+	mBlurShader[1].Use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+	glBindVertexArray(mVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	mLastColorMap = mBlur[1].GetColorMap();
+	mBlur[1].Unbind();
+}
+
+void PostProcess::DoDownFilter(int level)
+{
+	DoBlur();
+
+	mDownFilter.Bind();
+	mDownFilterShader.Use();
+	mDownFilterShader.SetUniform("uFilterLevel", level);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+	glBindVertexArray(mVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	mLastColorMap = mDownFilter.GetColorMap();
+	mDownFilter.Unbind();
+
+	DoBlur();
+}
+
+void PostProcess::DoBrightPass()
+{
+	mBrightPass.Bind();
+	mBrightPassShader.Use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+	glBindVertexArray(mVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	mLastColorMap = mBrightPass.GetColorMap();
+	mBrightPass.Unbind();
+}
+
+void PostProcess::DoBloom(float intensity)
+{
+	GLuint lastMap = mLastColorMap;
+	DoBrightPass();
+	DoBlur();
+	
+	mBloom.Bind();
+	mBloomShader.Use();
+	mBloomShader.SetUniform("uBloomIntensity", intensity);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, lastMap);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+	glBindVertexArray(mVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	mLastColorMap = mBloom.GetColorMap();
+	mBloom.Unbind();
 }

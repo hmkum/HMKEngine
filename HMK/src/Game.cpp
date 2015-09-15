@@ -100,6 +100,8 @@ void Game::Update(float dt)
 	ImGui::DragFloat3("Light Position", (float*)&mLightPosition.x, 0.1f);
 	ImGui::Separator();
 	ImGui::SliderFloat("Tonemap Exposure", &mTonemapExposure, 0.0f, 16.0f);
+	ImGui::Checkbox("Bloom", &mIsBloomActive);
+	ImGui::SliderFloat("Bloom Intensity", &mBloomIntensity, 0.0f, 5.0f);
 	ImGui::End();
 	if (mSelectedModel.get() != nullptr)
 	{
@@ -171,10 +173,12 @@ void Game::Render()
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	mPostProcess->End();
 	//mPostProcess->DoMonochrome();
-	mPostProcess->DoBlur();
+	//mPostProcess->DoBlur();
 	const glm::mat4 viewProjMatrix = mCamera->GetProjMatrix() * mCamera->GetViewMatrix();
+	if(mIsBloomActive) mPostProcess->DoBloom(mBloomIntensity);
 	mPostProcess->DoMotionBlur(viewProjMatrix);
 	mPostProcess->DoHDR(mTonemapExposure);
+	
 	//mPostProcess->DoNegative();
 	//mPostProcess->DoGrayScale();
 	mPostProcess->Render(mPPShader);

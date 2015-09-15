@@ -130,7 +130,11 @@
     <None Include="data\shaders\default.vert" />
     <None Include="data\shaders\post_process.frag" />
     <None Include="data\shaders\post_process.vert" />
-    <None Include="data\shaders\pp_blur.frag" />
+    <None Include="data\shaders\pp_bloom.frag" />
+    <None Include="data\shaders\pp_blur_h.frag" />
+    <None Include="data\shaders\pp_blur_v.frag" />
+    <None Include="data\shaders\pp_bright_pass.frag" />
+    <None Include="data\shaders\pp_down_filter.frag" />
     <None Include="data\shaders\pp_hdr.frag" />
     <None Include="data\shaders\pp_default.vert" />
     <None Include="data\shaders\pp_monochrome.frag" />

@@ -21,13 +21,16 @@ public:
 	void DoNegative();
 	void DoGrayScale();
 	void DoBlur();
+	void DoDownFilter(int level);
+	void DoBrightPass();
+	void DoBloom(float intensity);
 
 private:
 	DrawableTexture mDefault;
-	DrawableTexture mMonochrome, mHDR, mMotionBlur, mNegativeGrayscale, mBlur;
-
-	ShaderProgram mMonochromeShader, mHDRShader, mMotionBlurShader, mNegativeGrayscaleShader, mBlurShader;
-
+	DrawableTexture mMonochrome, mHDR, mMotionBlur, mNegativeGrayscale, mBlur[2];
+	DrawableTexture mDownFilter, mBrightPass, mBloom;
+	ShaderProgram mMonochromeShader, mHDRShader, mMotionBlurShader, mNegativeGrayscaleShader, mBlurShader[2];
+	ShaderProgram mDownFilterShader, mBrightPassShader, mBloomShader;
 private:
 	glm::mat4 mPrevViewProjMatrix;
 
