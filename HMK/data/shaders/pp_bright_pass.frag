@@ -6,7 +6,7 @@ in vec2 TexCoords;
 uniform sampler2D PostProcessBuffer;
 
 const float gMiddleGray = 0.5f;
-const float gWhiteCutoff = 0.5f;
+const float gWhiteCutoff = 0.8f;
 
 float calcLuminance(vec3 color)
 {

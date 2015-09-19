@@ -174,13 +174,21 @@ void PostProcess::DoMonochrome()
 	mMonochrome.Unbind();
 }
 
-void PostProcess::DoHDR(float exposure)
+void PostProcess::DoHDR(float exposure, bool isBloomActive)
 {
 	mHDR.Bind();
 	mHDRShader.Use();
 	mHDRShader.SetUniform("uExposure", exposure);
+	mHDRShader.SetUniform("uIsBloomActive", isBloomActive);
+	mHDRShader.SetUniform("uBloomIntensity", mBloomIntensity);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+	if(isBloomActive)
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, mBloomColorMap);
+	}
+
 	glBindVertexArray(mVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
@@ -285,6 +293,7 @@ void PostProcess::DoBrightPass()
 	mBrightPassShader.Use();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindVertexArray(mVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
@@ -294,21 +303,11 @@ void PostProcess::DoBrightPass()
 
 void PostProcess::DoBloom(float intensity)
 {
-	GLuint lastMap = mLastColorMap;
+	mBloomIntensity = intensity;
+	GLuint tmpColorMap = mLastColorMap;
 	DoBrightPass();
 	DoBlur();
-	
-	mBloom.Bind();
-	mBloomShader.Use();
-	mBloomShader.SetUniform("uBloomIntensity", intensity);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, lastMap);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
-	glBindVertexArray(mVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
-	mLastColorMap = mBloom.GetColorMap();
-	mBloom.Unbind();
+	mBloomColorMap = mLastColorMap;
+	mLastColorMap = tmpColorMap;
 }

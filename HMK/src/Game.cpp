@@ -172,15 +172,12 @@ void Game::Render()
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	mPostProcess->End();
-	//mPostProcess->DoMonochrome();
-	//mPostProcess->DoBlur();
 	const glm::mat4 viewProjMatrix = mCamera->GetProjMatrix() * mCamera->GetViewMatrix();
+
 	if(mIsBloomActive) mPostProcess->DoBloom(mBloomIntensity);
 	mPostProcess->DoMotionBlur(viewProjMatrix);
-	mPostProcess->DoHDR(mTonemapExposure);
 	
-	//mPostProcess->DoNegative();
-	//mPostProcess->DoGrayScale();
+	mPostProcess->DoHDR(mTonemapExposure, mIsBloomActive);
 	mPostProcess->Render(mPPShader);
 }
 

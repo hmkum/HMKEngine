@@ -3,8 +3,12 @@
 out vec4 FinalColor;
 in vec2 TexCoords;
 
-uniform sampler2D PostProcessBuffer;
+layout(binding = 0) uniform sampler2D PostProcessBuffer;
+layout(binding = 1) uniform sampler2D BloomBuffer;
+
 uniform float uExposure;
+uniform bool uIsBloomActive;
+uniform float uBloomIntensity;
 
 const float A = 0.22;
 const float B = 0.30;
@@ -23,10 +27,6 @@ void main()
 {
    vec3 texColor = texture(PostProcessBuffer, TexCoords).rgb;
 
-   // Simple Reinhard tonemapping
-   //texColor *= 2.0f; // Hardcoded exposure
-   //texColor = texColor / (1.0f + texColor);
-
    texColor *= uExposure;
    float ExposureBias = 2.0f;
    vec3 curr = Uncharted2Tonemap(ExposureBias * texColor);
@@ -34,7 +34,13 @@ void main()
    vec3 whiteScale = 1.0f / Uncharted2Tonemap(vec3(W));
    vec3 color = curr*whiteScale;
 
+   if(uIsBloomActive)
+   {
+		vec3 bloomColor = texture(BloomBuffer, TexCoords).rgb;
+		color = color + uBloomIntensity * bloomColor;
+   }
+
    // Gamma correction
-   texColor = pow(texColor, vec3(1.0f / 2.2f));
-   FinalColor = vec4(texColor, 1.0f);
+   color = pow(color, vec3(1.0f / 2.2f));
+   FinalColor = vec4(color, 1.0f);
 }

@@ -16,7 +16,7 @@ public:
 	void Render(ShaderProgram &shader);
 
 	void DoMonochrome();
-	void DoHDR(float exposure = 1.0f);
+	void DoHDR(float exposure = 1.0f, bool isBloomActive = true);
 	void DoMotionBlur(const glm::mat4 &viewProjMatrix);
 	void DoNegative();
 	void DoGrayScale();
@@ -37,5 +37,7 @@ private:
 private:
 	GLuint mVAO, mVBO;
 	GLuint mLastColorMap;
+	GLuint mBloomColorMap;
+	float mBloomIntensity;
 };
 }

@@ -16,6 +16,6 @@ void main()
 	color += texture(PostProcessBuffer, TexCoords - offset).rgb;
 
 	color /= 4.0f;
-
-	FinalColor = vec4(color, 1.0f);
+	float luminance = dot(color, vec3(0.2126f, 0.7152f, 0.0722f));
+	FinalColor = vec4(color * (luminance - 0.25f), 1.0f);
 }
