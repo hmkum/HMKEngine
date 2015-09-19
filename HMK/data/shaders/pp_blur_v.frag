@@ -5,17 +5,20 @@ in vec2 TexCoords;
 
 uniform sampler2D PostProcessBuffer;
 
-const float gBlurOffsets[9] = {-4.0f, -3.0f, -2.0f, -1.0f, 0.0f, 1.0f, 2.0f, 3.0f, 4.0f};
-const float gBlurWeights[9] = {0.05f, 0.09f, 0.12f, 0.15f, 0.16f, 0.15f, 0.12f, 0.09f, 0.05f};
+const float Weight[5] = float[](0.2270270270, 0.1945945946, 0.1216216216,
+                                0.0540540541, 0.0162162162);
 
 void main()
 {
-	vec3 color = vec3(0.0f);
-	float blurSizeW = 1.0f / 800.0f;
-	for(int i = 0; i < 9; ++i)
-	{
-		color += texture(PostProcessBuffer, vec2(TexCoords.x + gBlurOffsets[i] * blurSizeW, TexCoords.y)).rgb * gBlurWeights[i];
-	}
-
-	FinalColor = vec4(color, 1.0f);
+	ivec2 pix = ivec2(gl_FragCoord.xy);
+    vec4 color = texelFetch(PostProcessBuffer, pix, 0) * Weight[0];
+    color += texelFetchOffset(PostProcessBuffer, pix, 0, ivec2(0, 1)) * Weight[1];
+    color += texelFetchOffset(PostProcessBuffer, pix, 0, ivec2(0,-1)) * Weight[1];
+    color += texelFetchOffset(PostProcessBuffer, pix, 0, ivec2(0, 2)) * Weight[2];
+    color += texelFetchOffset(PostProcessBuffer, pix, 0, ivec2(0,-2)) * Weight[2];
+    color += texelFetchOffset(PostProcessBuffer, pix, 0, ivec2(0, 3)) * Weight[3];
+    color += texelFetchOffset(PostProcessBuffer, pix, 0, ivec2(0,-3)) * Weight[3];
+    color += texelFetchOffset(PostProcessBuffer, pix, 0, ivec2(0, 4)) * Weight[4];
+    color += texelFetchOffset(PostProcessBuffer, pix, 0, ivec2(0,-4)) * Weight[4];
+	FinalColor = color;
 }
