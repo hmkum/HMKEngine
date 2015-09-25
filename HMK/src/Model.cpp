@@ -1,6 +1,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <glm/glm.hpp>
+#include <glm/common.hpp>
 #include "Model.h"
 #include "Material.h"
 #include "Utility.h"
@@ -54,10 +56,12 @@ bool Model::Load(std::string modelName)
 			aiVector3D pos = mesh->mVertices[j];
 			vertices[j].Position = glm::vec3(pos.x, pos.y, pos.z);
 
+#undef min // min ve max windows kütüphanesi için macro olarak tanýmlanmýþ. Bu yüzden glm'nin fonksiyonlarýný görmüyordu.
+		   // Bu yüzden undef yapmak zorunda kaldým.
             mBoundingBox.mMin.x = glm::min(mBoundingBox.mMin.x, pos.x);
             mBoundingBox.mMin.y = glm::min(mBoundingBox.mMin.y, pos.y);
             mBoundingBox.mMin.z = glm::min(mBoundingBox.mMin.z, pos.z);
-
+#undef max
             mBoundingBox.mMax.x = glm::max(mBoundingBox.mMax.x, pos.x);
             mBoundingBox.mMax.y = glm::max(mBoundingBox.mMax.y, pos.y);
             mBoundingBox.mMax.z = glm::max(mBoundingBox.mMax.z, pos.z);
