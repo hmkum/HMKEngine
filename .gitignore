@@ -6,3 +6,5 @@ Debug/
 /HMK/external/stb/*.o
 *.opensdf
 *.tlog
+build/
+HMK.pro.user

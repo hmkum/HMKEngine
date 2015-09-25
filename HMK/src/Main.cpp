@@ -63,7 +63,7 @@ void APIENTRY glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum seve
 	errorMessage += message;
 
 	HMK_LOG_ERROR(errorMessage);
-	HMK_PRINT(errorMessage);
+    HMK_PRINT(errorMessage);
 }
 
 int main()

@@ -16,12 +16,12 @@ Game::~Game()
 
 bool Game::Init()
 {
-	mCamera = std::make_shared<hmk::Camera>(800, 600);
-	mCamera->CreateLookAt(glm::vec3(0.0f, 2.0f, 10.0f));
+    mCamera = std::make_shared<hmk::Camera>();
+    mCamera->CreateLookAt(glm::vec3(0.0f, 2.0f, 10.0f));
 	mCamera->CreatePerspectiveProj(120.0f, 0.1f, 100.0f);
 
-	mShadowMap = std::make_shared<hmk::ShadowMap>();
-	mShadowMap->Init(2048, 2048);
+    mShadowMap = std::make_shared<hmk::ShadowMap>();
+    mShadowMap->Init(2048, 2048);
 
 	mPostProcess = std::make_shared<hmk::PostProcess>();
 	mPostProcess->Init();

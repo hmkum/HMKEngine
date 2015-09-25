@@ -9,15 +9,15 @@
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
 #undef APIENTRY
-#if _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define GLFW_EXPOSE_NATIVE_WGL
-#else
+#elif __linux__
 #define GLFW_EXPOSE_NATIVE_X11
 #define GLFW_EXPOSE_NATIVE_GLX
+#else
+#error Not supported platform
 #endif
 #include <GLFW/glfw3native.h>
-#endif
 
 // Data
 static GLFWwindow*  g_Window = NULL;
@@ -290,8 +290,11 @@ bool    ImGui_ImplGlfwGL3_Init(GLFWwindow* window, bool install_callbacks)
 	io.GetClipboardTextFn = ImGui_ImplGlfwGL3_GetClipboardText;
 #ifdef _WIN32
 	io.ImeWindowHandle = glfwGetWin32Window(g_Window);
+#elif __linux__
+    Window linuxWindow = glfwGetX11Window(g_Window);
+    io.ImeWindowHandle = &linuxWindow;
 #else
-	io.ImeWindowHandle = glfwGetX11Window(g_Window);
+#error Not supported platform
 #endif
 
 	if (install_callbacks)

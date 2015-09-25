@@ -54,13 +54,13 @@ bool Model::Load(std::string modelName)
 			aiVector3D pos = mesh->mVertices[j];
 			vertices[j].Position = glm::vec3(pos.x, pos.y, pos.z);
 
-			mBoundingBox.mMin.x = min(mBoundingBox.mMin.x, pos.x);
-			mBoundingBox.mMin.y = min(mBoundingBox.mMin.y, pos.y);
-			mBoundingBox.mMin.z = min(mBoundingBox.mMin.z, pos.z);
+            mBoundingBox.mMin.x = glm::min(mBoundingBox.mMin.x, pos.x);
+            mBoundingBox.mMin.y = glm::min(mBoundingBox.mMin.y, pos.y);
+            mBoundingBox.mMin.z = glm::min(mBoundingBox.mMin.z, pos.z);
 
-			mBoundingBox.mMax.x = max(mBoundingBox.mMax.x, pos.x);
-			mBoundingBox.mMax.y = max(mBoundingBox.mMax.y, pos.y);
-			mBoundingBox.mMax.z = max(mBoundingBox.mMax.z, pos.z);
+            mBoundingBox.mMax.x = glm::max(mBoundingBox.mMax.x, pos.x);
+            mBoundingBox.mMax.y = glm::max(mBoundingBox.mMax.y, pos.y);
+            mBoundingBox.mMax.z = glm::max(mBoundingBox.mMax.z, pos.z);
 
 			aiVector3D one3D(1.0f, 1.0f, 1.0f);
 			aiVector3D zero3D(0.0f, 0.0f, 0.0f);
@@ -114,7 +114,6 @@ bool Model::Load(std::string modelName)
 			mat.mBaseColor = glm::vec3(color.r, color.g, color.b);
 		}
 
-		float value = 0.0f;
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
 		{
 			aiString filename;

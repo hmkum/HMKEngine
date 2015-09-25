@@ -1,5 +1,6 @@
 #pragma once
 #include <malloc.h>
+#include <cstdlib>
 
 template<size_t Alignment>
 class AlignedAllocation
@@ -10,7 +11,10 @@ public:
 #ifdef _WIN32
 		return _aligned_malloc(size, Alignment);
 #elif __linux__
-		return memalign(size, Alignment);
+        void *mem = malloc(size + Alignment + sizeof(void*));
+        void **ptr = (void**)((long)(mem + Alignment + sizeof(void*)) & ~(Alignment-1));
+        ptr[-1] = mem;
+        return ptr;
 #else
 #error Platform not supported!
 #endif
@@ -21,7 +25,7 @@ public:
 #ifdef _WIN32
 		_aligned_free(memory);
 #elif __linux__
-		free(memory);
+        free(((void**)memory)[-1]);
 #else
 #error Platform not supported!
 #endif

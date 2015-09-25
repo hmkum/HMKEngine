@@ -11,7 +11,7 @@
 #define HMK_LOG_WARNING(log, ...) {hmk::Logger::Inst().Write("<WARNING> ", log, " ", ##__VA_ARGS__, "\n");}
 #define HMK_LOG_ERROR(log, ...)   {hmk::Logger::Inst().Write("<ERROR>   ", log, " ", ##__VA_ARGS__, "\n");}
 
-#define HMK_PRINT(d, ...) {hmk::Debug::Print(d, __VA_ARGS__, "\n");}
+#define HMK_PRINT(...) {hmk::Debug::Print("", __VA_ARGS__, "\n");}
 
 // C++11 based callback macros
 #define HMK_CALLBACK_1(SELECTOR, TARGET) std::bind(&SELECTOR, TARGET, std::placeholders::_1);
