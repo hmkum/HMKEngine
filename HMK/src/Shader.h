@@ -12,6 +12,8 @@ class Shader
 {
 public:
     Shader();
+	~Shader();
+
     bool Init(GLenum shaderType, std::string shaderName);
 
     GLuint GetID() const;

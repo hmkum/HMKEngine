@@ -32,13 +32,13 @@ private:
 	void ProcessSelection(int x, int y);
 
 private:
-	std::shared_ptr<hmk::Model> mSelectedModel;
-	std::shared_ptr<hmk::Model> mAxe, mSphere, mSphere2, mPlane;
-	std::shared_ptr<hmk::Skybox> mSkybox;
+	hmk::ModelPtr mSelectedModel;
+	hmk::ModelPtr mAxe, mSphere, mSphere2, mPlane;
+	hmk::SkyboxPtr mSkybox;
 	hmk::ShaderProgram mBasicShader, mSkyboxShader, mSimpleDepthShader, mPickingShader, mPPShader;
-    std::shared_ptr<hmk::Camera> mCamera;
-    std::shared_ptr<hmk::ShadowMap> mShadowMap;
-    std::shared_ptr<hmk::PostProcess> mPostProcess;
+    hmk::CameraPtr mCamera;
+    hmk::ShadowMapPtr mShadowMap;
+    hmk::PostProcessPtr mPostProcess;
 	glm::vec3 mLightPosition;
 	glm::mat4 mLightProj;
 	glm::mat4 mLightSpaceMatrix;

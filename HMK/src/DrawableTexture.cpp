@@ -3,17 +3,19 @@
 using namespace hmk;
 
 DrawableTexture::DrawableTexture()
+	: mFBO{0}
+	, mDepthMap{0}
+	, mColorMap{0}
+	, mWidth{1024}
+	, mHeight{1024}
 {
-	mFBO = 0;
-	mDepthMap = 0;
-	mColorMap = 0;
-	mWidth = 1024;
-	mHeight = 1024;
 }
 
 DrawableTexture::~DrawableTexture()
 {
 	glDeleteFramebuffers(1, &mFBO);
+	glDeleteTextures(1, &mDepthMap);
+	glDeleteTextures(1, &mColorMap);
 }
 
 bool DrawableTexture::Init(bool hasColorMap, const GLuint width, const GLuint height, GLint format)

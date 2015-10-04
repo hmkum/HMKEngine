@@ -20,6 +20,7 @@ class Model
 public:
 	Model();
 	~Model();
+
 	bool Load(std::string modelName);
 	void Render();
 	void Render(ShaderProgram &shader);
@@ -52,4 +53,6 @@ private:
 	glm::mat4 mRotation;
 	glm::mat4 mScale;
 };
+
+typedef std::shared_ptr<Model> ModelPtr;
 }

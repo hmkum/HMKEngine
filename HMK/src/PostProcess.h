@@ -1,5 +1,6 @@
 #pragma once
 #include <GL/gl3w.h>
+#include <memory>
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "DrawableTexture.h"
@@ -10,6 +11,8 @@ class PostProcess
 {
 public:
 	PostProcess();
+	~PostProcess();
+
 	bool Init();
 	void Begin();
 	void End();
@@ -40,4 +43,6 @@ private:
 	GLuint mBloomColorMap;
 	float mBloomIntensity;
 };
+
+typedef std::shared_ptr<PostProcess> PostProcessPtr;
 }

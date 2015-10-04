@@ -3,16 +3,16 @@
 using namespace hmk;
 
 ShadowMap::ShadowMap()
-{
-	mFBO = 0;
-	mDepthMap = 0;
-	mWidth = 1024;
-	mHeight = 1024;
-}
+	: mFBO{0}
+	, mDepthMap{0}
+	, mWidth{1024}
+	, mHeight{1024}
+{ }
 
 ShadowMap::~ShadowMap()
 {
 	glDeleteFramebuffers(1, &mFBO);
+	glDeleteTextures(1, &mDepthMap);
 }
 
 bool ShadowMap::Init(const GLuint width, const GLuint height)

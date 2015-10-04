@@ -2,17 +2,31 @@
 
 using namespace hmk;
 
-Camera::Camera(int width, int height)
+Camera::Camera()
+	: mPosition{glm::vec3(0.0f, 0.0f, 3.0f)}
+	, mWorldUp{glm::vec3(0.0f, 1.0f, 0.0f)}
+	, mFront{glm::vec3(0.0f, 0.0f, -1.0f)}
+	, mWidth{800}
+	, mHeight{600}
+	, mPitch{0.0f}
+	, mYaw{-90.0f}
+	, mSensitivity{0.25f}
+	, mMovementSpeed{4.0f}
 {
-	mPosition	   = glm::vec3(0.0f, 0.0f, 3.0f);
-	mWorldUp	   = glm::vec3(0.0f, 1.0f, 0.0f);
-	mFront		   = glm::vec3(0.0f, 0.0f, -1.0f);
-	mWidth		   = width;
-	mHeight		   = height;
-	mPitch		   = 0.0f;
-	mYaw		   = -90.0f;
-	mSensitivity   = 0.25f;
-	mMovementSpeed = 4.0f;
+	UpdateCameraVectors();
+}
+
+Camera::Camera(int width, int height)
+	: mPosition{glm::vec3(0.0f, 0.0f, 3.0f)}
+	, mWorldUp{glm::vec3(0.0f, 1.0f, 0.0f)}
+	, mFront{glm::vec3(0.0f, 0.0f, -1.0f)}
+	, mWidth{width}
+	, mHeight{height}
+	, mPitch{0.0f}
+	, mYaw{-90.0f}
+	, mSensitivity{0.25f}
+	, mMovementSpeed{4.0f}
+{
 	UpdateCameraVectors();
 }
 

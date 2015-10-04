@@ -8,7 +8,11 @@ Texture::Texture()
     , mWidth(256)
     , mHeight(256)
     , mComponent(3)
+{ }
+
+Texture::~Texture()
 {
+	glDeleteTextures(1, &mTextureID);
 }
 
 bool Texture::Create(std::string name, int wrapMode, int minFilter, int magFilter, bool genMipMap)

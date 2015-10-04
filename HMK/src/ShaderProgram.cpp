@@ -5,8 +5,7 @@ using namespace hmk;
 
 ShaderProgram::ShaderProgram()
     : mProgramID(0)
-{
-}
+{ }
 
 ShaderProgram::~ShaderProgram()
 {

@@ -9,6 +9,7 @@ class Ray
 public:
 	Ray();
 	Ray(const glm::vec3 &origin, const glm::vec3 &direction);
+
 	bool IntersectAABB(const BoundingBox &box);
 
 private:

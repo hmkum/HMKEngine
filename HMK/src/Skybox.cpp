@@ -2,6 +2,19 @@
 
 using namespace hmk;
 
+Skybox::Skybox()
+	: mTextureID{0}
+	, mVAO{0}
+	, mVBO{0}
+{ }
+
+Skybox::~Skybox()
+{
+	glDeleteTextures(1, &mTextureID);
+	glDeleteBuffers(1, &mVBO);
+	glDeleteVertexArrays(1, &mVAO);
+}
+
 bool Skybox::Load(std::string texturePath)
 {
 	glGenTextures(1, &mTextureID);

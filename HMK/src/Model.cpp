@@ -10,12 +10,11 @@
 using namespace hmk;
 
 Model::Model()
-{
-	mDrawBoundingBox = false;
-	mTranslation = glm::mat4(1.0f);
-	mRotation	 = glm::mat4(1.0f);
-	mScale		 = glm::mat4(1.0f);
-}
+	: mDrawBoundingBox{false}
+	, mTranslation{1.0f}
+	, mRotation{1.0f}
+	, mScale{1.0f}
+{ }
 
 Model::~Model()
 {

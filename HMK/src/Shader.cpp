@@ -5,6 +5,9 @@ using namespace hmk;
 
 Shader::Shader()
     : mShaderID(0)
+{ }
+
+Shader::~Shader()
 {
 }
 

@@ -9,6 +9,7 @@ class DrawableTexture
 public:
 	DrawableTexture();
 	~DrawableTexture();
+
 	bool Init(bool hasColorMap = false, const GLuint width = 1024, const GLuint height = 1024, GLint format = GL_RGBA);
 	void Bind();
 	void Unbind();

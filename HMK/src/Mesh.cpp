@@ -3,10 +3,15 @@
 using namespace hmk;
 
 Mesh::Mesh(std::vector<Vertex> vertices, Material &material, std::vector<unsigned int> indices)
+	: mVAO{0}
+	, mVBO{0}
+	, mIBO{0}
+	, mMaterial{material}
+	, mAlbedoTexture{nullptr}
+	, mNormalTexture{nullptr}
+	, mRoughnessTexture{nullptr}
+	, mMetalnessTexture{nullptr}
 {
-	mAlbedoTexture = nullptr;
-	mMetalnessTexture = nullptr;
-	mMaterial	 = material;
 	mIndicesSize = indices.size();
 
 	glGenVertexArrays(1, &mVAO);
@@ -64,6 +69,9 @@ Mesh::Mesh(std::vector<Vertex> vertices, Material &material, std::vector<unsigne
 
 Mesh::~Mesh()
 {
+	glDeleteBuffers(1, &mVBO);
+	glDeleteBuffers(1, &mIBO);
+	glDeleteVertexArrays(1, &mVAO);
 }
 
 void Mesh::Render()

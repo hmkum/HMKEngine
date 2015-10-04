@@ -3,16 +3,17 @@
 using namespace hmk;
 
 Ray::Ray()
+	: mOrigin{0.0f}
+	, mDirection{0.0f}
 {
-	mOrigin = glm::vec3(0.0f);
-	mDirection = glm::vec3(0.0f);
 }
 
 Ray::Ray(const glm::vec3 &origin, const glm::vec3 &direction)
+	: mOrigin{origin}
+	, mDirection{direction}
 {
-	mOrigin = origin;
-	mDirection = direction;
 }
+
 bool Ray::IntersectAABB(const BoundingBox &box)
 {
 	glm::vec3 dirFrac = 1.0f / mDirection;

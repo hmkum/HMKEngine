@@ -3,10 +3,16 @@
 using namespace hmk;
 
 PostProcess::PostProcess()
+	: mVAO{0}
+	, mVBO{0}
+	, mLastColorMap{0}
+	, mPrevViewProjMatrix{1.0f}
+{}
+
+PostProcess::~PostProcess()
 {
-	mVAO = mVBO = 0;
-	mLastColorMap = 0;
-	mPrevViewProjMatrix = glm::mat4(1.0f);
+	glDeleteBuffers(1, &mVBO);
+	glDeleteVertexArrays(1, &mVAO);
 }
 
 bool PostProcess::Init()
