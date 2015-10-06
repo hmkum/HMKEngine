@@ -21,37 +21,37 @@ public:
 	Model();
 	~Model();
 
-	bool Load(std::string modelName);
-	void Render();
-	void Render(ShaderProgram &shader);
+	bool load(std::string modelName);
+	void render();
+	void render(ShaderProgram &shader);
 
-	glm::mat4 GetModelMatrix() const;
+	glm::mat4 get_model_matrix() const;
 
-	void Translate(glm::vec3 t);
-	void Rotate(float degree, glm::vec3 axis);
-	void Scale(glm::vec3 s);
+	void translate(glm::vec3 t);
+	void rotate(float degree, glm::vec3 axis);
+	void scale(glm::vec3 s);
 
-	void SetRoughness(float r);
-	float GetRoughness();
+	void set_roughness(float r);
+	float get_roughness();
 
-	void SetMetallic(float m);
-	float GetMetallic();
+	void set_metallic(float m);
+	float get_metallic();
 
-	void DrawBoundingBox(bool draw);
-	BoundingBox GetBoundingBox() const;
+	void draw_bounding_box(bool draw);
+	BoundingBox get_bounding_box() const;
 
 private:
-	std::string HandleTextureName(const char *filename);
+	std::string handle_texture_name(const char *filename);
 private:
 	// Holds meshes of models.
-	std::vector<std::shared_ptr<Mesh>> mMeshes;
-	BoundingBox mBoundingBox;
-	GLuint mBBVAO, mBBVBO;
-	bool mDrawBoundingBox;
+	std::vector<std::shared_ptr<Mesh>> meshes_;
+	BoundingBox bounding_box_;
+	GLuint bounding_box_vao_id, bounding_box_vbo_id;
+	bool draw_bounding_box_;
 
-	glm::mat4 mTranslation;
-	glm::mat4 mRotation;
-	glm::mat4 mScale;
+	glm::mat4 translation_;
+	glm::mat4 rotation_;
+	glm::mat4 scale_;
 };
 
 typedef std::shared_ptr<Model> ModelPtr;

@@ -10,17 +10,17 @@
 using namespace hmk;
 
 Model::Model()
-	: mDrawBoundingBox{false}
-	, mTranslation{1.0f}
-	, mRotation{1.0f}
-	, mScale{1.0f}
+	: draw_bounding_box_{false}
+	, translation_{1.0f}
+	, rotation_{1.0f}
+	, scale_{1.0f}
 { }
 
 Model::~Model()
 {
 }
 
-bool Model::Load(std::string modelName)
+bool Model::load(std::string modelName)
 {
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(MODEL_PATH + modelName, aiProcess_Triangulate | aiProcess_FlipUVs |
@@ -57,13 +57,13 @@ bool Model::Load(std::string modelName)
 
 #undef min // min ve max windows kütüphanesi için macro olarak tanýmlanmýþ. Bu yüzden glm'nin fonksiyonlarýný görmüyordu.
 		   // Bu yüzden undef yapmak zorunda kaldým.
-            mBoundingBox.mMin.x = glm::min(mBoundingBox.mMin.x, pos.x);
-            mBoundingBox.mMin.y = glm::min(mBoundingBox.mMin.y, pos.y);
-            mBoundingBox.mMin.z = glm::min(mBoundingBox.mMin.z, pos.z);
+            bounding_box_.min_corner_.x = glm::min(bounding_box_.min_corner_.x, pos.x);
+            bounding_box_.min_corner_.y = glm::min(bounding_box_.min_corner_.y, pos.y);
+            bounding_box_.min_corner_.z = glm::min(bounding_box_.min_corner_.z, pos.z);
 #undef max
-            mBoundingBox.mMax.x = glm::max(mBoundingBox.mMax.x, pos.x);
-            mBoundingBox.mMax.y = glm::max(mBoundingBox.mMax.y, pos.y);
-            mBoundingBox.mMax.z = glm::max(mBoundingBox.mMax.z, pos.z);
+            bounding_box_.max_corner_.x = glm::max(bounding_box_.max_corner_.x, pos.x);
+            bounding_box_.max_corner_.y = glm::max(bounding_box_.max_corner_.y, pos.y);
+            bounding_box_.max_corner_.z = glm::max(bounding_box_.max_corner_.z, pos.z);
 
 			aiVector3D one3D(1.0f, 1.0f, 1.0f);
 			aiVector3D zero3D(0.0f, 0.0f, 0.0f);
@@ -78,30 +78,30 @@ bool Model::Load(std::string modelName)
 			vertices[j].Tangent = glm::vec3(tangent.x, tangent.y, tangent.z);
 		}
 
-		glGenVertexArrays(1, &mBBVAO);
-		glBindVertexArray(mBBVAO);
+		glGenVertexArrays(1, &bounding_box_vao_id);
+		glBindVertexArray(bounding_box_vao_id);
 
 		GLfloat bbVertices[] = {
-			mBoundingBox.mMax.x, mBoundingBox.mMax.y, mBoundingBox.mMin.z,
-			mBoundingBox.mMin.x, mBoundingBox.mMax.y, mBoundingBox.mMin.z,
-			mBoundingBox.mMin.x, mBoundingBox.mMin.y, mBoundingBox.mMin.z,
-			mBoundingBox.mMax.x, mBoundingBox.mMin.y, mBoundingBox.mMin.z,
-			mBoundingBox.mMax.x, mBoundingBox.mMin.y, mBoundingBox.mMax.z,
-			mBoundingBox.mMax.x, mBoundingBox.mMax.y, mBoundingBox.mMax.z,
-			mBoundingBox.mMin.x, mBoundingBox.mMax.y, mBoundingBox.mMax.z,
-			mBoundingBox.mMin.x, mBoundingBox.mMin.y, mBoundingBox.mMax.z,
-			mBoundingBox.mMax.x, mBoundingBox.mMax.y, mBoundingBox.mMin.z,
-			mBoundingBox.mMax.x, mBoundingBox.mMax.y, mBoundingBox.mMax.z,
-			mBoundingBox.mMin.x, mBoundingBox.mMax.y, mBoundingBox.mMax.z,
-			mBoundingBox.mMin.x, mBoundingBox.mMax.y, mBoundingBox.mMin.z,
-			mBoundingBox.mMax.x, mBoundingBox.mMin.y, mBoundingBox.mMax.z,
-			mBoundingBox.mMin.x, mBoundingBox.mMin.y, mBoundingBox.mMax.z,
-			mBoundingBox.mMin.x, mBoundingBox.mMin.y, mBoundingBox.mMin.z,
-			mBoundingBox.mMax.x, mBoundingBox.mMin.y, mBoundingBox.mMin.z
+			bounding_box_.max_corner_.x, bounding_box_.max_corner_.y, bounding_box_.min_corner_.z,
+			bounding_box_.min_corner_.x, bounding_box_.max_corner_.y, bounding_box_.min_corner_.z,
+			bounding_box_.min_corner_.x, bounding_box_.min_corner_.y, bounding_box_.min_corner_.z,
+			bounding_box_.max_corner_.x, bounding_box_.min_corner_.y, bounding_box_.min_corner_.z,
+			bounding_box_.max_corner_.x, bounding_box_.min_corner_.y, bounding_box_.max_corner_.z,
+			bounding_box_.max_corner_.x, bounding_box_.max_corner_.y, bounding_box_.max_corner_.z,
+			bounding_box_.min_corner_.x, bounding_box_.max_corner_.y, bounding_box_.max_corner_.z,
+			bounding_box_.min_corner_.x, bounding_box_.min_corner_.y, bounding_box_.max_corner_.z,
+			bounding_box_.max_corner_.x, bounding_box_.max_corner_.y, bounding_box_.min_corner_.z,
+			bounding_box_.max_corner_.x, bounding_box_.max_corner_.y, bounding_box_.max_corner_.z,
+			bounding_box_.min_corner_.x, bounding_box_.max_corner_.y, bounding_box_.max_corner_.z,
+			bounding_box_.min_corner_.x, bounding_box_.max_corner_.y, bounding_box_.min_corner_.z,
+			bounding_box_.max_corner_.x, bounding_box_.min_corner_.y, bounding_box_.max_corner_.z,
+			bounding_box_.min_corner_.x, bounding_box_.min_corner_.y, bounding_box_.max_corner_.z,
+			bounding_box_.min_corner_.x, bounding_box_.min_corner_.y, bounding_box_.min_corner_.z,
+			bounding_box_.max_corner_.x, bounding_box_.min_corner_.y, bounding_box_.min_corner_.z
 		};
 
-		glGenBuffers(1, &mBBVBO);
-		glBindBuffer(GL_ARRAY_BUFFER, mBBVBO);
+		glGenBuffers(1, &bounding_box_vbo_id);
+		glBindBuffer(GL_ARRAY_BUFFER, bounding_box_vbo_id);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(bbVertices), bbVertices, GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(0);
@@ -114,137 +114,137 @@ bool Model::Load(std::string modelName)
 		aiColor4D color;
 		if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == aiReturn_SUCCESS)
 		{
-			mat.mBaseColor = glm::vec3(color.r, color.g, color.b);
+			mat.base_color_ = glm::vec3(color.r, color.g, color.b);
 		}
 
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
 		{
 			aiString filename;
 			material->GetTexture(aiTextureType_DIFFUSE, 0, &filename);
-			mat.mAlbedoTexName = HandleTextureName(filename.C_Str());
-			mat.mHasTextures.x = 1;
+			mat.albedo_texture_name_ = handle_texture_name(filename.C_Str());
+			mat.has_textures_.x = 1;
 		}
 
 		if (material->GetTextureCount(aiTextureType_HEIGHT) > 0) // Normal map
 		{
 			aiString filename;
 			material->GetTexture(aiTextureType_HEIGHT, 0, &filename);
-			mat.mNormalTexName = HandleTextureName(filename.C_Str());
-			mat.mHasTextures.y = 1;
+			mat.normal_texture_name_ = handle_texture_name(filename.C_Str());
+			mat.has_textures_.y = 1;
 		}
 
 		if (material->GetTextureCount(aiTextureType_SHININESS) > 0)
 		{
 			aiString filename;
 			material->GetTexture(aiTextureType_SHININESS, 0, &filename);
-			mat.mRoughnessTexName = HandleTextureName(filename.C_Str());
-			mat.mHasTextures.z = 1;
+			mat.roughness_texture_name_ = handle_texture_name(filename.C_Str());
+			mat.has_textures_.z = 1;
 		}
 
 		if (material->GetTextureCount(aiTextureType_SPECULAR) > 0)
 		{
 			aiString filename;
 			material->GetTexture(aiTextureType_SPECULAR, 0, &filename);
-			mat.mMetallicTexName = HandleTextureName(filename.C_Str());
-			mat.mHasTextures.w = 1;
+			mat.metallic_texture_name_ = handle_texture_name(filename.C_Str());
+			mat.has_textures_.w = 1;
 		}
 
 		// Initialize mesh
 		std::shared_ptr<Mesh> mesh1 = std::make_shared<Mesh>(vertices, mat, indices);
-		mMeshes.push_back(mesh1);
+		meshes_.push_back(mesh1);
 	}
 
 	importer.FreeScene();
 	return true;
 }
 
-void Model::Render()
+void Model::render()
 {
-	for (auto &mesh : mMeshes)
+	for (auto &mesh : meshes_)
 	{
-		mesh->Render();
+		mesh->render();
 	}
 }
 
-void Model::Render(ShaderProgram &shader)
+void Model::render(ShaderProgram &shader)
 {
-	if(mDrawBoundingBox)
+	if(draw_bounding_box_)
 	{
-		glBindVertexArray(mBBVAO);
+		glBindVertexArray(bounding_box_vao_id);
 		glDrawArrays(GL_LINE_LOOP, 0, 16 * 3);
 		glBindVertexArray(0);
 	}
 
-	for(auto &mesh : mMeshes)
+	for(auto &mesh : meshes_)
 	{
-		mesh->Render(shader);
+		mesh->render(shader);
 	}
 }
 
-glm::mat4 Model::GetModelMatrix() const
+glm::mat4 Model::get_model_matrix() const
 {
-	return mScale * mRotation * mTranslation;
+	return scale_ * rotation_ * translation_;
 }
 
-void Model::Translate(glm::vec3 t)
+void Model::translate(glm::vec3 t)
 {
-	mTranslation = glm::translate(mTranslation, t);
+	translation_ = glm::translate(translation_, t);
 }
 
-void Model::Rotate(float degree, glm::vec3 axis)
+void Model::rotate(float degree, glm::vec3 axis)
 {
-	mRotation = glm::rotate(mRotation, glm::radians(degree), axis);
+	rotation_ = glm::rotate(rotation_, glm::radians(degree), axis);
 }
 
-void Model::Scale(glm::vec3 s)
+void Model::scale(glm::vec3 s)
 {
-	mScale = glm::scale(mScale, s);
+	scale_ = glm::scale(scale_, s);
 }
 
-void Model::SetRoughness(float r)
+void Model::set_roughness(float r)
 {
 	if (r >= 1.0f) r = 1.0f;
 	if (r <= 0.0f) r = 0.0f;
-	for (auto &mesh : mMeshes)
+	for (auto &mesh : meshes_)
 	{
-		mesh->SetRoughness(r);
+		mesh->set_roughness(r);
 	}
 }
 
-float Model::GetRoughness()
+float Model::get_roughness()
 {
-	return mMeshes[0]->GetRoughness();
+	return meshes_[0]->get_roughness();
 }
 
-void Model::SetMetallic(float m)
+void Model::set_metallic(float m)
 {
 	if (m >= 1.0f) m = 1.0f;
 	if (m <= 0.0f) m = 0.0f;
-	for (auto &mesh : mMeshes)
+	for (auto &mesh : meshes_)
 	{
-		mesh->SetMetallic(m);
+		mesh->set_metallic(m);
 	}
 }
 
-float Model::GetMetallic()
+float Model::get_metallic()
 {
-	return mMeshes[0]->GetMetallic();
+	return meshes_[0]->get_metallic();
 }
 
-void Model::DrawBoundingBox(bool draw)
+void Model::draw_bounding_box(bool draw)
 {
-	mDrawBoundingBox = draw;
+	draw_bounding_box_ = draw;
 }
 
-BoundingBox Model::GetBoundingBox() const
+BoundingBox Model::get_bounding_box() const
 {
 	BoundingBox box;
-	box.mMin = glm::vec3(GetModelMatrix() * glm::vec4(mBoundingBox.mMin, 1.0f));
-	box.mMax = glm::vec3(GetModelMatrix() * glm::vec4(mBoundingBox.mMax, 1.0f));
+	box.min_corner_ = glm::vec3(get_model_matrix() * glm::vec4(bounding_box_.min_corner_, 1.0f));
+	box.max_corner_ = glm::vec3(get_model_matrix() * glm::vec4(bounding_box_.max_corner_, 1.0f));
 	return box;
 }
 
-std::string Model::HandleTextureName(const char *filename)
+std::string Model::handle_texture_name(const char *filename)
 {
 	std::string name(filename);
 	int index = name.find_last_of('\\');

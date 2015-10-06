@@ -7,11 +7,11 @@
 
 #define SAFE_RELEASE(v) {if(v != nullptr) {delete v; v = nullptr;}}
 
-#define HMK_LOG_WRITE(log, ...)   {hmk::Logger::Inst().Write("<DEBUG>   ", log, " ", ##__VA_ARGS__, "\n");}
-#define HMK_LOG_WARNING(log, ...) {hmk::Logger::Inst().Write("<WARNING> ", log, " ", ##__VA_ARGS__, "\n");}
-#define HMK_LOG_ERROR(log, ...)   {hmk::Logger::Inst().Write("<ERROR>   ", log, " ", ##__VA_ARGS__, "\n");}
+#define HMK_LOG_WRITE(log, ...)   {hmk::Logger::get_instance().write("<DEBUG>   ", log, " ", ##__VA_ARGS__, "\n");}
+#define HMK_LOG_WARNING(log, ...) {hmk::Logger::get_instance().write("<WARNING> ", log, " ", ##__VA_ARGS__, "\n");}
+#define HMK_LOG_ERROR(log, ...)   {hmk::Logger::get_instance().write("<ERROR>   ", log, " ", ##__VA_ARGS__, "\n");}
 
-#define HMK_PRINT(...) {hmk::Debug::Print("", __VA_ARGS__, "\n");}
+#define HMK_PRINT(...) {hmk::Debug::print("", __VA_ARGS__, "\n");}
 
 // C++11 based callback macros
 #define HMK_CALLBACK_1(SELECTOR, TARGET) std::bind(&SELECTOR, TARGET, std::placeholders::_1);

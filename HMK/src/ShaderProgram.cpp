@@ -4,55 +4,55 @@
 using namespace hmk;
 
 ShaderProgram::ShaderProgram()
-    : mProgramID(0)
+    : program_id_(0)
 { }
 
 ShaderProgram::~ShaderProgram()
 {
-	glDeleteProgram(mProgramID);
+	glDeleteProgram(program_id_);
 }
 
-ShaderProgram &ShaderProgram::AddShader(const Shader &shader)
+ShaderProgram &ShaderProgram::add_shader(const Shader &shader)
 {
-    mShaders.push_back(shader);
+    shaders_.push_back(shader);
     return *this;
 }
 
-void ShaderProgram::Link()
+void ShaderProgram::link_shaders()
 {
-    mProgramID = glCreateProgram();
-    for(auto &shader : mShaders)
+    program_id_ = glCreateProgram();
+    for(auto &shader : shaders_)
     {
-        glAttachShader(mProgramID, shader.GetID());
+        glAttachShader(program_id_, shader.get_id());
     }
-    glLinkProgram(mProgramID);
-	glValidateProgram(mProgramID);
+    glLinkProgram(program_id_);
+	glValidateProgram(program_id_);
 
     GLint success;
-    glGetProgramiv(mProgramID, GL_LINK_STATUS, &success);
+    glGetProgramiv(program_id_, GL_LINK_STATUS, &success);
     if(!success)
     {
         GLchar log[512];
-        glGetProgramInfoLog(mProgramID, 512, nullptr, log);
+        glGetProgramInfoLog(program_id_, 512, nullptr, log);
 		HMK_PRINT(log)
 		HMK_LOG_ERROR(log)
     }
 
-    for(auto &shader : mShaders)
+    for(auto &shader : shaders_)
     {
-		glDetachShader(mProgramID, shader.GetID());
-        glDeleteShader(shader.GetID());
+		glDetachShader(program_id_, shader.get_id());
+        glDeleteShader(shader.get_id());
     }
 }
 
-void ShaderProgram::Use()
+void ShaderProgram::use()
 {
-    glUseProgram(mProgramID);
+    glUseProgram(program_id_);
 }
 
-bool ShaderProgram::SetUniform(std::string name, float f)
+bool ShaderProgram::set_uniform(std::string name, float f)
 {
-	GLint id = glGetUniformLocation(mProgramID, name.c_str());
+	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
@@ -63,9 +63,9 @@ bool ShaderProgram::SetUniform(std::string name, float f)
 	return true;
 }
 
-bool ShaderProgram::SetUniform(std::string name, int i)
+bool ShaderProgram::set_uniform(std::string name, int i)
 {
-	GLint id = glGetUniformLocation(mProgramID, name.c_str());
+	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
@@ -76,9 +76,9 @@ bool ShaderProgram::SetUniform(std::string name, int i)
 	return true;
 }
 
-bool ShaderProgram::SetUniform(std::string name, const glm::vec2 &v)
+bool ShaderProgram::set_uniform(std::string name, const glm::vec2 &v)
 {
-	GLint id = glGetUniformLocation(mProgramID, name.c_str());
+	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
@@ -89,9 +89,9 @@ bool ShaderProgram::SetUniform(std::string name, const glm::vec2 &v)
 	return true;
 }
 
-bool ShaderProgram::SetUniform(std::string name, const glm::vec3 &v)
+bool ShaderProgram::set_uniform(std::string name, const glm::vec3 &v)
 {
-	GLint id = glGetUniformLocation(mProgramID, name.c_str());
+	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
@@ -102,9 +102,9 @@ bool ShaderProgram::SetUniform(std::string name, const glm::vec3 &v)
 	return true;
 }
 
-bool ShaderProgram::SetUniform(std::string name, const glm::vec4 &v)
+bool ShaderProgram::set_uniform(std::string name, const glm::vec4 &v)
 {
-	GLint id = glGetUniformLocation(mProgramID, name.c_str());
+	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
@@ -115,9 +115,9 @@ bool ShaderProgram::SetUniform(std::string name, const glm::vec4 &v)
 	return true;
 }
 
-bool ShaderProgram::SetUniform(std::string name, const glm::ivec4 &v)
+bool ShaderProgram::set_uniform(std::string name, const glm::ivec4 &v)
 {
-	GLint id = glGetUniformLocation(mProgramID, name.c_str());
+	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if (id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
@@ -128,9 +128,9 @@ bool ShaderProgram::SetUniform(std::string name, const glm::ivec4 &v)
 	return true;
 }
 
-bool ShaderProgram::SetUniform(std::string name, const glm::mat3 &m)
+bool ShaderProgram::set_uniform(std::string name, const glm::mat3 &m)
 {
-	GLint id = glGetUniformLocation(mProgramID, name.c_str());
+	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
@@ -142,9 +142,9 @@ bool ShaderProgram::SetUniform(std::string name, const glm::mat3 &m)
 }
 
 
-bool ShaderProgram::SetUniform(std::string name, const glm::mat4 &m)
+bool ShaderProgram::set_uniform(std::string name, const glm::mat4 &m)
 {
-	GLint id = glGetUniformLocation(mProgramID, name.c_str());
+	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
@@ -155,31 +155,31 @@ bool ShaderProgram::SetUniform(std::string name, const glm::mat4 &m)
 	return true;
 }
 
-bool ShaderProgram::SetUniform(std::string name, const MaterialUniform &mat)
+bool ShaderProgram::set_uniform(std::string name, const MaterialUniform &mat)
 {
-	GLint id = glGetUniformLocation(mProgramID, (name + ".BaseColor").c_str());
+	GLint id = glGetUniformLocation(program_id_, (name + ".BaseColor").c_str());
 	if (id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ".BaseColor)!");
 		return false;
 	}
-	glUniform4f(id, mat.mBaseColor.x, mat.mBaseColor.y, mat.mBaseColor.z, mat.mBaseColor.w);
+	glUniform4f(id, mat.base_color_.x, mat.base_color_.y, mat.base_color_.z, mat.base_color_.w);
 
-	id = glGetUniformLocation(mProgramID, (name + ".Roughness").c_str());
+	id = glGetUniformLocation(program_id_, (name + ".Roughness").c_str());
 	if (id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ".Roughness)!");
 		return false;
 	}
-	glUniform1f(id, mat.mRoughness);
+	glUniform1f(id, mat.roughness_);
 
-	id = glGetUniformLocation(mProgramID, (name + ".Metallic").c_str());
+	id = glGetUniformLocation(program_id_, (name + ".Metallic").c_str());
 	if (id == -1)
 	{
 		HMK_LOG_ERROR("Wrong uniform name(" + name + ".Metallic)!");
 		return false;
 	}
-	glUniform1f(id, mat.mMetallic);
+	glUniform1f(id, mat.metallic_);
 
 	return true;
 }

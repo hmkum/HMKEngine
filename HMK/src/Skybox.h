@@ -15,13 +15,13 @@ public:
 	Skybox();
 	~Skybox();
 
-	bool Load(std::string texturePath);
-	void Render();
+	bool load(std::string texturePath);
+	void render();
 
-	GLuint GetTextureID() const;
+	GLuint get_texture_id() const;
 private:
-	GLuint mTextureID;
-	GLuint mVAO, mVBO;
+	GLuint texture_id_;
+	GLuint vao_id_, vbo_id_;
 };
 
 typedef std::shared_ptr<Skybox> SkyboxPtr;

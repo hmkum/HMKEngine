@@ -11,15 +11,15 @@ public:
 	ShadowMap();
 	~ShadowMap();
 
-	bool Init(const GLuint width = 1024, const GLuint height = 1024);
-	void Bind();
-	void Unbind();
+	bool initialize(const GLuint width = 1024, const GLuint height = 1024);
+	void bind();
+	void unbind();
 
-	GLuint GetDepthMap() const;
+	GLuint get_depth_map() const;
 private:
-	GLuint mFBO;
-	GLuint mDepthMap;
-	GLuint mWidth, mHeight;
+	GLuint fbo_id_;
+	GLuint depth_map_;
+	GLuint width_, height_;
 
 };
 

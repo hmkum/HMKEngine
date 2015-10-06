@@ -2,14 +2,14 @@
 
 using namespace hmk;
 
-bool KeyManager::mKeys[512] = {};
+bool KeyManager::keys_[512] = {};
 
-bool KeyManager::GetKey(unsigned short key)
+bool KeyManager::get_key(unsigned short key)
 {
-	return mKeys[key];
+	return keys_[key];
 }
 
-void KeyManager::SetKey(unsigned short key, bool value)
+void KeyManager::set_key(unsigned short key, bool value)
 {
-	mKeys[key] = value;
+	keys_[key] = value;
 }

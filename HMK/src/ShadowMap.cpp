@@ -3,28 +3,28 @@
 using namespace hmk;
 
 ShadowMap::ShadowMap()
-	: mFBO{0}
-	, mDepthMap{0}
-	, mWidth{1024}
-	, mHeight{1024}
+	: fbo_id_{0}
+	, depth_map_{0}
+	, width_{1024}
+	, height_{1024}
 { }
 
 ShadowMap::~ShadowMap()
 {
-	glDeleteFramebuffers(1, &mFBO);
-	glDeleteTextures(1, &mDepthMap);
+	glDeleteFramebuffers(1, &fbo_id_);
+	glDeleteTextures(1, &depth_map_);
 }
 
-bool ShadowMap::Init(const GLuint width, const GLuint height)
+bool ShadowMap::initialize(const GLuint width, const GLuint height)
 {
-	mWidth    = width;
-	mHeight   = height;
+	width_    = width;
+	height_   = height;
 
-	glGenFramebuffers(1, &mFBO);
+	glGenFramebuffers(1, &fbo_id_);
 
-	glGenTextures(1, &mDepthMap);
-	glBindTexture(GL_TEXTURE_2D, mDepthMap);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, mWidth, mHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glGenTextures(1, &depth_map_);
+	glBindTexture(GL_TEXTURE_2D, depth_map_);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width_, height_, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -32,8 +32,8 @@ bool ShadowMap::Init(const GLuint width, const GLuint height)
 	GLfloat borderColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, mFBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, mDepthMap, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_map_, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -41,19 +41,19 @@ bool ShadowMap::Init(const GLuint width, const GLuint height)
 	return true;
 }
 
-void ShadowMap::Bind()
+void ShadowMap::bind()
 {
-	glViewport(0, 0, mWidth, mHeight);
-	glBindFramebuffer(GL_FRAMEBUFFER, mFBO);
+	glViewport(0, 0, width_, height_);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo_id_);
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void ShadowMap::Unbind()
+void ShadowMap::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-GLuint ShadowMap::GetDepthMap() const
+GLuint ShadowMap::get_depth_map() const
 {
-	return mDepthMap;
+	return depth_map_;
 }

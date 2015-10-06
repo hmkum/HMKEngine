@@ -5,10 +5,10 @@ namespace hmk
 class KeyManager
 {
 public:
-	static void SetKey(unsigned short key, bool value);
-	static bool GetKey(unsigned short key);
+	static void set_key(unsigned short key, bool value);
+	static bool get_key(unsigned short key);
 
 private:
-	static bool mKeys[512];
+	static bool keys_[512];
 };
 }

@@ -7,10 +7,10 @@ class BoundingBox
 {
 public:
 	BoundingBox()
-		: mMin{glm::vec3(999999.0f)}
-		, mMax{glm::vec3(-999999.0f)}
+		: min_corner_{glm::vec3(999999.0f)}
+		, max_corner_{glm::vec3(-999999.0f)}
 	{}
 
-	glm::vec3 mMin, mMax;
+	glm::vec3 min_corner_, max_corner_;
 };
 }

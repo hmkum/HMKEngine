@@ -68,11 +68,11 @@ void APIENTRY glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum seve
 
 int main()
 {
-	hmk::Logger::Inst().Initialize("engine.txt");
+	hmk::Logger::get_instance().initialize("engine.txt");
 	if (glfwInit() == GL_FALSE)
 	{
 		HMK_LOG_ERROR("failed glfwInit")
-		hmk::Logger::Inst().Shutdown();
+		hmk::Logger::get_instance().shutdown();
 		return -1;
 	}
 
@@ -84,11 +84,11 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, 8);
 
-	auto window = glfwCreateWindow(800, 600, "HMK", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(800, 600, "HMK", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		HMK_LOG_ERROR("failed glfwCreateWindow")
-		hmk::Logger::Inst().Shutdown();
+		hmk::Logger::get_instance().shutdown();
 		glfwTerminate();
 		return -1;
 	}
@@ -98,7 +98,7 @@ int main()
 	if (gl3wInit() == -1) // 0 success
 	{
 		HMK_LOG_ERROR("failed gl3wInit")
-		hmk::Logger::Inst().Shutdown();
+		hmk::Logger::get_instance().shutdown();
 		glfwTerminate();
 		return -1;
 	}
@@ -106,7 +106,7 @@ int main()
 	if (!gl3wIsSupported(3, 3))
 	{
 		HMK_LOG_ERROR("Upgrade your graphic card!")
-		hmk::Logger::Inst().Shutdown();
+		hmk::Logger::get_instance().shutdown();
 		glfwTerminate();
 		return -1;
 	}
@@ -124,15 +124,15 @@ int main()
 	ImGui_ImplGlfwGL3_Init(window, false);
 
 	Game *game = new Game();
-	game->Init();
+	game->initialize();
 
 	glfwSetKeyCallback(window, KeyCallback);
 	glfwSetCursorPosCallback(window, CursorPosCallback);
 	glfwSetMouseButtonCallback(window, MouseButtonCallback);
 
-	keyCallback = HMK_CALLBACK_4(Game::KeyInput, game);
-	cursorPosCallback = HMK_CALLBACK_2(Game::CursorPosInput, game);
-	mouseButtonCallback = HMK_CALLBACK_3(Game::MouseButtonInput, game);
+	keyCallback = HMK_CALLBACK_4(Game::key_input, game);
+	cursorPosCallback = HMK_CALLBACK_2(Game::cursor_pos_input, game);
+	mouseButtonCallback = HMK_CALLBACK_3(Game::mouse_button_input, game);
 
 	double lastTime = glfwGetTime();
 
@@ -160,8 +160,8 @@ int main()
 		lastTime = now;
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		game->Update((float)delta);
-		game->Render();
+		game->update((float)delta);
+		game->render();
 
 		fps++;
 		acc += delta;
@@ -176,7 +176,7 @@ int main()
 	}
 
 	delete game;
-	hmk::Logger::Inst().Shutdown();
+	hmk::Logger::get_instance().shutdown();
 	glfwDestroyWindow(window);
 	ImGui_ImplGlfwGL3_Shutdown();
 	glfwTerminate();

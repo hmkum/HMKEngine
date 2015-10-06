@@ -10,10 +10,10 @@ public:
 	Ray();
 	Ray(const glm::vec3 &origin, const glm::vec3 &direction);
 
-	bool IntersectAABB(const BoundingBox &box);
+	bool intersect_aabb(const BoundingBox &box);
 
 private:
-	glm::vec3 mOrigin;
-	glm::vec3 mDirection;
+	glm::vec3 origin_point_;
+	glm::vec3 direction_;
 };
 }

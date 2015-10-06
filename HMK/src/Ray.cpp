@@ -3,27 +3,27 @@
 using namespace hmk;
 
 Ray::Ray()
-	: mOrigin{0.0f}
-	, mDirection{0.0f}
+	: origin_point_{0.0f}
+	, direction_{0.0f}
 {
 }
 
 Ray::Ray(const glm::vec3 &origin, const glm::vec3 &direction)
-	: mOrigin{origin}
-	, mDirection{direction}
+	: origin_point_{origin}
+	, direction_{direction}
 {
 }
 
-bool Ray::IntersectAABB(const BoundingBox &box)
+bool Ray::intersect_aabb(const BoundingBox &box)
 {
-	glm::vec3 dirFrac = 1.0f / mDirection;
+	glm::vec3 dirFrac = 1.0f / direction_;
 
-	float t1 = (box.mMin.x - mOrigin.x) * dirFrac.x;
-	float t2 = (box.mMax.x - mOrigin.x) * dirFrac.x;
-	float t3 = (box.mMin.y - mOrigin.y) * dirFrac.y;
-	float t4 = (box.mMax.y - mOrigin.y) * dirFrac.y;
-	float t5 = (box.mMin.z - mOrigin.z) * dirFrac.z;
-	float t6 = (box.mMax.z - mOrigin.z) * dirFrac.z;
+	float t1 = (box.min_corner_.x - origin_point_.x) * dirFrac.x;
+	float t2 = (box.max_corner_.x - origin_point_.x) * dirFrac.x;
+	float t3 = (box.min_corner_.y - origin_point_.y) * dirFrac.y;
+	float t4 = (box.max_corner_.y - origin_point_.y) * dirFrac.y;
+	float t5 = (box.min_corner_.z - origin_point_.z) * dirFrac.z;
+	float t6 = (box.max_corner_.z - origin_point_.z) * dirFrac.z;
 
 	float tmin = glm::max(glm::max(glm::min(t1, t2), glm::min(t3, t4)), glm::min(t5, t6));
 	float tmax = glm::min(glm::min(glm::max(t1, t2), glm::max(t3, t4)), glm::max(t5, t6));

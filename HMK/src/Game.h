@@ -20,37 +20,37 @@ public:
 	Game();
 	~Game();
 
-	bool Init();
-	void KeyInput(int key, int scancode, int action, int mods);
-	void CursorPosInput(double xPos, double yPos);
-	void MouseButtonInput(int button, int action, int mods);
+	bool initialize();
+	void key_input(int key, int scancode, int action, int mods);
+	void cursor_pos_input(double xPos, double yPos);
+	void mouse_button_input(int button, int action, int mods);
 
-	void Update(float dt);
-	void Render();
-
-private:
-	void ProcessSelection(int x, int y);
+	void update(float dt);
+	void render();
 
 private:
-	hmk::ModelPtr mSelectedModel;
-	hmk::ModelPtr mAxe, mSphere, mSphere2, mPlane;
-	hmk::SkyboxPtr mSkybox;
-	hmk::ShaderProgram mBasicShader, mSkyboxShader, mSimpleDepthShader, mPickingShader, mPPShader;
-    hmk::CameraPtr mCamera;
-    hmk::ShadowMapPtr mShadowMap;
-    hmk::PostProcessPtr mPostProcess;
-	glm::vec3 mLightPosition;
-	glm::mat4 mLightProj;
-	glm::mat4 mLightSpaceMatrix;
+	void process_selection(int x, int y);
 
-	float mTonemapExposure = 1.0f, mBloomIntensity = 1.0f;
-	bool mIsBloomActive = true;
+private:
+	hmk::ModelPtr selected_model_with_mouse_;
+	hmk::ModelPtr model_axe_, model_sphere_, model_sphere2_, model_plane_;
+	hmk::SkyboxPtr skybox_;
+	hmk::ShaderProgram shader_basic_, shader_skybox_, shader_simple_depth_, shader_picking_with_mouse_, shader_post_process_;
+    hmk::CameraPtr camera_;
+    hmk::ShadowMapPtr shadow_map_;
+    hmk::PostProcessPtr post_process_system_;
+	glm::vec3 light_position_;
+	glm::mat4 light_projection_;
+	glm::mat4 light_space_matrix_;
+
+	float gui_tonemap_exposure_ = 1.0f, gui_bloom_intensity_ = 1.0f;
+	bool gui_is_bloom_active_ = true;
 
 private:
 	struct CursorState_t
 	{
-		bool firstMouse = true;
-		glm::vec2 last = glm::vec2(400.0f, 300.0f);
-	} mCursorState;
-	bool mMouseRightPressed, mMouseLeftPressed;
+		bool first_mouse_ = true;
+		glm::vec2 last_position_ = glm::vec2(400.0f, 300.0f);
+	} cursor_state_;
+	bool mouse_right_pressed_, mouse_left_pressed_;
 };

@@ -4,14 +4,14 @@
 using namespace hmk;
 
 Shader::Shader()
-    : mShaderID(0)
+    : shader_id_(0)
 { }
 
 Shader::~Shader()
 {
 }
 
-bool Shader::Init(GLenum shaderType, std::string shaderName)
+bool Shader::initialize(GLenum shaderType, std::string shaderName)
 {
     std::ifstream file(SHADER_PATH + shaderName);
     if(file.is_open())
@@ -23,16 +23,16 @@ bool Shader::Init(GLenum shaderType, std::string shaderName)
 			shaderCode += line + "\n";
 		}
 		const GLchar *sCode = shaderCode.c_str();
-        mShaderID = glCreateShader(shaderType);
-        glShaderSource(mShaderID, 1, &sCode, nullptr);
-        glCompileShader(mShaderID);
+        shader_id_ = glCreateShader(shaderType);
+        glShaderSource(shader_id_, 1, &sCode, nullptr);
+        glCompileShader(shader_id_);
 
         GLint success;
-        glGetShaderiv(mShaderID, GL_COMPILE_STATUS, &success);
+        glGetShaderiv(shader_id_, GL_COMPILE_STATUS, &success);
         if(!success)
         {
             GLchar log[512];
-            glGetShaderInfoLog(mShaderID, 512, nullptr, log);
+            glGetShaderInfoLog(shader_id_, 512, nullptr, log);
 			std::cerr << "Shader(" << shaderName << "): " << log << std::endl;
             return false;
         }
@@ -45,7 +45,7 @@ bool Shader::Init(GLenum shaderType, std::string shaderName)
 
 }
 
-GLuint Shader::GetID() const
+GLuint Shader::get_id() const
 {
-    return mShaderID;
+    return shader_id_;
 }

@@ -14,11 +14,11 @@ public:
     Shader();
 	~Shader();
 
-    bool Init(GLenum shaderType, std::string shaderName);
+    bool initialize(GLenum shaderType, std::string shaderName);
 
-    GLuint GetID() const;
+    GLuint get_id() const;
 
 private:
-    GLuint mShaderID;
+    GLuint shader_id_;
 };
 }

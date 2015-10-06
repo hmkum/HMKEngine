@@ -13,23 +13,23 @@ public:
     ShaderProgram();
 	~ShaderProgram();
 
-    ShaderProgram &AddShader(const Shader &shader);
-    void Link();
-    void Use();
+    ShaderProgram &add_shader(const Shader &shader);
+    void link_shaders();
+    void use();
 
-	bool SetUniform(std::string name, float f);
-	bool SetUniform(std::string name, int i);
-	bool SetUniform(std::string name, const glm::vec2 &v);
-	bool SetUniform(std::string name, const glm::vec3 &v);
-	bool SetUniform(std::string name, const glm::vec4 &v);
-	bool SetUniform(std::string name, const glm::ivec4 &v);
-	bool SetUniform(std::string name, const glm::mat3 &m);
-	bool SetUniform(std::string name, const glm::mat4 &m);
+	bool set_uniform(std::string name, float f);
+	bool set_uniform(std::string name, int i);
+	bool set_uniform(std::string name, const glm::vec2 &v);
+	bool set_uniform(std::string name, const glm::vec3 &v);
+	bool set_uniform(std::string name, const glm::vec4 &v);
+	bool set_uniform(std::string name, const glm::ivec4 &v);
+	bool set_uniform(std::string name, const glm::mat3 &m);
+	bool set_uniform(std::string name, const glm::mat4 &m);
 
-	bool SetUniform(std::string name, const MaterialUniform &mat);
+	bool set_uniform(std::string name, const MaterialUniform &mat);
 
 private:
-    GLuint mProgramID;
-    std::vector<Shader> mShaders;
+    GLuint program_id_;
+    std::vector<Shader> shaders_;
 };
 }

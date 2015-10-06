@@ -25,20 +25,20 @@ public:
 	Mesh(std::vector<Vertex> vertices, Material &material, std::vector<unsigned int> indices);
 	~Mesh();
 
-	void Render();
-	void Render(ShaderProgram &shader);
+	void render();
+	void render(ShaderProgram &shader);
 
-	void SetRoughness(float r);
-	float GetRoughness();
+	void set_roughness(float r);
+	float get_roughness();
 
-	void SetMetallic(float m);
-	float GetMetallic();
+	void set_metallic(float m);
+	float get_metallic();
 
 private:
-	GLuint mVAO, mVBO, mIBO;
-	Material mMaterial;
-	MaterialUniform mMaterialUniform;
-	unsigned int mIndicesSize;
-	std::shared_ptr<Texture> mAlbedoTexture, mNormalTexture, mRoughnessTexture, mMetalnessTexture;
+	GLuint vao_id_, vbo_id_, ibo_id_;
+	Material material_;
+	MaterialUniform material_uniform_;
+	unsigned int indices_size_;
+	std::shared_ptr<Texture> albedo_texture_, normal_texture_, roughness_texture_, metalness_texture_;
 };
 }

@@ -8,16 +8,16 @@ class Debug
 {
 public:
     template<typename T>
-    static void Print(T t)
+    static void print(T t)
     {
         std::cout << t;
     }
 
     template<typename T, typename... TArgs>
-    static void Print(T t, TArgs... targs)
+    static void print(T t, TArgs... targs)
     {
-        Print(t);
-        Print(targs...);
+        print(t);
+        print(targs...);
     }
 private:
     Debug() {}
