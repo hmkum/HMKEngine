@@ -107,17 +107,7 @@ void Mesh::set_roughness(float r)
 	material_uniform_.roughness_ = r;
 }
 
-float Mesh::get_roughness()
-{
-	return material_uniform_.roughness_;
-}
-
 void Mesh::set_metallic(float m)
 {
 	material_uniform_.metallic_ = m;
-}
-
-float Mesh::get_metallic()
-{
-	return material_uniform_.metallic_;
 }

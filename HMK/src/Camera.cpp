@@ -52,21 +52,6 @@ void Camera::create_orthographic_proj(float left, float right, float top, float 
 	projection_matrix_ = glm::ortho(left, right, bottom, top, nearZ, farZ);
 }
 
-glm::mat4 Camera::get_view_matrix()
-{
-	return glm::lookAt(position_, position_ + front_, up_);
-}
-
-glm::mat4 Camera::get_proj_matrix()
-{
-	return projection_matrix_;
-}
-
-glm::vec3 Camera::get_position()
-{
-	return position_;
-}
-
 void Camera::move_forward(float dt)
 {
 	position_ += front_ * dt * movement_speed_;

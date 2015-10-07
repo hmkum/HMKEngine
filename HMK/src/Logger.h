@@ -41,11 +41,12 @@ public:
         write(targs...);
     }
 
+	Logger(const Logger&) = delete;
+	Logger& operator=(const Logger&) = delete;
+
 private:
     std::fstream log_file_;
 private:
     Logger() {}
-    Logger(const Logger&);
-    Logger& operator=(const Logger&);
 };
 }

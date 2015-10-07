@@ -16,7 +16,7 @@ public:
 
     bool initialize(GLenum shaderType, std::string shaderName);
 
-    GLuint get_id() const;
+	inline GLuint get_id() const { return shader_id_; }
 
 private:
     GLuint shader_id_;

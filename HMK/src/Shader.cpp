@@ -42,10 +42,4 @@ bool Shader::initialize(GLenum shaderType, std::string shaderName)
     {
         return false;
     }
-
-}
-
-GLuint Shader::get_id() const
-{
-    return shader_id_;
 }

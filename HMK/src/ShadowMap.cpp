@@ -52,8 +52,3 @@ void ShadowMap::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
-GLuint ShadowMap::get_depth_map() const
-{
-	return depth_map_;
-}

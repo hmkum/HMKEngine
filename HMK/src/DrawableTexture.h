@@ -14,8 +14,8 @@ public:
 	void bind();
 	void unbind();
 
-	GLuint get_depth_map() const;
-	GLuint get_color_map() const;
+	inline GLuint get_depth_map() const { return depth_map_; };
+	inline GLuint get_color_map() const { return color_map_; };
 private:
 	GLuint fbo_id_;
 	GLuint depth_map_;

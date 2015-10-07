@@ -19,9 +19,10 @@ public:
         print(t);
         print(targs...);
     }
+
+	Debug(const Debug&) = delete;
+	Debug& operator=(const Debug&) = delete;
 private:
     Debug() {}
-    Debug(const Debug&);
-    Debug& operator=(const Debug&);
 };
 }

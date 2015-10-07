@@ -124,8 +124,3 @@ void Skybox::render()
 	glFrontFace(GL_CW);
 	glDepthMask(GL_TRUE);
 }
-
-GLuint Skybox::get_texture_id() const
-{
-	return texture_id_;
-}

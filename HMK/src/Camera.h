@@ -20,9 +20,9 @@ public:
 	void create_perspective_proj(float fovY, float nearZ, float farZ);
 	void create_orthographic_proj(float left, float right, float top, float bottom, float nearZ, float farZ);
 
-	glm::mat4 get_view_matrix();
-	glm::mat4 get_proj_matrix();
-	glm::vec3 get_position();
+	inline glm::mat4 get_view_matrix() const { return glm::lookAt(position_, position_ + front_, up_); }
+	inline glm::mat4 get_proj_matrix() const { return projection_matrix_; }
+	inline glm::vec3 get_position()    const { return position_; }
 
 	void move_forward(float dt);
 	void move_backward(float dt);

@@ -181,11 +181,6 @@ void Model::render(ShaderProgram &shader)
 	}
 }
 
-glm::mat4 Model::get_model_matrix() const
-{
-	return scale_ * rotation_ * translation_;
-}
-
 void Model::translate(glm::vec3 t)
 {
 	translation_ = glm::translate(translation_, t);
@@ -211,11 +206,6 @@ void Model::set_roughness(float r)
 	}
 }
 
-float Model::get_roughness()
-{
-	return meshes_[0]->get_roughness();
-}
-
 void Model::set_metallic(float m)
 {
 	if (m >= 1.0f) m = 1.0f;
@@ -224,11 +214,6 @@ void Model::set_metallic(float m)
 	{
 		mesh->set_metallic(m);
 	}
-}
-
-float Model::get_metallic()
-{
-	return meshes_[0]->get_metallic();
 }
 
 void Model::draw_bounding_box(bool draw)

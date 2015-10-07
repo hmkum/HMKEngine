@@ -29,10 +29,10 @@ public:
 	void render(ShaderProgram &shader);
 
 	void set_roughness(float r);
-	float get_roughness();
-
 	void set_metallic(float m);
-	float get_metallic();
+
+	inline float get_roughness() const { return material_uniform_.roughness_; }
+	inline float get_metallic() const { return material_uniform_.metallic_; }
 
 private:
 	GLuint vao_id_, vbo_id_, ibo_id_;

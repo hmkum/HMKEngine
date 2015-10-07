@@ -18,7 +18,7 @@ public:
 	bool load(std::string texturePath);
 	void render();
 
-	GLuint get_texture_id() const;
+	inline GLuint get_texture_id() const { return texture_id_; }
 private:
 	GLuint texture_id_;
 	GLuint vao_id_, vbo_id_;

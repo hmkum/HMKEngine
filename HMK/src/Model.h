@@ -25,19 +25,18 @@ public:
 	void render();
 	void render(ShaderProgram &shader);
 
-	glm::mat4 get_model_matrix() const;
-
 	void translate(glm::vec3 t);
 	void rotate(float degree, glm::vec3 axis);
 	void scale(glm::vec3 s);
 
-	void set_roughness(float r);
-	float get_roughness();
-
-	void set_metallic(float m);
-	float get_metallic();
-
 	void draw_bounding_box(bool draw);
+
+	void set_roughness(float r);
+	void set_metallic(float m);
+
+	inline glm::mat4 get_model_matrix() const { return scale_ * rotation_ * translation_; }
+	inline float get_roughness() const { return meshes_.at(0)->get_roughness(); }
+	inline float get_metallic()  const { return meshes_.at(0)->get_metallic(); }
 	BoundingBox get_bounding_box() const;
 
 private:

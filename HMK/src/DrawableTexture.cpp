@@ -73,13 +73,3 @@ void DrawableTexture::unbind()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
-GLuint DrawableTexture::get_color_map() const
-{
-	return color_map_;
-}
-
-GLuint DrawableTexture::get_depth_map() const
-{
-	return depth_map_;
-}
