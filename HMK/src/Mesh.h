@@ -39,6 +39,6 @@ private:
 	Material material_;
 	MaterialUniform material_uniform_;
 	unsigned int indices_size_;
-	std::shared_ptr<Texture> albedo_texture_, normal_texture_, roughness_texture_, metalness_texture_;
+	std::vector<std::shared_ptr<Texture>> textures_;
 };
 }
