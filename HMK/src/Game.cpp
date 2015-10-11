@@ -1,9 +1,6 @@
 #include "Game.h"
 #include <imgui/imgui.h>
-#include <rapidxml/rapidxml.hpp>
 #include <filesystem> // C++17
-#include <fstream>
-#include <streambuf>
 #include <set>
 #include "KeyManager.h"
 #include "SceneParser.h"
@@ -71,7 +68,7 @@ bool Game::initialize()
 	}
 	
 	skybox_ = std::make_shared<hmk::Skybox>();
-	skybox_->load("Bridge");
+	skybox_->load(scene_data.atmosphere_.skybox_folder_);
 
 	return true;
 }

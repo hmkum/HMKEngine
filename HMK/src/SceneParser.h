@@ -4,10 +4,20 @@
 #include <streambuf>
 #include <string>
 #include <vector>
-#include <rapidxml/rapidxml.hpp>
 
 namespace hmk
 {
+struct FogData
+{
+	// TODO_HMK: Implement this
+};
+
+struct AtmosphereData
+{
+	std::string skybox_folder_;
+	//FogData fog_data_;
+};
+
 struct MaterialData
 {
 	std::string name_;
@@ -31,6 +41,7 @@ struct ModelData
 struct SceneData
 {
 	std::string name_;
+	AtmosphereData atmosphere_;
 	std::vector<ModelData> model_;
 };
 

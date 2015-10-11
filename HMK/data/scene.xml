@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scene name="default">
+	<atmosphere>
+		<skybox folder="Bridge"></skybox>
+		<fog method="linear" density="0.2" start="5" end="100"></fog>
+	</atmosphere>
 	<model file="plane.obj" name="Plane">
 		<material>
 			<roughness value="1.0"></roughness>

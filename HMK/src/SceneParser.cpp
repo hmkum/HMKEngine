@@ -1,4 +1,5 @@
 #include "SceneParser.h"
+#include <pugixml/pugixml.hpp>
 
 using namespace hmk;
 
@@ -6,82 +7,54 @@ SceneData SceneParser::scene_data_;
 
 bool SceneParser::parse(const std::string& name)
 {
-	std::ifstream scene_file(name);
-	if(!scene_file.is_open())
+	pugi::xml_document doc;
+	pugi::xml_parse_result result = doc.load_file(name.c_str());
+	if(!result)
 	{
-		HMK_LOG_ERROR("Could not load scene.xml file!");
 		return false;
 	}
+	pugi::xml_node scene_node = doc.first_child();
+	scene_data_.name_ = scene_node.name();
 
-	std::string scene_text;
-	scene_text.assign(std::istreambuf_iterator<char>(scene_file), std::istreambuf_iterator<char>());
-	scene_file.close();
+	for(pugi::xml_node atmosphere : scene_node.child("atmosphere"))
+	{
+		if(atmosphere.name() == std::string("skybox"))
+		{
+			scene_data_.atmosphere_.skybox_folder_ = atmosphere.attribute("folder").value();
+		}
+		else
+		{
+			// TODO_HMK: Implement fog.
+		}
+	}
 
-	rapidxml::xml_document<> xml_doc;
-	xml_doc.parse<0>(&scene_text[0]);
-
-	rapidxml::xml_node<> *main_node = xml_doc.first_node("scene"); // scene
-	scene_data_.name_ = main_node->first_attribute()->value();
-	auto model_node = main_node->first_node(); // model
-	while(model_node)
+	for(pugi::xml_node model : scene_node.children("model"))
 	{
 		ModelData model_data;
-		auto attr = model_node->first_attribute();
-		model_data.file_ = attr->value();
-		attr = attr->next_attribute();
-		model_data.name_ = attr->value();
+		model_data.file_ = model.attribute("file").value();
+		model_data.name_ = model.attribute("name").value();
+		
+		pugi::xml_node mat_node = model.child("material");
+		model_data.material_.roughness_value_ = mat_node.first_child().first_attribute().as_float();
+		mat_node = mat_node.first_child().next_sibling();
+		model_data.material_.metalness_value_ = mat_node.first_attribute().as_float();
 
-		auto node = model_node->first_node();
-		while(node)
-		{
-			auto n = node->first_node();
-			while(n)
-			{
-				if(std::string(node->name()) == std::string("material"))
-				{
-					attr = n->first_attribute();
-					if(std::string(n->name()) == std::string("roughness"))
-						model_data.material_.roughness_value_ = std::stof(attr->value());
-					else if(std::string(n->name()) == std::string("metalness"))
-						model_data.material_.metalness_value_ = std::stof(attr->value());
-				}
-				else if(std::string(node->name()) == std::string("transform"))
-				{
-					attr = n->first_attribute();
-					if(std::string(n->name()) == std::string("position"))
-					{
-						model_data.transform_.pos_x_ = std::stof(attr->value());
-						attr = attr->next_attribute();
-						model_data.transform_.pos_y_ = std::stof(attr->value());
-						attr = attr->next_attribute();
-						model_data.transform_.pos_z_ = std::stof(attr->value());
-					}
-					else if(std::string(n->name()) == std::string("rotation"))
-					{
-						model_data.transform_.rot_x_ = std::stof(attr->value());
-						attr = attr->next_attribute();
-						model_data.transform_.rot_y_ = std::stof(attr->value());
-						attr = attr->next_attribute();
-						model_data.transform_.rot_z_ = std::stof(attr->value());
-					}
-					else
-					{
-						model_data.transform_.scale_x_ = std::stof(attr->value());
-						attr = attr->next_attribute();
-						model_data.transform_.scale_y_ = std::stof(attr->value());
-						attr = attr->next_attribute();
-						model_data.transform_.scale_z_ = std::stof(attr->value());
-					}
-				}
-				else
-				{
-				}
-				n = n->next_sibling();
-			}
-			node = node->next_sibling();
-		}
+		pugi::xml_node transf_node = model.child("transform");
+		pugi::xml_node pos_node = transf_node.child("position");
+		pugi::xml_node rot_node = transf_node.child("rotation");
+		pugi::xml_node scale_node = transf_node.child("scale");
+		model_data.transform_.pos_x_ = pos_node.attribute("x").as_float();
+		model_data.transform_.pos_y_ = pos_node.attribute("y").as_float();
+		model_data.transform_.pos_z_ = pos_node.attribute("z").as_float();
+		model_data.transform_.rot_x_ = rot_node.attribute("x").as_float();
+		model_data.transform_.rot_y_ = rot_node.attribute("y").as_float();
+		model_data.transform_.rot_z_ = rot_node.attribute("z").as_float();
+		model_data.transform_.scale_x_ = scale_node.attribute("x").as_float();
+		model_data.transform_.scale_y_ = scale_node.attribute("y").as_float();
+		model_data.transform_.scale_z_ = scale_node.attribute("z").as_float();
+
 		scene_data_.model_.push_back(model_data);
-		model_node = model_node->next_sibling();
 	}
+
 	return true;
 }
