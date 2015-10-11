@@ -74,7 +74,7 @@ bool PostProcess::initialize()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glBindVertexArray(0);
 
-	shader_monochrome_.add_shader("pp_default.vert", "pp_default.frag");
+	shader_monochrome_.add_shader("pp_default.vert", "pp_monochrome.frag");
 	shader_monochrome_.link_shaders();
 	
 	shader_hdr_.add_shader("pp_default.vert", "pp_hdr.frag");
