@@ -27,6 +27,8 @@ bool ShaderProgram::add_shader(const std::string &vertex_name, const std::string
 		return false;
 	}
 
+	shader_names_[0] = vertex_name;
+	shader_names_[1] = fragment_name;
 	shaders_.push_back(vert_shader);
 	shaders_.push_back(frag_shader);
 	return true;
@@ -72,7 +74,7 @@ bool ShaderProgram::set_uniform(std::string name, float f)
 	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
-		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
+		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!Program Id :" + std::to_string(program_id_) + " Shader names: " + shader_names_[0] + ", " + shader_names_[1]);
 		return false;
 	}
 	glUniform1f(id,f);
@@ -85,7 +87,7 @@ bool ShaderProgram::set_uniform(std::string name, int i)
 	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
-		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
+		HMK_LOG_ERROR("Wrong uniform name(" + name + ")! Program Id: " + std::to_string(program_id_) + " Shader names: " + shader_names_[0] + ", " + shader_names_[1]);
 		return false;
 	}
 	glUniform1i(id, i);
@@ -98,7 +100,7 @@ bool ShaderProgram::set_uniform(std::string name, const glm::vec2 &v)
 	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
-		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
+		HMK_LOG_ERROR("Wrong uniform name(" + name + ")! Program Id: " + std::to_string(program_id_) + " Shader names: " + shader_names_[0] + ", " + shader_names_[1]);
 		return false;
 	}
 	glUniform2f(id, v.x, v.y);
@@ -111,7 +113,7 @@ bool ShaderProgram::set_uniform(std::string name, const glm::vec3 &v)
 	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
-		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
+		HMK_LOG_ERROR("Wrong uniform name(" + name + ")! Program Id: " + std::to_string(program_id_) + " Shader names: " + shader_names_[0] + ", " + shader_names_[1]);
 		return false;
 	}
 	glUniform3f(id, v.x, v.y, v.z);
@@ -124,7 +126,7 @@ bool ShaderProgram::set_uniform(std::string name, const glm::vec4 &v)
 	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
-		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
+		HMK_LOG_ERROR("Wrong uniform name(" + name + ")! Program Id: " + std::to_string(program_id_) + " Shader names: " + shader_names_[0] + ", " + shader_names_[1]);
 		return false;
 	}
 	glUniform4f(id, v.x, v.y, v.z, v.w);
@@ -137,7 +139,7 @@ bool ShaderProgram::set_uniform(std::string name, const glm::ivec4 &v)
 	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if (id == -1)
 	{
-		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
+		HMK_LOG_ERROR("Wrong uniform name(" + name + ")! Program Id: " + std::to_string(program_id_) + " Shader names: " + shader_names_[0] + ", " + shader_names_[1]);
 		return false;
 	}
 	glUniform4i(id, v.x, v.y, v.z, v.w);
@@ -150,7 +152,7 @@ bool ShaderProgram::set_uniform(std::string name, const glm::mat3 &m)
 	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
-		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
+		HMK_LOG_ERROR("Wrong uniform name(" + name + ")! Program Id: " + std::to_string(program_id_) + " Shader names: " + shader_names_[0] + ", " + shader_names_[1]);
 		return false;
 	}
 	glUniformMatrix3fv(id, 1, GL_FALSE, &m[0][0]);
@@ -164,7 +166,7 @@ bool ShaderProgram::set_uniform(std::string name, const glm::mat4 &m)
 	GLint id = glGetUniformLocation(program_id_, name.c_str());
 	if(id == -1)
 	{
-		HMK_LOG_ERROR("Wrong uniform name(" + name + ")!");
+		HMK_LOG_ERROR("Wrong uniform name(" + name + ")! Program Id: " + std::to_string(program_id_) + " Shader names: " + shader_names_[0] + ", " + shader_names_[1]);
 		return false;
 	}
 	glUniformMatrix4fv(id, 1, GL_FALSE, &m[0][0]);

@@ -31,5 +31,6 @@ public:
 private:
     GLuint program_id_;
     std::vector<Shader> shaders_;
+	std::string shader_names_[2];
 };
 }
