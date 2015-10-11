@@ -9,16 +9,30 @@ ShaderProgram::ShaderProgram()
 
 ShaderProgram::~ShaderProgram()
 {
-	glDeleteProgram(program_id_);
 }
 
-ShaderProgram &ShaderProgram::add_shader(const Shader &shader)
+bool ShaderProgram::add_shader(const std::string &vertex_name, const std::string& fragment_name)
 {
-    shaders_.push_back(shader);
-    return *this;
+	Shader vert_shader, frag_shader;
+	bool result = vert_shader.initialize(ShaderType::Vertex, vertex_name);
+	if(!result)
+	{
+		HMK_LOG_ERROR("Could not load shader(" + vertex_name + ")!");
+		return false;
+	}
+	result = frag_shader.initialize(ShaderType::Fragment, fragment_name);
+	if(!result)
+	{
+		HMK_LOG_ERROR("Could not load shader(" + fragment_name + ")!");
+		return false;
+	}
+
+	shaders_.push_back(vert_shader);
+	shaders_.push_back(frag_shader);
+	return true;
 }
 
-void ShaderProgram::link_shaders()
+bool ShaderProgram::link_shaders()
 {
     program_id_ = glCreateProgram();
     for(auto &shader : shaders_)
@@ -36,6 +50,7 @@ void ShaderProgram::link_shaders()
         glGetProgramInfoLog(program_id_, 512, nullptr, log);
 		HMK_PRINT(log)
 		HMK_LOG_ERROR(log)
+		return false;
     }
 
     for(auto &shader : shaders_)
@@ -43,6 +58,8 @@ void ShaderProgram::link_shaders()
 		glDetachShader(program_id_, shader.get_id());
         glDeleteShader(shader.get_id());
     }
+
+	return true;
 }
 
 void ShaderProgram::use()

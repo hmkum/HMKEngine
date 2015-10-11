@@ -13,8 +13,8 @@ public:
     ShaderProgram();
 	~ShaderProgram();
 
-    ShaderProgram &add_shader(const Shader &shader);
-    void link_shaders();
+	bool add_shader(const std::string &vertex_name, const std::string& fragment_name);
+    bool link_shaders();
     void use();
 
 	bool set_uniform(std::string name, float f);

@@ -1,6 +1,9 @@
 #include "Game.h"
 #include <imgui/imgui.h>
+#include <filesystem> // C++17
+#include <set>
 #include "KeyManager.h"
+#include "ShaderManager.h"
 #include "Utility.h"
 
 Game::Game()
@@ -20,28 +23,25 @@ bool Game::initialize()
     camera_->create_look_at(glm::vec3(0.0f, 2.0f, 10.0f));
 	camera_->create_perspective_proj(120.0f, 0.1f, 100.0f);
 
+	compile_and_link_all_shaders();
+
     shadow_map_ = std::make_shared<hmk::ShadowMap>();
     shadow_map_->initialize(2048, 2048);
 
 	post_process_system_ = std::make_shared<hmk::PostProcess>();
 	post_process_system_->initialize();
 
-	hmk::Shader vert, frag;
-	vert.initialize(GL_VERTEX_SHADER, "default.vert");
-	frag.initialize(GL_FRAGMENT_SHADER, "default.frag");
-	shader_basic_.add_shader(vert).add_shader(frag).link_shaders();
+	shader_basic_.add_shader("default.vert", "default.frag");
+	shader_basic_.link_shaders();
 
-	vert.initialize(GL_VERTEX_SHADER, "skybox.vert");
-	frag.initialize(GL_FRAGMENT_SHADER, "skybox.frag");
-	shader_skybox_.add_shader(vert).add_shader(frag).link_shaders();
+	shader_skybox_.add_shader("skybox.vert", "skybox.frag");
+	shader_skybox_.link_shaders();
 	
-	vert.initialize(GL_VERTEX_SHADER, "simple_depth.vert");
-	frag.initialize(GL_FRAGMENT_SHADER, "simple_depth.frag");
-	shader_simple_depth_.add_shader(vert).add_shader(frag).link_shaders();
+	shader_simple_depth_.add_shader("simple_depth.vert", "simple_depth.frag");
+	shader_simple_depth_.link_shaders();
 
-	vert.initialize(GL_VERTEX_SHADER, "post_process.vert");
-	frag.initialize(GL_FRAGMENT_SHADER, "post_process.frag");
-	shader_post_process_.add_shader(vert).add_shader(frag).link_shaders();
+	shader_post_process_.add_shader("post_process.vert", "post_process.frag");
+	shader_post_process_.link_shaders();
 
 	glm::mat4 lightView = glm::lookAt(light_position_, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	light_projection_ = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 50.0f);
@@ -53,7 +53,6 @@ bool Game::initialize()
 	model_plane_ = std::make_shared<hmk::Model>();
 	model_plane_->load("plane.obj");
 	model_plane_->scale(glm::vec3(10.0f));
-	model_plane_->translate(glm::vec3(0.0f, -0.1f, -1.5f));
 	model_plane_->set_roughness(1.0f);
 
 	model_sphere_ = std::make_shared<hmk::Model>();
@@ -61,14 +60,13 @@ bool Game::initialize()
 
 	model_sphere2_ = std::make_shared<hmk::Model>();
 	model_sphere2_->load("sphere.obj");
-	model_sphere2_->translate(glm::vec3(-3.0f, 0.0f, -2.0f));
+	model_sphere2_->translate(glm::vec3(-3.0f, 0.0f, 0.0f));
 
 	model_axe_ = std::make_shared<hmk::Model>();
 	model_axe_->load("axe.obj");
-	model_axe_->translate(glm::vec3(-30.0f, 0.0f, 0.0f));
+	model_axe_->translate(glm::vec3(2.0f, 0.0f, 0.0f));
 	model_axe_->scale(glm::vec3(0.1f));
 	model_axe_->rotate(90.0f, glm::vec3(1, 0, 0));
-	model_axe_->rotate(180.0f, glm::vec3(0, 0, 1));
 
 	skybox_ = std::make_shared<hmk::Skybox>();
 	skybox_->load("Bridge/");
@@ -255,4 +253,52 @@ void Game::mouse_button_input(int button, int action, int mods)
 		mouse_left_pressed_ = true;
 	else
 		mouse_left_pressed_ = false;
+}
+
+bool Game::compile_and_link_all_shaders()
+{
+	namespace fs = std::tr2::sys;
+	std::set<std::string> shader_names_set, post_process_shader_names_set;
+	fs::path shaders_path{SHADER_PATH};
+	for(auto it = fs::directory_iterator(shaders_path); it != fs::directory_iterator(); ++it)
+	{
+		const auto& file = it->path();
+		std::string filename = file.basename();
+		auto is_pp_shader = filename.find("pp_");
+		if(file.extension().compare(".vert") == 0 || file.extension().compare(".frag") == 0)
+		{
+			if(is_pp_shader == std::string::npos)
+			{
+				shader_names_set.insert(filename);
+			}
+			else
+			{
+				if(filename.find("pp_default") != std::string::npos)
+					continue;
+				post_process_shader_names_set.insert(filename);
+			}
+		}
+	}
+	
+	std::vector<std::string> shader_names(shader_names_set.size());
+	std::vector<std::string> post_process_shader_names(post_process_shader_names_set.size());
+	shader_names.assign(std::begin(shader_names_set), std::cend(shader_names_set));
+	post_process_shader_names.assign(std::begin(post_process_shader_names_set), std::cend(post_process_shader_names_set));
+	
+	bool result = true;
+	for(unsigned int i = 0; i < shader_names.size(); ++i)
+	{
+		std::string shader_name = shader_names[i];
+		hmk::ShaderManager::get_instance().add_shader(shader_name);
+	}
+
+	for(unsigned int i = 0; i < post_process_shader_names.size(); ++i)
+	{
+		std::string shader_name = post_process_shader_names[i];
+		hmk::ShaderManager::get_instance().add_shader("pp_default", shader_name);
+	}
+
+	hmk::ShaderManager::get_instance().compile_and_link_shaders();
+
+	return true;
 }

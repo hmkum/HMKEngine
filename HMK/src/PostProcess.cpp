@@ -74,60 +74,32 @@ bool PostProcess::initialize()
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glBindVertexArray(0);
 
-	{
-		hmk::Shader vert, frag;
-		vert.initialize(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.initialize(GL_FRAGMENT_SHADER, "pp_monochrome.frag");
-		shader_monochrome_.add_shader(vert).add_shader(frag).link_shaders();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.initialize(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.initialize(GL_FRAGMENT_SHADER, "pp_hdr.frag");
-		shader_hdr_.add_shader(vert).add_shader(frag).link_shaders();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.initialize(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.initialize(GL_FRAGMENT_SHADER, "pp_motion_blur.frag");
-		shader_motion_blur_.add_shader(vert).add_shader(frag).link_shaders();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.initialize(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.initialize(GL_FRAGMENT_SHADER, "pp_negative_grayscale.frag");
-		shader_negative_and_grayscale_.add_shader(vert).add_shader(frag).link_shaders();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.initialize(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.initialize(GL_FRAGMENT_SHADER, "pp_blur_v.frag");
-		shader_blurs_[0].add_shader(vert).add_shader(frag).link_shaders();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.initialize(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.initialize(GL_FRAGMENT_SHADER, "pp_blur_h.frag");
-		shader_blurs_[1].add_shader(vert).add_shader(frag).link_shaders();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.initialize(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.initialize(GL_FRAGMENT_SHADER, "pp_down_filter.frag");
-		shader_down_filter_.add_shader(vert).add_shader(frag).link_shaders();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.initialize(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.initialize(GL_FRAGMENT_SHADER, "pp_bloom.frag");
-		shader_bloom_.add_shader(vert).add_shader(frag).link_shaders();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.initialize(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.initialize(GL_FRAGMENT_SHADER, "pp_bright_pass.frag");
-		shader_bright_pass_.add_shader(vert).add_shader(frag).link_shaders();
-	}
+	shader_monochrome_.add_shader("pp_default.vert", "pp_default.frag");
+	shader_monochrome_.link_shaders();
+	
+	shader_hdr_.add_shader("pp_default.vert", "pp_hdr.frag");
+	shader_hdr_.link_shaders();
+
+	shader_motion_blur_.add_shader("pp_default.vert", "pp_motion_blur.frag");
+	shader_motion_blur_.link_shaders();
+
+	shader_negative_and_grayscale_.add_shader("pp_default.vert", "pp_negative_grayscale.frag");
+	shader_negative_and_grayscale_.link_shaders();
+
+	shader_blurs_[0].add_shader("pp_default.vert", "pp_blur_v.frag");
+	shader_blurs_[0].link_shaders();
+
+	shader_blurs_[1].add_shader("pp_default.vert", "pp_blur_h.frag");
+	shader_blurs_[1].link_shaders();
+	
+	shader_down_filter_.add_shader("pp_default.vert", "pp_down_filter.frag");
+	shader_down_filter_.link_shaders();
+
+	shader_bloom_.add_shader("pp_default.vert", "pp_bloom.frag");
+	shader_bloom_.link_shaders();
+
+	shader_bright_pass_.add_shader("pp_default.vert", "pp_bright_pass.frag");
+	shader_bright_pass_.link_shaders();
 
 	bool result = true;
 	result &= default_.initialize(true, 800, 600, GL_RGBA16F);

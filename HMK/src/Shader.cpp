@@ -11,7 +11,7 @@ Shader::~Shader()
 {
 }
 
-bool Shader::initialize(GLenum shaderType, std::string shaderName)
+bool Shader::initialize(ShaderType shader_type, std::string shaderName)
 {
     std::ifstream file(SHADER_PATH + shaderName);
     if(file.is_open())
@@ -23,7 +23,7 @@ bool Shader::initialize(GLenum shaderType, std::string shaderName)
 			shaderCode += line + "\n";
 		}
 		const GLchar *sCode = shaderCode.c_str();
-        shader_id_ = glCreateShader(shaderType);
+		shader_id_ = glCreateShader((unsigned int)shader_type);
         glShaderSource(shader_id_, 1, &sCode, nullptr);
         glCompileShader(shader_id_);
 

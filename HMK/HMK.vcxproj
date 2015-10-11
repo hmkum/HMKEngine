@@ -98,6 +98,7 @@
     <ClCompile Include="src\PostProcess.cpp" />
     <ClCompile Include="src\Ray.cpp" />
     <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\ShaderManager.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
     <ClCompile Include="src\ShadowMap.cpp" />
     <ClCompile Include="src\Skybox.cpp" />
@@ -119,6 +120,7 @@
     <ClInclude Include="src\PostProcess.h" />
     <ClInclude Include="src\Ray.h" />
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\ShaderManager.h" />
     <ClInclude Include="src\ShaderProgram.h" />
     <ClInclude Include="src\ShadowMap.h" />
     <ClInclude Include="src\Skybox.h" />

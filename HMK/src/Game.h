@@ -6,8 +6,6 @@
 #include "BoundingBox.h"
 #include "Camera.h"
 #include "Keys.h"
-#include "Shader.h"
-#include "ShaderProgram.h"
 #include "Model.h"
 #include "Skybox.h"
 #include "ShadowMap.h"
@@ -30,13 +28,14 @@ public:
 
 private:
 	void process_selection(int x, int y);
+	bool compile_and_link_all_shaders();
 
 private:
 	hmk::ModelPtr selected_model_with_mouse_;
 	hmk::ModelPtr model_axe_, model_sphere_, model_sphere2_, model_plane_;
 	hmk::SkyboxPtr skybox_;
 	hmk::ShaderProgram shader_basic_, shader_skybox_, shader_simple_depth_, shader_picking_with_mouse_, shader_post_process_;
-    hmk::CameraPtr camera_;
+	hmk::CameraPtr camera_;
     hmk::ShadowMapPtr shadow_map_;
     hmk::PostProcessPtr post_process_system_;
 	glm::vec3 light_position_;
