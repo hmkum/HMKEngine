@@ -80,6 +80,9 @@
     <ClCompile Include="src\ShaderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\SceneParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -143,6 +146,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ShaderManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SceneParser.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

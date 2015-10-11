@@ -97,6 +97,7 @@
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\PostProcess.cpp" />
     <ClCompile Include="src\Ray.cpp" />
+    <ClCompile Include="src\SceneParser.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\ShaderManager.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
@@ -119,6 +120,7 @@
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\PostProcess.h" />
     <ClInclude Include="src\Ray.h" />
+    <ClInclude Include="src\SceneParser.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\ShaderManager.h" />
     <ClInclude Include="src\ShaderProgram.h" />

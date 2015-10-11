@@ -6,6 +6,7 @@
 #include <streambuf>
 #include <set>
 #include "KeyManager.h"
+#include "SceneParser.h"
 #include "ShaderManager.h"
 #include "Utility.h"
 
@@ -54,94 +55,21 @@ bool Game::initialize()
 	light_projection_ = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 50.0f);
 	light_space_matrix_ = light_projection_ * lightView;
 
-	std::ifstream scene_file("data/scene.xml");
-	if(!scene_file.is_open())
+	hmk::SceneParser::parse("data/scene.xml");
+	hmk::SceneData scene_data = hmk::SceneParser::get_data();
+	for(const auto& model : scene_data.model_)
 	{
-		HMK_LOG_ERROR("Could not load scene.xml file!");
-		return false;
+		hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
+		temp_model->load(model.file_);
+		temp_model->set_name(model.name_);
+		temp_model->set_roughness(model.material_.roughness_value_);
+		temp_model->set_metallic(model.material_.metalness_value_);
+		temp_model->set_position(glm::vec3(model.transform_.pos_x_, model.transform_.pos_y_, model.transform_.pos_z_));
+		temp_model->set_rotation(model.transform_.rot_x_, model.transform_.rot_y_, model.transform_.rot_z_);
+		temp_model->set_scale(glm::vec3(model.transform_.scale_x_, model.transform_.scale_y_, model.transform_.scale_z_));
+		scene_models.emplace_back(std::move(temp_model));
 	}
 	
-	std::string scene_text;
-	scene_text.assign(std::istreambuf_iterator<char>(scene_file), std::istreambuf_iterator<char>());
-	scene_file.close();
-
-	rapidxml::xml_document<> xml_doc;
-	xml_doc.parse<0>(&scene_text[0]);
-
-	rapidxml::xml_node<> *main_node = xml_doc.first_node("scene"); // scene
-	auto model_node = main_node->first_node(); // model
-	while(model_node)
-	{
-		// TODO_HMK: Improve with loops
-		auto node = model_node;
-		auto attr = node->first_attribute();
-		std::string model_file = attr->value();
-		attr = attr->next_attribute();
-		std::string model_name = attr->value();
-
-		node = node->first_node(); // boundingbox
-		attr = node->first_attribute();
-		std::string bounding_box_draw_str = attr->value();
-		bool bounding_box_draw = std::stoi(bounding_box_draw_str) == 0 ? false : true;
-
-		node = node->next_sibling(); // material
-		auto mat_node = node->first_node(); // roughness
-		attr = mat_node->first_attribute();
-		std::string roughness_value_str = attr->value();
-		float roughness_value = std::stof(roughness_value_str);
-		mat_node = mat_node->next_sibling(); // metalness
-		attr = mat_node->first_attribute();
-		std::string metalness_value_str = attr->value();
-		float metalness_value = std::stof(metalness_value_str);
-
-		node = node->next_sibling(); // transform
-		auto trans_node = node->first_node(); // position
-		attr = trans_node->first_attribute();
-		std::string pos_x_str = attr->value();
-		float pos_x = std::stof(pos_x_str);
-		attr = attr->next_attribute();
-		std::string pos_y_str = attr->value();
-		float pos_y = std::stof(pos_y_str);
-		attr = attr->next_attribute();
-		std::string pos_z_str = attr->value();
-		float pos_z = std::stof(pos_z_str);
-
-		trans_node = trans_node->next_sibling(); // rotation
-		attr = trans_node->first_attribute();
-		std::string rot_x_str = attr->value();
-		float rot_x = std::stof(rot_x_str);
-		attr = attr->next_attribute();
-		std::string rot_y_str = attr->value();
-		float rot_y = std::stof(rot_y_str);
-		attr = attr->next_attribute();
-		std::string rot_z_str = attr->value();
-		float rot_z = std::stof(rot_z_str);
-
-		trans_node = trans_node->next_sibling(); // scale
-		attr = trans_node->first_attribute();
-		std::string scale_x_str = attr->value();
-		float scale_x = std::stof(scale_x_str);
-		attr = attr->next_attribute();
-		std::string scale_y_str = attr->value();
-		float scale_y = std::stof(scale_y_str);
-		attr = attr->next_attribute();
-		std::string scale_z_str = attr->value();
-		float scale_z = std::stof(scale_z_str);
-
-		hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
-		temp_model->load(model_file);
-		temp_model->set_name(model_name);
-		temp_model->draw_bounding_box(bounding_box_draw);
-		temp_model->set_roughness(roughness_value);
-		temp_model->set_metallic(metalness_value);
-		temp_model->set_position(glm::vec3(pos_x, pos_y, pos_z));
-		temp_model->set_rotation(rot_x, rot_y, rot_z);
-		temp_model->set_scale(glm::vec3(scale_x, scale_y, scale_z));
-		scene_models.emplace_back(std::move(temp_model));
-
-		model_node = model_node->next_sibling();
-	}
-
 	skybox_ = std::make_shared<hmk::Skybox>();
 	skybox_->load("Bridge/");
 
