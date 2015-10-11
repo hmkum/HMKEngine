@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scene name="default">
 	<model file="plane.obj" name="Plane">
-		<boundingbox draw="0">
-		</boundingbox>
 		<material>
 			<roughness value="1.0"></roughness>
 			<metalness value="0.0"></metalness>
@@ -14,8 +12,6 @@
 		</transform>
 	</model>
 	<model file="sphere.obj" name="Sphere">
-		<boundingbox draw="0">
-		</boundingbox>
 		<material>
 			<roughness value="0.0"></roughness>
 			<metalness value="0.0"></metalness>
@@ -27,8 +23,6 @@
 		</transform>
 	</model>
 	<model file="sphere.obj" name="Sphere2">
-		<boundingbox draw="0">
-		</boundingbox>
 		<material>
 			<roughness value="0.0"></roughness>
 			<metalness value="0.0"></metalness>
@@ -40,8 +34,6 @@
 		</transform>
 	</model>
 	<model file="axe.obj" name="Axe">
-		<boundingbox draw="0">
-		</boundingbox>
 		<material>
 			<roughness value="0.0"></roughness>
 			<metalness value="0.0"></metalness>
