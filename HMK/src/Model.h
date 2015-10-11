@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "AlignedAllocation.h"
 #include "Mesh.h"
 #include "BoundingBox.h"
 #include "ShaderProgram.h"
@@ -15,7 +16,7 @@ namespace hmk
 /**
 	Responsible for rendering models.
 */
-class Model
+class Model : public AlignedAllocation<16>
 {
 public:
 	Model();
@@ -68,5 +69,6 @@ private:
 	glm::vec3 rotation_vec_;
 };
 
-typedef std::shared_ptr<Model> ModelPtr;
+typedef std::unique_ptr<Model> ModelUPtr;
+typedef std::shared_ptr<Model> ModelSPtr;
 }

@@ -17,6 +17,7 @@ Game::Game()
 	selected_model_position_ = glm::vec3(0);
 	selected_model_rotation_ = glm::vec3(0);
 	selected_model_scale_	 = glm::vec3(0);
+	selected_model_index	 = -1;
 }
 
 Game::~Game()
@@ -29,7 +30,7 @@ bool Game::initialize()
     camera_->create_look_at(glm::vec3(0.0f, 2.0f, 10.0f));
 	camera_->create_perspective_proj(120.0f, 0.1f, 100.0f);
 
-	compile_and_link_all_shaders();
+	//compile_and_link_all_shaders();
 
     shadow_map_ = std::make_shared<hmk::ShadowMap>();
     shadow_map_->initialize(2048, 2048);
@@ -52,9 +53,6 @@ bool Game::initialize()
 	glm::mat4 lightView = glm::lookAt(light_position_, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	light_projection_ = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 50.0f);
 	light_space_matrix_ = light_projection_ * lightView;
-
-	selected_model_with_mouse_ = std::make_shared<hmk::Model>();
-	selected_model_with_mouse_.reset();
 
 	std::ifstream scene_file("data/scene.xml");
 	if(!scene_file.is_open())
@@ -130,7 +128,7 @@ bool Game::initialize()
 		std::string scale_z_str = attr->value();
 		float scale_z = std::stof(scale_z_str);
 
-		hmk::ModelPtr temp_model = std::make_shared<hmk::Model>();
+		hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
 		temp_model->load(model_file);
 		temp_model->set_name(model_name);
 		temp_model->draw_bounding_box(bounding_box_draw);
@@ -139,7 +137,7 @@ bool Game::initialize()
 		temp_model->set_position(glm::vec3(pos_x, pos_y, pos_z));
 		temp_model->set_rotation(rot_x, rot_y, rot_z);
 		temp_model->set_scale(glm::vec3(scale_x, scale_y, scale_z));
-		scene_models.push_back(temp_model);
+		scene_models.emplace_back(std::move(temp_model));
 
 		model_node = model_node->next_sibling();
 	}
@@ -176,32 +174,32 @@ void Game::update(float dt)
 		ImGui::Checkbox("Negative", &gui_is_negative_active_);
 	}
 	static float r = 0.0f, m = 0.0f;
-	if(selected_model_with_mouse_.get() != nullptr)
+	if(selected_model_index != -1)
 	{
-		r = selected_model_with_mouse_->get_roughness();
-		m = selected_model_with_mouse_->get_metallic();
-		selected_model_position_ = selected_model_with_mouse_->get_position();
-		selected_model_rotation_ = selected_model_with_mouse_->get_rotation();
-		selected_model_scale_	 = selected_model_with_mouse_->get_scale();
+		r = scene_models[selected_model_index]->get_roughness();
+		m = scene_models[selected_model_index]->get_metallic();
+		selected_model_position_ = scene_models[selected_model_index]->get_position();
+		selected_model_rotation_ = scene_models[selected_model_index]->get_rotation();
+		selected_model_scale_	 = scene_models[selected_model_index]->get_scale();
 
 		if(ImGui::CollapsingHeader("Entity Properties"))
 		{
-			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), selected_model_with_mouse_->get_name().c_str());
+			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), scene_models[selected_model_index]->get_name().c_str());
 			ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f);
 			ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f);
-			selected_model_with_mouse_->set_roughness(r);
-			selected_model_with_mouse_->set_metallic(m);
+			scene_models[selected_model_index]->set_roughness(r);
+			scene_models[selected_model_index]->set_metallic(m);
 
 			ImGui::Separator();
 
 			ImGui::DragFloat3("Position", (float*)&selected_model_position_.x, 0.01f);
-			selected_model_with_mouse_->set_position(selected_model_position_);
+			scene_models[selected_model_index]->set_position(selected_model_position_);
 
 			ImGui::DragFloat3("Rotation", (float*)&selected_model_rotation_.x, 0.1f);
-			selected_model_with_mouse_->set_rotation(selected_model_rotation_);
+			scene_models[selected_model_index]->set_rotation(selected_model_rotation_);
 
 			ImGui::DragFloat3("Scale", (float*)&selected_model_scale_.x, 0.01f);
-			selected_model_with_mouse_->set_scale(selected_model_scale_);
+			scene_models[selected_model_index]->set_scale(selected_model_scale_);
 		}
 	}
 	ImGui::End();
@@ -285,7 +283,7 @@ void Game::process_selection(int x, int y)
 		hmk::BoundingBox box = boxes[i];
 		if(ray.intersect_aabb(box))
 		{
-			selected_model_with_mouse_ = scene_models[i];
+			selected_model_index = i;
 		}
 	}
 }
