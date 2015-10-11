@@ -214,8 +214,8 @@ void Game::render()
 
 	for(const auto& model : scene_models)
 	{
-		shader_basic_.set_uniform("uModel", model->get_model_matrix());
-		model->render(shader_simple_depth_);
+		shader_simple_depth_.set_uniform("uModel", model->get_model_matrix());
+		model->render();
 	}
 
 	shadow_map_->unbind();
