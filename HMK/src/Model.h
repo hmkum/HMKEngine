@@ -34,7 +34,7 @@ public:
 	void set_roughness(float r);
 	void set_metallic(float m);
 
-	inline glm::mat4 get_model_matrix() const { return scale_ * rotation_ * translation_; }
+	inline glm::mat4 get_model_matrix() const { return translation_ * rotation_ * scale_; }
 	inline float get_roughness() const { return meshes_.at(0)->get_roughness(); }
 	inline float get_metallic()  const { return meshes_.at(0)->get_metallic(); }
 	BoundingBox get_bounding_box() const;
