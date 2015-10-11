@@ -71,7 +71,7 @@ bool Game::initialize()
 	}
 	
 	skybox_ = std::make_shared<hmk::Skybox>();
-	skybox_->load("Bridge/");
+	skybox_->load("Bridge");
 
 	return true;
 }

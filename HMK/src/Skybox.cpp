@@ -22,12 +22,12 @@ bool Skybox::load(std::string texturePath)
 	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id_);
 
 	std::vector<std::string> textureNames;
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "posx.jpg");
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "negx.jpg");
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "posy.jpg");
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "negy.jpg");
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "posz.jpg");
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "negz.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/posx.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/negx.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/posy.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/negy.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/posz.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/negz.jpg");
 
 	for(size_t i = 0; i < textureNames.size(); ++i)
 	{
