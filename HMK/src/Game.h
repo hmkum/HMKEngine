@@ -45,6 +45,7 @@ private:
 	glm::vec3 selected_model_rotation_;
 	glm::vec3 selected_model_scale_;
 
+	bool gui_is_shadow_active = true;
 	float gui_tonemap_exposure_ = 1.0f, gui_bloom_intensity_ = 1.0f;
 	bool gui_is_bloom_active_ = true;
 	bool gui_is_motionblur_active_ = true;

@@ -19,6 +19,7 @@ uniform vec3 uCameraPosition;
 uniform vec3 uLightPosition;
 uniform ivec4 uHasTextures;
 uniform Material uMaterial;
+uniform int uIsShadowMapActive;
 
 layout(binding = 0) uniform sampler2D AlbedoTexture;
 layout(binding = 1) uniform sampler2D NormalTexture;
@@ -161,7 +162,7 @@ void main()
 	float mipIndex = Roughness * Roughness * 8.0f;
 	vec4 ReflectedColor = pow(textureLod(EnvMap, Reflected, mipIndex), vec4(Gamma, Gamma, Gamma, 1.0f));
 
-	float Shadow = CalculateShadow(FragPosLightSpace);
+	float Shadow = mix(vec3(1.0), vec3(CalculateShadow(FragPosLightSpace)), uIsShadowMapActive).r;
 
 	vec4 Result = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	Result += BaseColor * 0.05f; // Ambient

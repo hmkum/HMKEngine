@@ -88,6 +88,7 @@ void Game::update(float dt)
 	if(ImGui::CollapsingHeader("World Properties"))
 	{
 		ImGui::DragFloat3("Light Position", (float*)&light_position_.x, 0.1f);
+		ImGui::Checkbox("Shadows", &gui_is_shadow_active);
 	}
 	if(ImGui::CollapsingHeader("Post Process Effects"))
 	{
@@ -135,21 +136,23 @@ void Game::update(float dt)
 
 void Game::render()
 {	
-	shadow_map_->bind();
-
-	shader_simple_depth_.use();
-	shader_simple_depth_.set_uniform("uLightSpaceMatrix", light_space_matrix_);
-
-	for(const auto& model : scene_models)
+	if(gui_is_shadow_active)
 	{
-		shader_simple_depth_.set_uniform("uModel", model->get_model_matrix());
-		model->render();
+		shadow_map_->bind();
+
+		shader_simple_depth_.use();
+		shader_simple_depth_.set_uniform("uLightSpaceMatrix", light_space_matrix_);
+
+		for(const auto& model : scene_models)
+		{
+			shader_simple_depth_.set_uniform("uModel", model->get_model_matrix());
+			model->render();
+		}
+
+		shadow_map_->unbind();
+
+		glViewport(0, 0, 800, 600);
 	}
-
-	shadow_map_->unbind();
-	
-	glViewport(0, 0, 800, 600);
-
 	post_process_system_->begin();
 		shader_skybox_.use();
 		glm::mat4 skyboxModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f));
@@ -163,8 +166,13 @@ void Game::render()
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_->get_texture_id());
 
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, shadow_map_->get_depth_map());
+		shader_basic_.set_uniform("uIsShadowMapActive", 0);
+		if(gui_is_shadow_active)
+		{
+			shader_basic_.set_uniform("uIsShadowMapActive", 1);
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_2D, shadow_map_->get_depth_map());
+		}
 		
 		shader_basic_.set_uniform("uViewMatrix", camera_->get_view_matrix());
 		shader_basic_.set_uniform("uProjMatrix", camera_->get_proj_matrix());
