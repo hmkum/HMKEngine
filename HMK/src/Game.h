@@ -47,6 +47,9 @@ private:
 
 	float gui_tonemap_exposure_ = 1.0f, gui_bloom_intensity_ = 1.0f;
 	bool gui_is_bloom_active_ = true;
+	bool gui_is_motionblur_active_ = true;
+	bool gui_is_monochrome_active_ = false;
+	bool gui_is_negative_active_ = false;
 
 private:
 	struct CursorState_t

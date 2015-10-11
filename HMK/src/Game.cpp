@@ -165,10 +165,15 @@ void Game::update(float dt)
 	if(ImGui::CollapsingHeader("World Properties"))
 	{
 		ImGui::DragFloat3("Light Position", (float*)&light_position_.x, 0.1f);
-		ImGui::Separator();
-		ImGui::SliderFloat("Tonemap Exposure", &gui_tonemap_exposure_, 0.0f, 16.0f);
+	}
+	if(ImGui::CollapsingHeader("Post Process Effects"))
+	{
 		ImGui::Checkbox("Bloom", &gui_is_bloom_active_);
-		ImGui::SliderFloat("Bloom Intensity", &gui_bloom_intensity_, 0.0f, 5.0f);
+		if(gui_is_bloom_active_) ImGui::SliderFloat("Bloom Intensity", &gui_bloom_intensity_, 0.0f, 5.0f);
+		ImGui::SliderFloat("Tonemap Exposure", &gui_tonemap_exposure_, 0.0f, 16.0f);
+		ImGui::Checkbox("Motion BLur", &gui_is_motionblur_active_);
+		ImGui::Checkbox("Monochrome", &gui_is_monochrome_active_);
+		ImGui::Checkbox("Negative", &gui_is_negative_active_);
 	}
 	static float r = 0.0f, m = 0.0f;
 	if(selected_model_with_mouse_.get() != nullptr)
@@ -255,8 +260,9 @@ void Game::render()
 	const glm::mat4 viewProjMatrix = camera_->get_proj_matrix() * camera_->get_view_matrix();
 
 	if(gui_is_bloom_active_) post_process_system_->do_bloom(gui_bloom_intensity_);
-	post_process_system_->do_motion_blur(viewProjMatrix);
-	
+	if(gui_is_motionblur_active_) post_process_system_->do_motion_blur(viewProjMatrix);
+	if(gui_is_monochrome_active_) post_process_system_->do_monochrome();
+	if(gui_is_negative_active_) post_process_system_->do_negative();
 	post_process_system_->do_hdr(gui_tonemap_exposure_, gui_is_bloom_active_);
 	post_process_system_->render(shader_post_process_);
 }
@@ -268,7 +274,6 @@ void Game::process_selection(int x, int y)
 	
 	hmk::Ray ray(camera_->get_position(), normalize(rayFar - rayNear));
 
-	// TODO: Get model's bounding box from ModelManager
 	std::vector<hmk::BoundingBox> boxes;
 	for(const auto& model : scene_models)
 	{
