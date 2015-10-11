@@ -10,7 +10,10 @@ Game::Game()
 {
 	mouse_right_pressed_ = false;
 	mouse_left_pressed_  = false;
-	light_position_ = glm::vec3(0, 4, 4);
+	light_position_		 = glm::vec3(0, 4, 4);
+	selected_model_position_ = glm::vec3(0);
+	selected_model_rotation_ = glm::vec3(0);
+	selected_model_scale_	 = glm::vec3(0);
 }
 
 Game::~Game()
@@ -52,7 +55,7 @@ bool Game::initialize()
 
 	model_plane_ = std::make_shared<hmk::Model>();
 	model_plane_->load("plane.obj");
-	model_plane_->scale(glm::vec3(10.0f));
+	model_plane_->set_scale(glm::vec3(10.0f));
 	model_plane_->set_roughness(1.0f);
 
 	model_sphere_ = std::make_shared<hmk::Model>();
@@ -60,13 +63,13 @@ bool Game::initialize()
 
 	model_sphere2_ = std::make_shared<hmk::Model>();
 	model_sphere2_->load("sphere.obj");
-	model_sphere2_->translate(glm::vec3(-3.0f, 0.0f, 0.0f));
+	model_sphere2_->set_position(glm::vec3(-3.0f, 0.0f, 0.0f));
 
 	model_axe_ = std::make_shared<hmk::Model>();
 	model_axe_->load("axe.obj");
-	model_axe_->translate(glm::vec3(2.0f, 0.0f, 0.0f));
-	model_axe_->scale(glm::vec3(0.1f));
-	model_axe_->rotate(90.0f, glm::vec3(1, 0, 0));
+	model_axe_->set_position(glm::vec3(2.0f, 0.0f, 0.0f));
+	model_axe_->set_scale(glm::vec3(0.1f));
+	model_axe_->set_rotation(90.0f, 0.0f, 0.0f);
 
 	skybox_ = std::make_shared<hmk::Skybox>();
 	skybox_->load("Bridge/");
@@ -85,27 +88,44 @@ void Game::update(float dt)
 	if (hmk::KeyManager::get_key(HMK_KEY_D))
 		camera_->move_right(dt);
 
+	ImGui::Begin("Properties");
+	if(ImGui::CollapsingHeader("World Properties"))
+	{
+		ImGui::DragFloat3("Light Position", (float*)&light_position_.x, 0.1f);
+		ImGui::Separator();
+		ImGui::SliderFloat("Tonemap Exposure", &gui_tonemap_exposure_, 0.0f, 16.0f);
+		ImGui::Checkbox("Bloom", &gui_is_bloom_active_);
+		ImGui::SliderFloat("Bloom Intensity", &gui_bloom_intensity_, 0.0f, 5.0f);
+	}
 	static float r = 0.0f, m = 0.0f;
-	if (selected_model_with_mouse_.get() != nullptr)
+	if(selected_model_with_mouse_.get() != nullptr)
 	{
 		r = selected_model_with_mouse_->get_roughness();
 		m = selected_model_with_mouse_->get_metallic();
+		selected_model_position_ = selected_model_with_mouse_->get_position();
+		selected_model_rotation_ = selected_model_with_mouse_->get_rotation();
+		selected_model_scale_	 = selected_model_with_mouse_->get_scale();
+
+		if(ImGui::CollapsingHeader("Entity Properties"))
+		{
+			ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f);
+			ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f);
+			selected_model_with_mouse_->set_roughness(r);
+			selected_model_with_mouse_->set_metallic(m);
+
+			ImGui::Separator();
+
+			ImGui::DragFloat3("Position", (float*)&selected_model_position_.x, 0.01f);
+			selected_model_with_mouse_->set_position(selected_model_position_);
+
+			ImGui::DragFloat3("Rotation", (float*)&selected_model_rotation_.x, 0.1f);
+			selected_model_with_mouse_->set_rotation(selected_model_rotation_);
+
+			ImGui::DragFloat3("Scale", (float*)&selected_model_scale_.x, 0.01f);
+			selected_model_with_mouse_->set_scale(selected_model_scale_);
+		}
 	}
-	ImGui::Begin("Material");
-	ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f);
-	ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f);
-	ImGui::Separator();
-	ImGui::DragFloat3("Light Position", (float*)&light_position_.x, 0.1f);
-	ImGui::Separator();
-	ImGui::SliderFloat("Tonemap Exposure", &gui_tonemap_exposure_, 0.0f, 16.0f);
-	ImGui::Checkbox("Bloom", &gui_is_bloom_active_);
-	ImGui::SliderFloat("Bloom Intensity", &gui_bloom_intensity_, 0.0f, 5.0f);
 	ImGui::End();
-	if (selected_model_with_mouse_.get() != nullptr)
-	{
-		selected_model_with_mouse_->set_roughness(r);
-		selected_model_with_mouse_->set_metallic(m);
-	}
 	
 	glm::mat4 lightView = glm::lookAt(light_position_, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	light_space_matrix_ = light_projection_ * lightView;

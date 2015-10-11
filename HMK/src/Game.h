@@ -41,6 +41,9 @@ private:
 	glm::vec3 light_position_;
 	glm::mat4 light_projection_;
 	glm::mat4 light_space_matrix_;
+	glm::vec3 selected_model_position_;
+	glm::vec3 selected_model_rotation_;
+	glm::vec3 selected_model_scale_;
 
 	float gui_tonemap_exposure_ = 1.0f, gui_bloom_intensity_ = 1.0f;
 	bool gui_is_bloom_active_ = true;
