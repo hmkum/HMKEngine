@@ -10,7 +10,8 @@
 using namespace hmk;
 
 Model::Model()
-	: draw_bounding_box_{false}
+	: name_{""}
+	, draw_bounding_box_{false}
 	, translation_matrix_{1.0f}
 	, rotation_matrix_{1.0f}
 	, scale_matrix_{1.0f}
@@ -180,6 +181,11 @@ void Model::render(ShaderProgram &shader)
 	{
 		mesh->render(shader);
 	}
+}
+
+void Model::set_name(const std::string& name)
+{
+	name_ = name;
 }
 
 void Model::set_position(glm::vec3 pos)

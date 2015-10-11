@@ -27,6 +27,9 @@ public:
 
 	void draw_bounding_box(bool draw);
 
+	void set_name(const std::string& name);
+	inline std::string get_name() const { return name_; }
+
 	void set_position(glm::vec3 pos);
 	void offset_position(glm::vec3 offset);
 
@@ -52,6 +55,7 @@ public:
 private:
 	std::string handle_texture_name(const char *filename);
 private:
+	std::string name_;
 	// Holds meshes of models.
 	std::vector<std::shared_ptr<Mesh>> meshes_;
 	BoundingBox bounding_box_;

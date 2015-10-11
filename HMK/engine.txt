@@ -1,2 +1,0 @@
-<ERROR>   Could not load shader(pp_default.frag)!
-<ERROR>   

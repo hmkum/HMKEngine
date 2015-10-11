@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene name="default">
+	<model file="plane.obj" name="Plane">
+		<boundingbox draw="0">
+		</boundingbox>
+		<material>
+			<roughness value="1.0"></roughness>
+			<metalness value="0.0"></metalness>
+		</material>
+		<transform>
+			<position x="0.0" y="0.0" z="0.0"></position>
+			<rotation x="0.0" y="0.0" z="0.0"></rotation>
+			<scale x="10.0" y="10.0" z="10.0"></scale>
+		</transform>
+	</model>
+	<model file="sphere.obj" name="Sphere">
+		<boundingbox draw="0">
+		</boundingbox>
+		<material>
+			<roughness value="0.0"></roughness>
+			<metalness value="0.0"></metalness>
+		</material>
+		<transform>
+			<position x="0.0" y="0.0" z="0.0"></position>
+			<rotation x="0.0" y="0.0" z="0.0"></rotation>
+			<scale x="1.0" y="1.0" z="1.0"></scale>
+		</transform>
+	</model>
+	<model file="sphere.obj" name="Sphere2">
+		<boundingbox draw="0">
+		</boundingbox>
+		<material>
+			<roughness value="0.0"></roughness>
+			<metalness value="0.0"></metalness>
+		</material>
+		<transform>
+			<position x="-3.0" y="0.0" z="0.0"></position>
+			<rotation x="0.0" y="0.0" z="0.0"></rotation>
+			<scale x="1.0" y="1.0" z="1.0"></scale>
+		</transform>
+	</model>
+	<model file="axe.obj" name="Axe">
+		<boundingbox draw="0">
+		</boundingbox>
+		<material>
+			<roughness value="0.0"></roughness>
+			<metalness value="0.0"></metalness>
+		</material>
+		<transform>
+			<position x="2.0" y="0.0" z="0.0"></position>
+			<rotation x="90.0" y="0.0" z="0.0"></rotation>
+			<scale x="0.1" y="0.1" z="0.1"></scale>
+		</transform>
+	</model>
+</scene>

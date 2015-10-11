@@ -1,6 +1,9 @@
 #include "Game.h"
 #include <imgui/imgui.h>
+#include <rapidxml/rapidxml.hpp>
 #include <filesystem> // C++17
+#include <fstream>
+#include <streambuf>
 #include <set>
 #include "KeyManager.h"
 #include "ShaderManager.h"
@@ -53,23 +56,93 @@ bool Game::initialize()
 	selected_model_with_mouse_ = std::make_shared<hmk::Model>();
 	selected_model_with_mouse_.reset();
 
-	model_plane_ = std::make_shared<hmk::Model>();
-	model_plane_->load("plane.obj");
-	model_plane_->set_scale(glm::vec3(10.0f));
-	model_plane_->set_roughness(1.0f);
+	std::ifstream scene_file("data/scene.xml");
+	if(!scene_file.is_open())
+	{
+		HMK_LOG_ERROR("Could not load scene.xml file!");
+		return false;
+	}
+	
+	std::string scene_text;
+	scene_text.assign(std::istreambuf_iterator<char>(scene_file), std::istreambuf_iterator<char>());
+	scene_file.close();
 
-	model_sphere_ = std::make_shared<hmk::Model>();
-	model_sphere_->load("sphere.obj");
+	rapidxml::xml_document<> xml_doc;
+	xml_doc.parse<0>(&scene_text[0]);
 
-	model_sphere2_ = std::make_shared<hmk::Model>();
-	model_sphere2_->load("sphere.obj");
-	model_sphere2_->set_position(glm::vec3(-3.0f, 0.0f, 0.0f));
+	rapidxml::xml_node<> *main_node = xml_doc.first_node("scene"); // scene
+	auto model_node = main_node->first_node(); // model
+	while(model_node)
+	{
+		// TODO_HMK: Improve with loops
+		auto node = model_node;
+		auto attr = node->first_attribute();
+		std::string model_file = attr->value();
+		attr = attr->next_attribute();
+		std::string model_name = attr->value();
 
-	model_axe_ = std::make_shared<hmk::Model>();
-	model_axe_->load("axe.obj");
-	model_axe_->set_position(glm::vec3(2.0f, 0.0f, 0.0f));
-	model_axe_->set_scale(glm::vec3(0.1f));
-	model_axe_->set_rotation(90.0f, 0.0f, 0.0f);
+		node = node->first_node(); // boundingbox
+		attr = node->first_attribute();
+		std::string bounding_box_draw_str = attr->value();
+		bool bounding_box_draw = std::stoi(bounding_box_draw_str) == 0 ? false : true;
+
+		node = node->next_sibling(); // material
+		auto mat_node = node->first_node(); // roughness
+		attr = mat_node->first_attribute();
+		std::string roughness_value_str = attr->value();
+		float roughness_value = std::stof(roughness_value_str);
+		mat_node = mat_node->next_sibling(); // metalness
+		attr = mat_node->first_attribute();
+		std::string metalness_value_str = attr->value();
+		float metalness_value = std::stof(metalness_value_str);
+
+		node = node->next_sibling(); // transform
+		auto trans_node = node->first_node(); // position
+		attr = trans_node->first_attribute();
+		std::string pos_x_str = attr->value();
+		float pos_x = std::stof(pos_x_str);
+		attr = attr->next_attribute();
+		std::string pos_y_str = attr->value();
+		float pos_y = std::stof(pos_y_str);
+		attr = attr->next_attribute();
+		std::string pos_z_str = attr->value();
+		float pos_z = std::stof(pos_z_str);
+
+		trans_node = trans_node->next_sibling(); // rotation
+		attr = trans_node->first_attribute();
+		std::string rot_x_str = attr->value();
+		float rot_x = std::stof(rot_x_str);
+		attr = attr->next_attribute();
+		std::string rot_y_str = attr->value();
+		float rot_y = std::stof(rot_y_str);
+		attr = attr->next_attribute();
+		std::string rot_z_str = attr->value();
+		float rot_z = std::stof(rot_z_str);
+
+		trans_node = trans_node->next_sibling(); // scale
+		attr = trans_node->first_attribute();
+		std::string scale_x_str = attr->value();
+		float scale_x = std::stof(scale_x_str);
+		attr = attr->next_attribute();
+		std::string scale_y_str = attr->value();
+		float scale_y = std::stof(scale_y_str);
+		attr = attr->next_attribute();
+		std::string scale_z_str = attr->value();
+		float scale_z = std::stof(scale_z_str);
+
+		hmk::ModelPtr temp_model = std::make_shared<hmk::Model>();
+		temp_model->load(model_file);
+		temp_model->set_name(model_name);
+		temp_model->draw_bounding_box(bounding_box_draw);
+		temp_model->set_roughness(roughness_value);
+		temp_model->set_metallic(metalness_value);
+		temp_model->set_position(glm::vec3(pos_x, pos_y, pos_z));
+		temp_model->set_rotation(rot_x, rot_y, rot_z);
+		temp_model->set_scale(glm::vec3(scale_x, scale_y, scale_z));
+		scene_models.push_back(temp_model);
+
+		model_node = model_node->next_sibling();
+	}
 
 	skybox_ = std::make_shared<hmk::Skybox>();
 	skybox_->load("Bridge/");
@@ -108,6 +181,7 @@ void Game::update(float dt)
 
 		if(ImGui::CollapsingHeader("Entity Properties"))
 		{
+			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), selected_model_with_mouse_->get_name().c_str());
 			ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f);
 			ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f);
 			selected_model_with_mouse_->set_roughness(r);
@@ -138,17 +212,11 @@ void Game::render()
 	shader_simple_depth_.use();
 	shader_simple_depth_.set_uniform("uLightSpaceMatrix", light_space_matrix_);
 
-	shader_simple_depth_.set_uniform("uModel", model_plane_->get_model_matrix());
-	model_plane_->render();
-
-	shader_simple_depth_.set_uniform("uModel", model_sphere_->get_model_matrix());
-	model_sphere_->render();
-
-	shader_simple_depth_.set_uniform("uModel", model_sphere2_->get_model_matrix());
-	model_sphere2_->render();
-
-	shader_simple_depth_.set_uniform("uModel", model_axe_->get_model_matrix());
-	model_axe_->render();
+	for(const auto& model : scene_models)
+	{
+		shader_basic_.set_uniform("uModel", model->get_model_matrix());
+		model->render(shader_simple_depth_);
+	}
 
 	shadow_map_->unbind();
 	
@@ -176,17 +244,11 @@ void Game::render()
 		shader_basic_.set_uniform("uLightPosition", light_position_);
 		shader_basic_.set_uniform("uLightSpaceMatrix", light_space_matrix_);
 
-		shader_basic_.set_uniform("uModel", model_plane_->get_model_matrix());
-		model_plane_->render(shader_basic_);
-
-		shader_basic_.set_uniform("uModel", model_sphere_->get_model_matrix());
-		model_sphere_->render(shader_basic_);
-
-		shader_basic_.set_uniform("uModel", model_sphere2_->get_model_matrix());
-		model_sphere2_->render(shader_basic_);
-
-		shader_basic_.set_uniform("uModel", model_axe_->get_model_matrix());
-		model_axe_->render(shader_basic_);
+		for(const auto& model : scene_models)
+		{
+			shader_basic_.set_uniform("uModel", model->get_model_matrix());
+			model->render(shader_basic_);
+		}
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	post_process_system_->end();
@@ -208,24 +270,17 @@ void Game::process_selection(int x, int y)
 
 	// TODO: Get model's bounding box from ModelManager
 	std::vector<hmk::BoundingBox> boxes;
-	boxes.push_back(model_sphere_->get_bounding_box());
-	boxes.push_back(model_sphere2_->get_bounding_box());
-	boxes.push_back(model_axe_->get_bounding_box());
+	for(const auto& model : scene_models)
+	{
+		boxes.push_back(model->get_bounding_box());
+	}
 
 	for (unsigned int i = 0; i < boxes.size(); ++i)
 	{
 		hmk::BoundingBox box = boxes[i];
 		if(ray.intersect_aabb(box))
 		{
-			// TODO: Implement ModelManager and select model with index
-			switch(i)
-			{
-				case 0: selected_model_with_mouse_ = model_sphere_; break;
-				case 1: selected_model_with_mouse_ = model_sphere2_; break;
-				case 2: selected_model_with_mouse_ = model_axe_; break;
-				default:
-					break;
-			}
+			selected_model_with_mouse_ = scene_models[i];
 		}
 	}
 }

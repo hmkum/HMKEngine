@@ -8,3 +8,4 @@ Debug/
 *.tlog
 build/
 HMK.pro.user
+HMK/engine.txt

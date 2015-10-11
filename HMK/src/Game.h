@@ -31,8 +31,8 @@ private:
 	bool compile_and_link_all_shaders();
 
 private:
+	std::vector<hmk::ModelPtr> scene_models;
 	hmk::ModelPtr selected_model_with_mouse_;
-	hmk::ModelPtr model_axe_, model_sphere_, model_sphere2_, model_plane_;
 	hmk::SkyboxPtr skybox_;
 	hmk::ShaderProgram shader_basic_, shader_skybox_, shader_simple_depth_, shader_picking_with_mouse_, shader_post_process_;
 	hmk::CameraPtr camera_;
