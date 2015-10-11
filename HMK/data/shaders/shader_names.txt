@@ -8,6 +8,6 @@ down_filter:pp_down_filter
 hdr:pp_hdr
 monochrome:pp_monochrome
 motion_blur:pp_motion_blur
-neg_gray:pp_negative_grayscale
+negative:pp_negative
 simple_depth:simple_depth
 skybox:skybox

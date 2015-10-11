@@ -183,9 +183,6 @@
     <None Include="data\shaders\pp_motion_blur.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="data\shaders\pp_negative_grayscale.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="data\shaders\pp_down_filter.frag">
       <Filter>Shaders</Filter>
     </None>
@@ -199,6 +196,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="data\shaders\pp_blur_h.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\pp_negative.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

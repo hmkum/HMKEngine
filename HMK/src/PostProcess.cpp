@@ -83,8 +83,8 @@ bool PostProcess::initialize()
 	shader_motion_blur_.add_shader("pp_default.vert", "pp_motion_blur.frag");
 	shader_motion_blur_.link_shaders();
 
-	shader_negative_and_grayscale_.add_shader("pp_default.vert", "pp_negative_grayscale.frag");
-	shader_negative_and_grayscale_.link_shaders();
+	shader_negative_.add_shader("pp_default.vert", "pp_negative.frag");
+	shader_negative_.link_shaders();
 
 	shader_blurs_[0].add_shader("pp_default.vert", "pp_blur_v.frag");
 	shader_blurs_[0].link_shaders();
@@ -106,7 +106,7 @@ bool PostProcess::initialize()
 	result &= monochrome_.initialize(true, 800, 600, GL_RGBA16F);
 	result &= hdr_.initialize(true, 800, 600);
 	result &= motion_blur_.initialize(true, 800, 600, GL_RGBA16F);
-	result &= negative_and_grayscale_.initialize(true, 800, 600);
+	result &= negative_.initialize(true, 800, 600);
 	result &= blurs_[0].initialize(true, 800, 600, GL_RGBA16F);
 	result &= blurs_[1].initialize(true, 800, 600, GL_RGBA16F);
 	result &= down_filter_.initialize(true, 800, 600, GL_RGBA16F);
@@ -198,30 +198,16 @@ void PostProcess::do_motion_blur(const glm::mat4 &viewProjMatrix)
 
 void PostProcess::do_negative()
 {
-	negative_and_grayscale_.bind();
-	shader_negative_and_grayscale_.use();
-	shader_negative_and_grayscale_.set_uniform("uIsGrayScale", 0);
+	negative_.bind();
+	shader_negative_.use();
+	shader_negative_.set_uniform("uIsGrayScale", 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, last_color_map_);
 	glBindVertexArray(vao_id_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
-	last_color_map_ = negative_and_grayscale_.get_color_map();
-	negative_and_grayscale_.unbind();
-}
-
-void PostProcess::do_grayscale()
-{
-	negative_and_grayscale_.bind();
-	shader_negative_and_grayscale_.use();
-	shader_negative_and_grayscale_.set_uniform("uIsGrayScale", 1);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, last_color_map_);
-	glBindVertexArray(vao_id_);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
-	last_color_map_ = negative_and_grayscale_.get_color_map();
-	negative_and_grayscale_.unbind();
+	last_color_map_ = negative_.get_color_map();
+	negative_.unbind();
 }
 
 void PostProcess::do_blur()
