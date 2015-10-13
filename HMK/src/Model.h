@@ -30,6 +30,7 @@ public:
 
 	void set_name(const std::string& name);
 	inline std::string get_name() const { return name_; }
+	inline std::string get_filename() const { return filename_; }
 
 	void set_position(glm::vec3 pos);
 	void offset_position(glm::vec3 offset);
@@ -56,7 +57,7 @@ public:
 private:
 	std::string handle_texture_name(const char *filename);
 private:
-	std::string name_;
+	std::string name_, filename_;
 	// Holds meshes of models.
 	std::vector<std::shared_ptr<Mesh>> meshes_;
 	BoundingBox bounding_box_;

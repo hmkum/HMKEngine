@@ -1,51 +1,51 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <scene name="default">
 	<atmosphere>
-		<skybox folder="Bridge"></skybox>
-		<fog method="linear" density="0.2" start="5" end="100"></fog>
+		<skybox folder="Bridge" />
+		<fog method="linear" density="0.2" start="5" end="100" />
 	</atmosphere>
 	<model file="plane.obj" name="Plane">
 		<material>
-			<roughness value="1.0"></roughness>
-			<metalness value="0.0"></metalness>
+			<roughness value="0" />
+			<metalness value="0" />
 		</material>
 		<transform>
-			<position x="0.0" y="0.0" z="0.0"></position>
-			<rotation x="0.0" y="0.0" z="0.0"></rotation>
-			<scale x="10.0" y="10.0" z="10.0"></scale>
+			<position x="0" y="0" z="0" />
+			<rotation x="0" y="0" z="0" />
+			<scale x="10" y="10" z="10" />
 		</transform>
 	</model>
 	<model file="sphere.obj" name="Sphere">
 		<material>
-			<roughness value="0.0"></roughness>
-			<metalness value="0.0"></metalness>
+			<roughness value="0" />
+			<metalness value="0" />
 		</material>
 		<transform>
-			<position x="0.0" y="0.0" z="0.0"></position>
-			<rotation x="0.0" y="0.0" z="0.0"></rotation>
-			<scale x="1.0" y="1.0" z="1.0"></scale>
+			<position x="0" y="1.10000002" z="0" />
+			<rotation x="0" y="0" z="0" />
+			<scale x="1" y="1" z="1" />
 		</transform>
 	</model>
 	<model file="sphere.obj" name="Sphere2">
 		<material>
-			<roughness value="0.0"></roughness>
-			<metalness value="0.0"></metalness>
+			<roughness value="0" />
+			<metalness value="0" />
 		</material>
 		<transform>
-			<position x="-3.0" y="0.0" z="0.0"></position>
-			<rotation x="0.0" y="0.0" z="0.0"></rotation>
-			<scale x="1.0" y="1.0" z="1.0"></scale>
+			<position x="-3" y="1.11000001" z="0" />
+			<rotation x="0" y="0" z="0" />
+			<scale x="1" y="1" z="1" />
 		</transform>
 	</model>
 	<model file="axe.obj" name="Axe">
 		<material>
-			<roughness value="0.0"></roughness>
-			<metalness value="0.0"></metalness>
+			<roughness value="0" />
+			<metalness value="0" />
 		</material>
 		<transform>
-			<position x="2.0" y="0.0" z="0.0"></position>
-			<rotation x="90.0" y="0.0" z="0.0"></rotation>
-			<scale x="0.1" y="0.1" z="0.1"></scale>
+			<position x="2" y="2.80000019" z="0" />
+			<rotation x="90" y="0" z="0" />
+			<scale x="0.100000001" y="0.100000001" z="0.100000001" />
 		</transform>
 	</model>
 </scene>

@@ -17,6 +17,8 @@ Skybox::~Skybox()
 
 bool Skybox::load(std::string texturePath)
 {
+	folder_name_ = texturePath;
+
 	glGenTextures(1, &texture_id_);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id_);

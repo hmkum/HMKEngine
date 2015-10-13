@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <imgui/imgui.h>
+#include <pugixml/pugixml.hpp>
 #include <filesystem> // C++17
 #include <set>
 #include "KeyManager.h"
@@ -118,13 +119,13 @@ void Game::update(float dt)
 
 			ImGui::Separator();
 
-			ImGui::DragFloat3("Position", (float*)&selected_model_position_.x, 0.01f);
+			ImGui::DragFloat3("Position", (float*)&selected_model_position_.x, 0.1f);
 			scene_models[selected_model_index]->set_position(selected_model_position_);
 
 			ImGui::DragFloat3("Rotation", (float*)&selected_model_rotation_.x, 0.1f);
 			scene_models[selected_model_index]->set_rotation(selected_model_rotation_);
 
-			ImGui::DragFloat3("Scale", (float*)&selected_model_scale_.x, 0.01f);
+			ImGui::DragFloat3("Scale", (float*)&selected_model_scale_.x, 0.1f);
 			scene_models[selected_model_index]->set_scale(selected_model_scale_);
 		}
 	}
@@ -223,6 +224,58 @@ void Game::process_selection(int x, int y)
 
 void Game::key_input(int key, int scancode, int action, int mods)
 {
+	if(key == HMK_KEY_S && mods == HMK_MOD_CONTROL)
+	{
+		std::string xml_text = "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>";
+		xml_text += "<scene name = \"default\">";
+		xml_text += "</scene>";
+		pugi::xml_document doc;
+		doc.load_string(xml_text.c_str());
+		pugi::xml_node scene_node = doc.first_child();
+		pugi::xml_node atmosphere_node = scene_node.append_child("atmosphere");
+
+		pugi::xml_node skybox_node = atmosphere_node.append_child("skybox");
+		skybox_node.append_attribute("folder").set_value(skybox_->get_folder_name().c_str());
+
+		pugi::xml_node fog_node = atmosphere_node.append_child("fog");
+		fog_node.append_attribute("method").set_value("linear");
+		fog_node.append_attribute("density").set_value("0.2");
+		fog_node.append_attribute("start").set_value("5");
+		fog_node.append_attribute("end").set_value("100");
+
+#pragma region Save Models
+		for(const auto& model : scene_models)
+		{
+			pugi::xml_node model_node = scene_node.append_child("model");
+			model_node.append_attribute("file").set_value(model->get_filename().c_str());
+			model_node.append_attribute("name").set_value(model->get_name().c_str());
+			pugi::xml_node material_node = model_node.append_child("material");
+			material_node.append_child("roughness").append_attribute("value").set_value(model->get_roughness());
+			material_node.append_child("metalness").append_attribute("value").set_value(model->get_metallic());
+			pugi::xml_node transform_node = model_node.append_child("transform");
+			pugi::xml_node pos_node = transform_node.append_child("position");
+			glm::vec3 pos = model->get_position();
+			pos_node.append_attribute("x").set_value(pos.x);
+			pos_node.append_attribute("y").set_value(pos.y);
+			pos_node.append_attribute("z").set_value(pos.z);
+			pugi::xml_node rot_node = transform_node.append_child("rotation");
+			glm::vec3 rot = model->get_rotation();
+			rot_node.append_attribute("x").set_value(rot.x);
+			rot_node.append_attribute("y").set_value(rot.y);
+			rot_node.append_attribute("z").set_value(rot.z);
+			pugi::xml_node scale_node = transform_node.append_child("scale");
+			glm::vec3 scale = model->get_scale();
+			scale_node.append_attribute("x").set_value(scale.x);
+			scale_node.append_attribute("y").set_value(scale.y);
+			scale_node.append_attribute("z").set_value(scale.z);
+		}
+#pragma endregion
+
+
+		doc.save_file("data/scene.xml");
+		HMK_PRINT("Scene saved.");
+		return;
+	}
 	hmk::KeyManager::set_key(key, (action == HMK_RELEASE) ? false : true);
 	if(key == HMK_KEY_ESCAPE)
 	{

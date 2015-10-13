@@ -132,6 +132,11 @@
 #define HMK_PRESS                  1
 #define HMK_REPEAT                 2
 
+#define HMK_MOD_SHIFT	0x0001
+#define HMK_MOD_CONTROL 0x0002
+#define HMK_MOD_ALT		0x0004
+#define HMK_MOD_SUPER	0x0008
+
 #define HMK_MOUSE_BUTTON_1   0
 #define HMK_MOUSE_BUTTON_2   1
 #define HMK_MOUSE_BUTTON_3   2

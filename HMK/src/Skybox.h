@@ -18,8 +18,10 @@ public:
 	bool load(std::string texturePath);
 	void render();
 
+	inline std::string get_folder_name() const { return folder_name_; }
 	inline GLuint get_texture_id() const { return texture_id_; }
 private:
+	std::string folder_name_;
 	GLuint texture_id_;
 	GLuint vao_id_, vbo_id_;
 };

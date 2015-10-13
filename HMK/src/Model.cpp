@@ -11,6 +11,7 @@ using namespace hmk;
 
 Model::Model()
 	: name_{""}
+	, filename_{""}
 	, draw_bounding_box_{false}
 	, translation_matrix_{1.0f}
 	, rotation_matrix_{1.0f}
@@ -33,7 +34,7 @@ bool Model::load(std::string modelName)
 		HMK_LOG_ERROR("Could not load model: ", modelName);
 		return false;
 	}
-
+	filename_ = modelName;
 	// Handle scene
 	unsigned int numMeshes = scene->mNumMeshes;
 	for (unsigned int i = 0; i < numMeshes; ++i)
