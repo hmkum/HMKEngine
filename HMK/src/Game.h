@@ -22,6 +22,7 @@ public:
 	void key_input(int key, int scancode, int action, int mods);
 	void cursor_pos_input(double xPos, double yPos);
 	void mouse_button_input(int button, int action, int mods);
+	void drop_files_callback(int number_of_files, const char** filenames);
 
 	void update(float dt);
 	void render();

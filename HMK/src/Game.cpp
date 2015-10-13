@@ -58,7 +58,12 @@ bool Game::initialize()
 	for(const auto& model : scene_data.model_)
 	{
 		hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
-		temp_model->load(model.file_);
+		if(!temp_model->load(model.file_))
+		{
+			HMK_LOG_WARNING("Could not load " + model.file_);
+			HMK_PRINT("Could not load " + model.file_);
+			continue;
+		}
 		temp_model->set_name(model.name_);
 		temp_model->set_roughness(model.material_.roughness_value_);
 		temp_model->set_metallic(model.material_.metalness_value_);
@@ -317,6 +322,38 @@ void Game::mouse_button_input(int button, int action, int mods)
 		mouse_left_pressed_ = true;
 	else
 		mouse_left_pressed_ = false;
+}
+
+void Game::drop_files_callback(int number_of_files, const char** filenames)
+{
+	for(int i = 0; i < number_of_files; ++i)
+	{
+		std::string file_path(filenames[i]);
+		auto last_slash = file_path.rfind("\\");
+		std::string filename = file_path;
+		file_path.erase(file_path.begin() + last_slash + 1, file_path.end());
+		filename.erase(filename.begin(), filename.begin() + last_slash + 1);
+		std::string file_extension = filename.substr(filename.rfind("."));
+		std::string file_proper_name = filename;
+		file_proper_name.erase(filename.find(file_extension));
+
+		HMK_PRINT("Copying " + filename);
+		if(file_extension.compare(".obj") == 0 || file_extension.compare(".mtl") == 0)
+			hmk::copy_file(file_path + filename, WORKIND_DIR + "data\\models\\" + filename);
+		if(file_extension.compare(".jpg") == 0)
+			hmk::copy_file(file_path + filename, WORKIND_DIR + "data\\textures\\" + filename, true);
+
+		HMK_PRINT("Loading " + filename);
+		if(file_extension.compare(".obj") == 0)
+		{
+			hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
+			temp_model->load(filename);
+			temp_model->set_name(file_proper_name);
+			temp_model->set_position(glm::vec3(0.0f));
+			scene_models.emplace_back(std::move(temp_model));
+		}
+		HMK_PRINT("Done " + filename);
+	}
 }
 
 bool Game::compile_and_link_all_shaders()

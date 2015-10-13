@@ -11,14 +11,14 @@
 		</material>
 		<transform>
 			<position x="0" y="0" z="0" />
-			<rotation x="0" y="0" z="0" />
+			<rotation x="0" y="-0" z="0" />
 			<scale x="10" y="10" z="10" />
 		</transform>
 	</model>
 	<model file="sphere.obj" name="Sphere">
 		<material>
 			<roughness value="0" />
-			<metalness value="0" />
+			<metalness value="1" />
 		</material>
 		<transform>
 			<position x="0" y="1.10000002" z="0" />
@@ -46,6 +46,17 @@
 			<position x="2" y="2.80000019" z="0" />
 			<rotation x="90" y="0" z="0" />
 			<scale x="0.100000001" y="0.100000001" z="0.100000001" />
+		</transform>
+	</model>
+	<model file="Guardian.obj" name="Guardian">
+		<material>
+			<roughness value="1" />
+			<metalness value="0" />
+		</material>
+		<transform>
+			<position x="-1.60000002" y="2.80000019" z="-3.30000019" />
+			<rotation x="0" y="0" z="0" />
+			<scale x="1" y="1" z="1" />
 		</transform>
 	</model>
 </scene>
