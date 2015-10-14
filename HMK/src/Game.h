@@ -52,6 +52,7 @@ private:
 	bool gui_is_motionblur_active_ = true;
 	bool gui_is_monochrome_active_ = false;
 	bool gui_is_negative_active_ = false;
+	bool is_mouse_on_gui = false;
 
 private:
 	struct CursorState_t

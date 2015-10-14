@@ -136,6 +136,8 @@ void Game::update(float dt)
 	}
 	ImGui::End();
 	
+	is_mouse_on_gui =  ImGui::IsMouseHoveringAnyWindow();
+
 	glm::mat4 lightView = glm::lookAt(light_position_, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	light_space_matrix_ = light_projection_ * lightView;
 }
@@ -210,20 +212,15 @@ void Game::process_selection(int x, int y)
 	glm::vec3 rayFar = glm::unProject(glm::vec3(x, 600 - y, 1.0f), camera_->get_view_matrix(), camera_->get_proj_matrix(), glm::vec4(0, 0, 800, 600));
 	
 	hmk::Ray ray(camera_->get_position(), normalize(rayFar - rayNear));
-
-	std::vector<hmk::BoundingBox> boxes;
+	int i = 0;
 	for(const auto& model : scene_models)
 	{
-		boxes.push_back(model->get_bounding_box());
-	}
-
-	for (unsigned int i = 0; i < boxes.size(); ++i)
-	{
-		hmk::BoundingBox box = boxes[i];
+		hmk::BoundingBox box = model->get_bounding_box();
 		if(ray.intersect_aabb(box))
 		{
 			selected_model_index = i;
 		}
+		++i;
 	}
 }
 
@@ -307,7 +304,8 @@ void Game::cursor_pos_input(double xPos, double yPos)
 	{
 		int x = (int)xPos;
 		int y = (int)yPos;
-		process_selection(x, y);
+		if(!is_mouse_on_gui)
+			process_selection(x, y);
 	}
 }
 

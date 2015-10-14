@@ -1,7 +1,10 @@
 To-Do
+- Fog ekle.
 - Light sistemini ekle(Point, ..).
 - scene.xml dosyasina isik sistemini de ekle.
-- GUI sistemini duzenle.
+- GUI sistemini duzenle. Gui için sýnýf. ImGui devam mý?, yoksa Qt mi?
+- Parent-child sistemini ekle(Base class: Entity, GameObject, Node. Hangisi?).
+- Scene sistemini ekle. Scene'e model ekleme. Scene deðiþimi.
 
 -------------------------------------
 
@@ -10,10 +13,9 @@ Bugs
 modeli seciyor.
 - Axe uzerinde dusen golgede hata var. Selfshadowing oluyor. Normal offset yontemini gelistir.
 
-- GUI arkasinda model varsa Picking o modeli seciyor. GUI event deaktif oluyor.
-
 --------------------------------------
 
 Done
-- Modellerde degisiklik olunca scene.xml guncellensin.
-- Oyun calisirken model ekleme.
+- [Added]Modellerde degisiklik olunca scene.xml guncellensin.
+- [Added]Oyun calisirken model ekleme.
+- [Fixed]GUI arkasinda model varsa Picking o modeli seciyor. GUI event deaktif oluyor.
