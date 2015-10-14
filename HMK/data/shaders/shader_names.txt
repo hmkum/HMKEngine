@@ -1,0 +1,13 @@
+default:default
+post_process:post_process
+bloom:pp_bloom
+blur1:pp_blur_h
+blur2:pp_blur_v
+bright_past:pp_bright_pass
+down_filter:pp_down_filter
+hdr:pp_hdr
+monochrome:pp_monochrome
+motion_blur:pp_motion_blur
+negative:pp_negative
+simple_depth:simple_depth
+skybox:skybox

@@ -8,44 +8,45 @@ namespace hmk
 class Logger
 {
 public:
-    static Logger& Inst()
+    static Logger& get_instance()
     {
         static Logger instance;
         return instance;
     }
 
-    bool Initialize(std::string filename)
+    bool initialize(std::string filename)
     {
-        mLogFile.open(filename, std::ios_base::out);
-        return mLogFile.is_open();
+        log_file_.open(filename, std::ios_base::out);
+        return log_file_.is_open();
     }
 
-    void Shutdown()
+    void shutdown()
     {
-        if(mLogFile.is_open())
+        if(log_file_.is_open())
         {
-            mLogFile.close();
+            log_file_.close();
         }
     }
 
     template<typename T>
-    void Write(T t)
+    void write(T t)
     {
-        mLogFile << t;
+        log_file_ << t;
     }
 
     template<typename T, typename... TArgs>
-    void Write(T t, TArgs... targs)
+    void write(T t, TArgs... targs)
     {
-        Write(t);
-        Write(targs...);
+        write(t);
+        write(targs...);
     }
 
+	Logger(const Logger&) = delete;
+	Logger& operator=(const Logger&) = delete;
+
 private:
-    std::fstream mLogFile;
+    std::fstream log_file_;
 private:
     Logger() {}
-    Logger(const Logger&);
-    Logger& operator=(const Logger&);
 };
 }

@@ -77,6 +77,15 @@
     <ClCompile Include="src\PostProcess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SceneParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="external\pugixml\pugixml.cpp">
+      <Filter>external</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -139,6 +148,12 @@
     <ClInclude Include="src\PostProcess.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ShaderManager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SceneParser.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\default.frag">
@@ -177,9 +192,6 @@
     <None Include="data\shaders\pp_motion_blur.frag">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="data\shaders\pp_negative_grayscale.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="data\shaders\pp_down_filter.frag">
       <Filter>Shaders</Filter>
     </None>
@@ -193,6 +205,9 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="data\shaders\pp_blur_h.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="data\shaders\pp_negative.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

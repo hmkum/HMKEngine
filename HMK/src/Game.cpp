@@ -1,258 +1,405 @@
 #include "Game.h"
 #include <imgui/imgui.h>
+#include <pugixml/pugixml.hpp>
+#include <filesystem> // C++17
+#include <set>
 #include "KeyManager.h"
+#include "SceneParser.h"
+#include "ShaderManager.h"
 #include "Utility.h"
 
 Game::Game()
 {
-	mMouseRightPressed = false;
-	mMouseLeftPressed  = false;
-	mLightPosition = glm::vec3(0, 4, 4);
+	mouse_right_pressed_ = false;
+	mouse_left_pressed_  = false;
+	light_position_		 = glm::vec3(0, 4, 4);
+	selected_model_position_ = glm::vec3(0);
+	selected_model_rotation_ = glm::vec3(0);
+	selected_model_scale_	 = glm::vec3(0);
+	selected_model_index	 = -1;
 }
 
 Game::~Game()
 {
 }
 
-bool Game::Init()
+bool Game::initialize()
 {
-    mCamera = std::make_shared<hmk::Camera>();
-    mCamera->CreateLookAt(glm::vec3(0.0f, 2.0f, 10.0f));
-	mCamera->CreatePerspectiveProj(120.0f, 0.1f, 100.0f);
+    camera_ = std::make_shared<hmk::Camera>();
+    camera_->create_look_at(glm::vec3(0.0f, 2.0f, 10.0f));
+	camera_->create_perspective_proj(120.0f, 0.1f, 100.0f);
 
-    mShadowMap = std::make_shared<hmk::ShadowMap>();
-    mShadowMap->Init(2048, 2048);
+	//compile_and_link_all_shaders();
 
-	mPostProcess = std::make_shared<hmk::PostProcess>();
-	mPostProcess->Init();
+    shadow_map_ = std::make_shared<hmk::ShadowMap>();
+    shadow_map_->initialize(2048, 2048);
 
-	hmk::Shader vert, frag;
-	vert.Init(GL_VERTEX_SHADER, "default.vert");
-	frag.Init(GL_FRAGMENT_SHADER, "default.frag");
-	mBasicShader.AddShader(vert).AddShader(frag).Link();
+	post_process_system_ = std::make_shared<hmk::PostProcess>();
+	post_process_system_->initialize();
 
-	vert.Init(GL_VERTEX_SHADER, "skybox.vert");
-	frag.Init(GL_FRAGMENT_SHADER, "skybox.frag");
-	mSkyboxShader.AddShader(vert).AddShader(frag).Link();
+	shader_basic_.add_shader("default.vert", "default.frag");
+	shader_basic_.link_shaders();
+
+	shader_skybox_.add_shader("skybox.vert", "skybox.frag");
+	shader_skybox_.link_shaders();
 	
-	vert.Init(GL_VERTEX_SHADER, "simple_depth.vert");
-	frag.Init(GL_FRAGMENT_SHADER, "simple_depth.frag");
-	mSimpleDepthShader.AddShader(vert).AddShader(frag).Link();
+	shader_simple_depth_.add_shader("simple_depth.vert", "simple_depth.frag");
+	shader_simple_depth_.link_shaders();
 
-	vert.Init(GL_VERTEX_SHADER, "post_process.vert");
-	frag.Init(GL_FRAGMENT_SHADER, "post_process.frag");
-	mPPShader.AddShader(vert).AddShader(frag).Link();
+	shader_post_process_.add_shader("post_process.vert", "post_process.frag");
+	shader_post_process_.link_shaders();
 
-	glm::mat4 lightView = glm::lookAt(mLightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	mLightProj = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 50.0f);
-	mLightSpaceMatrix = mLightProj * lightView;
+	glm::mat4 lightView = glm::lookAt(light_position_, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	light_projection_ = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 50.0f);
+	light_space_matrix_ = light_projection_ * lightView;
 
-	mSelectedModel = std::make_shared<hmk::Model>();
-	mSelectedModel.reset();
-
-	mPlane = std::make_shared<hmk::Model>();
-	mPlane->Load("plane.obj");
-	mPlane->Scale(glm::vec3(10.0f));
-	mPlane->Translate(glm::vec3(0.0f, -0.1f, -1.5f));
-	mPlane->SetRoughness(1.0f);
-
-	mSphere = std::make_shared<hmk::Model>();
-	mSphere->Load("sphere.obj");
-
-	mSphere2 = std::make_shared<hmk::Model>();
-	mSphere2->Load("sphere.obj");
-	mSphere2->Translate(glm::vec3(-3.0f, 0.0f, -2.0f));
-
-	mAxe = std::make_shared<hmk::Model>();
-	mAxe->Load("axe.obj");
-	mAxe->Translate(glm::vec3(-30.0f, 0.0f, 0.0f));
-	mAxe->Scale(glm::vec3(0.1f));
-	mAxe->Rotate(90.0f, glm::vec3(1, 0, 0));
-	mAxe->Rotate(180.0f, glm::vec3(0, 0, 1));
-
-	mSkybox = std::make_shared<hmk::Skybox>();
-	mSkybox->Load("Bridge/");
+	hmk::SceneParser::parse("data/scene.xml");
+	hmk::SceneData scene_data = hmk::SceneParser::get_data();
+	for(const auto& model : scene_data.model_)
+	{
+		hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
+		if(!temp_model->load(model.file_))
+		{
+			HMK_LOG_WARNING("Could not load " + model.file_);
+			HMK_PRINT("Could not load " + model.file_);
+			continue;
+		}
+		temp_model->set_name(model.name_);
+		temp_model->set_roughness(model.material_.roughness_value_);
+		temp_model->set_metallic(model.material_.metalness_value_);
+		temp_model->set_position(glm::vec3(model.transform_.pos_x_, model.transform_.pos_y_, model.transform_.pos_z_));
+		temp_model->set_rotation(model.transform_.rot_x_, model.transform_.rot_y_, model.transform_.rot_z_);
+		temp_model->set_scale(glm::vec3(model.transform_.scale_x_, model.transform_.scale_y_, model.transform_.scale_z_));
+		scene_models.emplace_back(std::move(temp_model));
+	}
+	
+	skybox_ = std::make_shared<hmk::Skybox>();
+	skybox_->load(scene_data.atmosphere_.skybox_folder_);
 
 	return true;
 }
 
-void Game::Update(float dt)
+void Game::update(float dt)
 {
-	if (hmk::KeyManager::GetKey(HMK_KEY_W))
-		mCamera->MoveForward(dt);
-	if (hmk::KeyManager::GetKey(HMK_KEY_S))
-		mCamera->MoveBackward(dt);
-	if (hmk::KeyManager::GetKey(HMK_KEY_A))
-		mCamera->MoveLeft(dt);
-	if (hmk::KeyManager::GetKey(HMK_KEY_D))
-		mCamera->MoveRight(dt);
+	if (hmk::KeyManager::get_key(HMK_KEY_W))
+		camera_->move_forward(dt);
+	if (hmk::KeyManager::get_key(HMK_KEY_S))
+		camera_->move_backward(dt);
+	if (hmk::KeyManager::get_key(HMK_KEY_A))
+		camera_->move_left(dt);
+	if (hmk::KeyManager::get_key(HMK_KEY_D))
+		camera_->move_right(dt);
 
+	ImGui::Begin("Properties");
+	if(ImGui::CollapsingHeader("World Properties"))
+	{
+		ImGui::DragFloat3("Light Position", (float*)&light_position_.x, 0.1f);
+		ImGui::Checkbox("Shadows", &gui_is_shadow_active);
+	}
+	if(ImGui::CollapsingHeader("Post Process Effects"))
+	{
+		ImGui::Checkbox("Bloom", &gui_is_bloom_active_);
+		if(gui_is_bloom_active_) ImGui::SliderFloat("Bloom Intensity", &gui_bloom_intensity_, 0.0f, 5.0f);
+		ImGui::SliderFloat("Tonemap Exposure", &gui_tonemap_exposure_, 0.0f, 16.0f);
+		ImGui::Checkbox("Motion BLur", &gui_is_motionblur_active_);
+		ImGui::Checkbox("Monochrome", &gui_is_monochrome_active_);
+		ImGui::Checkbox("Negative", &gui_is_negative_active_);
+	}
 	static float r = 0.0f, m = 0.0f;
-	if (mSelectedModel.get() != nullptr)
+	if(selected_model_index != -1)
 	{
-		r = mSelectedModel->GetRoughness();
-		m = mSelectedModel->GetMetallic();
+		r = scene_models[selected_model_index]->get_roughness();
+		m = scene_models[selected_model_index]->get_metallic();
+		selected_model_position_ = scene_models[selected_model_index]->get_position();
+		selected_model_rotation_ = scene_models[selected_model_index]->get_rotation();
+		selected_model_scale_	 = scene_models[selected_model_index]->get_scale();
+
+		if(ImGui::CollapsingHeader("Entity Properties"))
+		{
+			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), scene_models[selected_model_index]->get_name().c_str());
+			ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f);
+			ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f);
+			scene_models[selected_model_index]->set_roughness(r);
+			scene_models[selected_model_index]->set_metallic(m);
+
+			ImGui::Separator();
+
+			ImGui::DragFloat3("Position", (float*)&selected_model_position_.x, 0.1f);
+			scene_models[selected_model_index]->set_position(selected_model_position_);
+
+			ImGui::DragFloat3("Rotation", (float*)&selected_model_rotation_.x, 0.1f);
+			scene_models[selected_model_index]->set_rotation(selected_model_rotation_);
+
+			ImGui::DragFloat3("Scale", (float*)&selected_model_scale_.x, 0.1f);
+			scene_models[selected_model_index]->set_scale(selected_model_scale_);
+		}
 	}
-	ImGui::Begin("Material");
-	ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f);
-	ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f);
-	ImGui::Separator();
-	ImGui::DragFloat3("Light Position", (float*)&mLightPosition.x, 0.1f);
-	ImGui::Separator();
-	ImGui::SliderFloat("Tonemap Exposure", &mTonemapExposure, 0.0f, 16.0f);
-	ImGui::Checkbox("Bloom", &mIsBloomActive);
-	ImGui::SliderFloat("Bloom Intensity", &mBloomIntensity, 0.0f, 5.0f);
 	ImGui::End();
-	if (mSelectedModel.get() != nullptr)
-	{
-		mSelectedModel->SetRoughness(r);
-		mSelectedModel->SetMetallic(m);
-	}
 	
-	glm::mat4 lightView = glm::lookAt(mLightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	mLightSpaceMatrix = mLightProj * lightView;
+	glm::mat4 lightView = glm::lookAt(light_position_, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	light_space_matrix_ = light_projection_ * lightView;
 }
 
-void Game::Render()
+void Game::render()
 {	
-	mShadowMap->Bind();
+	if(gui_is_shadow_active)
+	{
+		shadow_map_->bind();
 
-	mSimpleDepthShader.Use();
-	mSimpleDepthShader.SetUniform("uLightSpaceMatrix", mLightSpaceMatrix);
+		shader_simple_depth_.use();
+		shader_simple_depth_.set_uniform("uLightSpaceMatrix", light_space_matrix_);
 
-	mSimpleDepthShader.SetUniform("uModel", mPlane->GetModelMatrix());
-	mPlane->Render();
+		for(const auto& model : scene_models)
+		{
+			shader_simple_depth_.set_uniform("uModel", model->get_model_matrix());
+			model->render();
+		}
 
-	mSimpleDepthShader.SetUniform("uModel", mSphere->GetModelMatrix());
-	mSphere->Render();
+		shadow_map_->unbind();
 
-	mSimpleDepthShader.SetUniform("uModel", mSphere2->GetModelMatrix());
-	mSphere2->Render();
-
-	mSimpleDepthShader.SetUniform("uModel", mAxe->GetModelMatrix());
-	mAxe->Render();
-
-	mShadowMap->Unbind();
-	
-	glViewport(0, 0, 800, 600);
-
-	mPostProcess->Begin();
-		mSkyboxShader.Use();
+		glViewport(0, 0, 800, 600);
+	}
+	post_process_system_->begin();
+		shader_skybox_.use();
 		glm::mat4 skyboxModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f));
-		mSkyboxShader.SetUniform("uModel", skyboxModelMatrix);
-		mSkyboxShader.SetUniform("uViewMatrix", mCamera->GetViewMatrix());
-		mSkyboxShader.SetUniform("uProjMatrix", mCamera->GetProjMatrix());
-		mSkybox->Render();
+		shader_skybox_.set_uniform("uModel", skyboxModelMatrix);
+		shader_skybox_.set_uniform("uViewMatrix", camera_->get_view_matrix());
+		shader_skybox_.set_uniform("uProjMatrix", camera_->get_proj_matrix());
+		skybox_->render();
 
-		mBasicShader.Use();
+		shader_basic_.use();
 
 		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, mSkybox->GetTextureID());
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skybox_->get_texture_id());
 
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, mShadowMap->GetDepthMap());
+		shader_basic_.set_uniform("uIsShadowMapActive", 0);
+		if(gui_is_shadow_active)
+		{
+			shader_basic_.set_uniform("uIsShadowMapActive", 1);
+			glActiveTexture(GL_TEXTURE5);
+			glBindTexture(GL_TEXTURE_2D, shadow_map_->get_depth_map());
+		}
 		
-		mBasicShader.SetUniform("uViewMatrix", mCamera->GetViewMatrix());
-		mBasicShader.SetUniform("uProjMatrix", mCamera->GetProjMatrix());
-		mBasicShader.SetUniform("uCameraPosition", mCamera->GetPosition());
-		mBasicShader.SetUniform("uLightPosition", mLightPosition);
-		mBasicShader.SetUniform("uLightSpaceMatrix", mLightSpaceMatrix);
+		shader_basic_.set_uniform("uViewMatrix", camera_->get_view_matrix());
+		shader_basic_.set_uniform("uProjMatrix", camera_->get_proj_matrix());
+		shader_basic_.set_uniform("uCameraPosition", camera_->get_position());
+		shader_basic_.set_uniform("uLightPosition", light_position_);
+		shader_basic_.set_uniform("uLightSpaceMatrix", light_space_matrix_);
 
-		mBasicShader.SetUniform("uModel", mPlane->GetModelMatrix());
-		mPlane->Render(mBasicShader);
-
-		mBasicShader.SetUniform("uModel", mSphere->GetModelMatrix());
-		mSphere->Render(mBasicShader);
-
-		mBasicShader.SetUniform("uModel", mSphere2->GetModelMatrix());
-		mSphere2->Render(mBasicShader);
-
-		mBasicShader.SetUniform("uModel", mAxe->GetModelMatrix());
-		mAxe->Render(mBasicShader);
+		for(const auto& model : scene_models)
+		{
+			shader_basic_.set_uniform("uModel", model->get_model_matrix());
+			model->render(shader_basic_);
+		}
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-	mPostProcess->End();
-	const glm::mat4 viewProjMatrix = mCamera->GetProjMatrix() * mCamera->GetViewMatrix();
+	post_process_system_->end();
+	const glm::mat4 viewProjMatrix = camera_->get_proj_matrix() * camera_->get_view_matrix();
 
-	if(mIsBloomActive) mPostProcess->DoBloom(mBloomIntensity);
-	mPostProcess->DoMotionBlur(viewProjMatrix);
-	
-	mPostProcess->DoHDR(mTonemapExposure, mIsBloomActive);
-	mPostProcess->Render(mPPShader);
+	if(gui_is_bloom_active_) post_process_system_->do_bloom(gui_bloom_intensity_);
+	if(gui_is_motionblur_active_) post_process_system_->do_motion_blur(viewProjMatrix);
+	if(gui_is_monochrome_active_) post_process_system_->do_monochrome();
+	if(gui_is_negative_active_) post_process_system_->do_negative();
+	post_process_system_->do_hdr(gui_tonemap_exposure_, gui_is_bloom_active_);
+	post_process_system_->render(shader_post_process_);
 }
 
-void Game::ProcessSelection(int x, int y)
+void Game::process_selection(int x, int y)
 {
-	glm::vec3 rayNear = glm::unProject(glm::vec3(x, 600 - y, 0.0f), mCamera->GetViewMatrix(), mCamera->GetProjMatrix(), glm::vec4(0, 0, 800, 600));
-	glm::vec3 rayFar = glm::unProject(glm::vec3(x, 600 - y, 1.0f), mCamera->GetViewMatrix(), mCamera->GetProjMatrix(), glm::vec4(0, 0, 800, 600));
+	glm::vec3 rayNear = glm::unProject(glm::vec3(x, 600 - y, 0.0f), camera_->get_view_matrix(), camera_->get_proj_matrix(), glm::vec4(0, 0, 800, 600));
+	glm::vec3 rayFar = glm::unProject(glm::vec3(x, 600 - y, 1.0f), camera_->get_view_matrix(), camera_->get_proj_matrix(), glm::vec4(0, 0, 800, 600));
 	
-	hmk::Ray ray(mCamera->GetPosition(), normalize(rayFar - rayNear));
+	hmk::Ray ray(camera_->get_position(), normalize(rayFar - rayNear));
 
-	// TODO: Get model's bounding box from ModelManager
 	std::vector<hmk::BoundingBox> boxes;
-	boxes.push_back(mSphere->GetBoundingBox());
-	boxes.push_back(mSphere2->GetBoundingBox());
-	boxes.push_back(mAxe->GetBoundingBox());
+	for(const auto& model : scene_models)
+	{
+		boxes.push_back(model->get_bounding_box());
+	}
 
 	for (unsigned int i = 0; i < boxes.size(); ++i)
 	{
 		hmk::BoundingBox box = boxes[i];
-		if(ray.IntersectAABB(box))
+		if(ray.intersect_aabb(box))
 		{
-			// TODO: Implement ModelManager and select model with index
-			switch(i)
-			{
-				case 0: mSelectedModel = mSphere; break;
-				case 1: mSelectedModel = mSphere2; break;
-				case 2: mSelectedModel = mAxe; break;
-				default:
-					break;
-			}
+			selected_model_index = i;
 		}
 	}
 }
 
-void Game::KeyInput(int key, int scancode, int action, int mods)
+void Game::key_input(int key, int scancode, int action, int mods)
 {
-	hmk::KeyManager::SetKey(key, (action == HMK_RELEASE) ? false : true);
+	if(key == HMK_KEY_S && mods == HMK_MOD_CONTROL)
+	{
+		std::string xml_text = "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>";
+		xml_text += "<scene name = \"default\">";
+		xml_text += "</scene>";
+		pugi::xml_document doc;
+		doc.load_string(xml_text.c_str());
+		pugi::xml_node scene_node = doc.first_child();
+		pugi::xml_node atmosphere_node = scene_node.append_child("atmosphere");
+
+		pugi::xml_node skybox_node = atmosphere_node.append_child("skybox");
+		skybox_node.append_attribute("folder").set_value(skybox_->get_folder_name().c_str());
+
+		pugi::xml_node fog_node = atmosphere_node.append_child("fog");
+		fog_node.append_attribute("method").set_value("linear");
+		fog_node.append_attribute("density").set_value("0.2");
+		fog_node.append_attribute("start").set_value("5");
+		fog_node.append_attribute("end").set_value("100");
+
+#pragma region Save Models
+		for(const auto& model : scene_models)
+		{
+			pugi::xml_node model_node = scene_node.append_child("model");
+			model_node.append_attribute("file").set_value(model->get_filename().c_str());
+			model_node.append_attribute("name").set_value(model->get_name().c_str());
+			pugi::xml_node material_node = model_node.append_child("material");
+			material_node.append_child("roughness").append_attribute("value").set_value(model->get_roughness());
+			material_node.append_child("metalness").append_attribute("value").set_value(model->get_metallic());
+			pugi::xml_node transform_node = model_node.append_child("transform");
+			pugi::xml_node pos_node = transform_node.append_child("position");
+			glm::vec3 pos = model->get_position();
+			pos_node.append_attribute("x").set_value(pos.x);
+			pos_node.append_attribute("y").set_value(pos.y);
+			pos_node.append_attribute("z").set_value(pos.z);
+			pugi::xml_node rot_node = transform_node.append_child("rotation");
+			glm::vec3 rot = model->get_rotation();
+			rot_node.append_attribute("x").set_value(rot.x);
+			rot_node.append_attribute("y").set_value(rot.y);
+			rot_node.append_attribute("z").set_value(rot.z);
+			pugi::xml_node scale_node = transform_node.append_child("scale");
+			glm::vec3 scale = model->get_scale();
+			scale_node.append_attribute("x").set_value(scale.x);
+			scale_node.append_attribute("y").set_value(scale.y);
+			scale_node.append_attribute("z").set_value(scale.z);
+		}
+#pragma endregion
+
+
+		doc.save_file("data/scene.xml");
+		HMK_PRINT("Scene saved.");
+		return;
+	}
+	hmk::KeyManager::set_key(key, (action == HMK_RELEASE) ? false : true);
 	if(key == HMK_KEY_ESCAPE)
 	{
 		exit(1);
 	}
 }
 
-void Game::CursorPosInput(double xPos, double yPos)
+void Game::cursor_pos_input(double xPos, double yPos)
 {
-	if(mCursorState.firstMouse)
+	if(cursor_state_.first_mouse_)
 	{
-		mCursorState.last = glm::vec2(xPos, yPos);
-		mCursorState.firstMouse = false;
+		cursor_state_.last_position_ = glm::vec2(xPos, yPos);
+		cursor_state_.first_mouse_ = false;
 	}
 
-	double xOffset = xPos - mCursorState.last.x;
-	double yOffset = mCursorState.last.y - yPos;
-	mCursorState.last = glm::vec2(xPos, yPos);
+	double xOffset = xPos - cursor_state_.last_position_.x;
+	double yOffset = cursor_state_.last_position_.y - yPos;
+	cursor_state_.last_position_ = glm::vec2(xPos, yPos);
 
-	if(mMouseRightPressed)
-		mCamera->Rotate((float)xOffset, (float)yOffset);
+	if(mouse_right_pressed_)
+		camera_->rotate((float)xOffset, (float)yOffset);
 
-	if(mMouseLeftPressed)
+	if(mouse_left_pressed_)
 	{
 		int x = (int)xPos;
 		int y = (int)yPos;
-		ProcessSelection(x, y);
+		process_selection(x, y);
 	}
 }
 
-void Game::MouseButtonInput(int button, int action, int mods)
+void Game::mouse_button_input(int button, int action, int mods)
 {
 	if (button == HMK_MOUSE_BUTTON_RIGHT && action == HMK_PRESS)
-		mMouseRightPressed = true;
+		mouse_right_pressed_ = true;
 	else
-		mMouseRightPressed = false;
+		mouse_right_pressed_ = false;
 
 	if (button == HMK_MOUSE_BUTTON_LEFT && action == HMK_PRESS)
-		mMouseLeftPressed = true;
+		mouse_left_pressed_ = true;
 	else
-		mMouseLeftPressed = false;
+		mouse_left_pressed_ = false;
+}
+
+void Game::drop_files_callback(int number_of_files, const char** filenames)
+{
+	for(int i = 0; i < number_of_files; ++i)
+	{
+		std::string file_path(filenames[i]);
+		auto last_slash = file_path.rfind("\\");
+		std::string filename = file_path;
+		file_path.erase(file_path.begin() + last_slash + 1, file_path.end());
+		filename.erase(filename.begin(), filename.begin() + last_slash + 1);
+		std::string file_extension = filename.substr(filename.rfind("."));
+		std::string file_proper_name = filename;
+		file_proper_name.erase(filename.find(file_extension));
+
+		HMK_PRINT("Copying " + filename);
+		if(file_extension.compare(".obj") == 0 || file_extension.compare(".mtl") == 0)
+			hmk::copy_file(file_path + filename, WORKIND_DIR + "data\\models\\" + filename);
+		if(file_extension.compare(".jpg") == 0)
+			hmk::copy_file(file_path + filename, WORKIND_DIR + "data\\textures\\" + filename, true);
+
+		HMK_PRINT("Loading " + filename);
+		if(file_extension.compare(".obj") == 0)
+		{
+			hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
+			temp_model->load(filename);
+			temp_model->set_name(file_proper_name);
+			temp_model->set_position(glm::vec3(0.0f));
+			scene_models.emplace_back(std::move(temp_model));
+		}
+		HMK_PRINT("Done " + filename);
+	}
+}
+
+bool Game::compile_and_link_all_shaders()
+{
+	namespace fs = std::tr2::sys;
+	std::set<std::string> shader_names_set, post_process_shader_names_set;
+	fs::path shaders_path{SHADER_PATH};
+	for(auto it = fs::directory_iterator(shaders_path); it != fs::directory_iterator(); ++it)
+	{
+		const auto& file = it->path();
+		std::string filename = file.basename();
+		auto is_pp_shader = filename.find("pp_");
+		if(file.extension().compare(".vert") == 0 || file.extension().compare(".frag") == 0)
+		{
+			if(is_pp_shader == std::string::npos)
+			{
+				shader_names_set.insert(filename);
+			}
+			else
+			{
+				if(filename.find("pp_default") != std::string::npos)
+					continue;
+				post_process_shader_names_set.insert(filename);
+			}
+		}
+	}
+	
+	std::vector<std::string> shader_names(shader_names_set.size());
+	std::vector<std::string> post_process_shader_names(post_process_shader_names_set.size());
+	shader_names.assign(std::begin(shader_names_set), std::cend(shader_names_set));
+	post_process_shader_names.assign(std::begin(post_process_shader_names_set), std::cend(post_process_shader_names_set));
+	
+	bool result = true;
+	for(unsigned int i = 0; i < shader_names.size(); ++i)
+	{
+		std::string shader_name = shader_names[i];
+		hmk::ShaderManager::get_instance().add_shader(shader_name);
+	}
+
+	for(unsigned int i = 0; i < post_process_shader_names.size(); ++i)
+	{
+		std::string shader_name = post_process_shader_names[i];
+		hmk::ShaderManager::get_instance().add_shader("pp_default", shader_name);
+	}
+
+	hmk::ShaderManager::get_instance().compile_and_link_shaders();
+
+	return true;
 }

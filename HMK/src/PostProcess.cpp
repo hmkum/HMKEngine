@@ -3,19 +3,19 @@
 using namespace hmk;
 
 PostProcess::PostProcess()
-	: mVAO{0}
-	, mVBO{0}
-	, mLastColorMap{0}
-	, mPrevViewProjMatrix{1.0f}
+	: vao_id_{0}
+	, vbo_id_{0}
+	, last_color_map_{0}
+	, previous_view_projection_matrix_{1.0f}
 {}
 
 PostProcess::~PostProcess()
 {
-	glDeleteBuffers(1, &mVBO);
-	glDeleteVertexArrays(1, &mVAO);
+	glDeleteBuffers(1, &vbo_id_);
+	glDeleteVertexArrays(1, &vao_id_);
 }
 
-bool PostProcess::Init()
+bool PostProcess::initialize()
 {
 	GLfloat vertices[] = {
 		// Back face
@@ -62,258 +62,216 @@ bool PostProcess::Init()
 		-1.0f, 1.0f,  1.0f, 0.0f, 0.0f // bottom-left        
 	};
 
-	glGenVertexArrays(1, &mVAO);
-	glGenBuffers(1, &mVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+	glGenVertexArrays(1, &vao_id_);
+	glGenBuffers(1, &vbo_id_);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_id_);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	glBindVertexArray(mVAO);
+	glBindVertexArray(vao_id_);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glBindVertexArray(0);
 
-	{
-		hmk::Shader vert, frag;
-		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.Init(GL_FRAGMENT_SHADER, "pp_monochrome.frag");
-		mMonochromeShader.AddShader(vert).AddShader(frag).Link();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.Init(GL_FRAGMENT_SHADER, "pp_hdr.frag");
-		mHDRShader.AddShader(vert).AddShader(frag).Link();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.Init(GL_FRAGMENT_SHADER, "pp_motion_blur.frag");
-		mMotionBlurShader.AddShader(vert).AddShader(frag).Link();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.Init(GL_FRAGMENT_SHADER, "pp_negative_grayscale.frag");
-		mNegativeGrayscaleShader.AddShader(vert).AddShader(frag).Link();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.Init(GL_FRAGMENT_SHADER, "pp_blur_v.frag");
-		mBlurShader[0].AddShader(vert).AddShader(frag).Link();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.Init(GL_FRAGMENT_SHADER, "pp_blur_h.frag");
-		mBlurShader[1].AddShader(vert).AddShader(frag).Link();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.Init(GL_FRAGMENT_SHADER, "pp_down_filter.frag");
-		mDownFilterShader.AddShader(vert).AddShader(frag).Link();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.Init(GL_FRAGMENT_SHADER, "pp_bloom.frag");
-		mBloomShader.AddShader(vert).AddShader(frag).Link();
-	}
-	{
-		hmk::Shader vert, frag;
-		vert.Init(GL_VERTEX_SHADER, "pp_default.vert");
-		frag.Init(GL_FRAGMENT_SHADER, "pp_bright_pass.frag");
-		mBrightPassShader.AddShader(vert).AddShader(frag).Link();
-	}
+	shader_monochrome_.add_shader("pp_default.vert", "pp_monochrome.frag");
+	shader_monochrome_.link_shaders();
+	
+	shader_hdr_.add_shader("pp_default.vert", "pp_hdr.frag");
+	shader_hdr_.link_shaders();
+
+	shader_motion_blur_.add_shader("pp_default.vert", "pp_motion_blur.frag");
+	shader_motion_blur_.link_shaders();
+
+	shader_negative_.add_shader("pp_default.vert", "pp_negative.frag");
+	shader_negative_.link_shaders();
+
+	shader_blurs_[0].add_shader("pp_default.vert", "pp_blur_v.frag");
+	shader_blurs_[0].link_shaders();
+
+	shader_blurs_[1].add_shader("pp_default.vert", "pp_blur_h.frag");
+	shader_blurs_[1].link_shaders();
+	
+	shader_down_filter_.add_shader("pp_default.vert", "pp_down_filter.frag");
+	shader_down_filter_.link_shaders();
+
+	shader_bloom_.add_shader("pp_default.vert", "pp_bloom.frag");
+	shader_bloom_.link_shaders();
+
+	shader_bright_pass_.add_shader("pp_default.vert", "pp_bright_pass.frag");
+	shader_bright_pass_.link_shaders();
 
 	bool result = true;
-	result &= mDefault.Init(true, 800, 600, GL_RGBA16F);
-	result &= mMonochrome.Init(true, 800, 600, GL_RGBA16F);
-	result &= mHDR.Init(true, 800, 600);
-	result &= mMotionBlur.Init(true, 800, 600, GL_RGBA16F);
-	result &= mNegativeGrayscale.Init(true, 800, 600);
-	result &= mBlur[0].Init(true, 800, 600, GL_RGBA16F);
-	result &= mBlur[1].Init(true, 800, 600, GL_RGBA16F);
-	result &= mDownFilter.Init(true, 800, 600, GL_RGBA16F);
-	result &= mBrightPass.Init(true, 800, 600, GL_RGBA16F);
-	result &= mBloom.Init(true, 800, 600, GL_RGBA16F);
+	result &= default_.initialize(true, 800, 600, GL_RGBA16F);
+	result &= monochrome_.initialize(true, 800, 600, GL_RGBA16F);
+	result &= hdr_.initialize(true, 800, 600);
+	result &= motion_blur_.initialize(true, 800, 600, GL_RGBA16F);
+	result &= negative_.initialize(true, 800, 600);
+	result &= blurs_[0].initialize(true, 800, 600, GL_RGBA16F);
+	result &= blurs_[1].initialize(true, 800, 600, GL_RGBA16F);
+	result &= down_filter_.initialize(true, 800, 600, GL_RGBA16F);
+	result &= bright_pass_.initialize(true, 800, 600, GL_RGBA16F);
+	result &= bloom_.initialize(true, 800, 600, GL_RGBA16F);
 
 	return result;
 }
 
-void PostProcess::Begin()
+void PostProcess::begin()
 {
-	mDefault.Bind();
+	default_.bind();
 }
 
-void PostProcess::End()
+void PostProcess::end()
 {
-	mDefault.Unbind();
-	mLastColorMap = mDefault.GetColorMap();
+	default_.unbind();
+	last_color_map_ = default_.get_color_map();
 }
 
-void PostProcess::Render(ShaderProgram &shader)
+void PostProcess::render(ShaderProgram &shader)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	shader.Use();
+	shader.use();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
-	glBindVertexArray(mVAO);
+	glBindTexture(GL_TEXTURE_2D, last_color_map_);
+	glBindVertexArray(vao_id_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 }
 
-void PostProcess::DoMonochrome()
+void PostProcess::do_monochrome()
 {
-	mMonochrome.Bind();
-	mMonochromeShader.Use();
+	monochrome_.bind();
+	shader_monochrome_.use();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
-	glBindVertexArray(mVAO);
+	glBindTexture(GL_TEXTURE_2D, last_color_map_);
+	glBindVertexArray(vao_id_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glBindVertexArray(0);
-	mLastColorMap = mMonochrome.GetColorMap();
-	mMonochrome.Unbind();
+	last_color_map_ = monochrome_.get_color_map();
+	monochrome_.unbind();
 }
 
-void PostProcess::DoHDR(float exposure, bool isBloomActive)
+void PostProcess::do_hdr(float exposure, bool isBloomActive)
 {
-	mHDR.Bind();
-	mHDRShader.Use();
-	mHDRShader.SetUniform("uExposure", exposure);
-	mHDRShader.SetUniform("uIsBloomActive", isBloomActive);
-	mHDRShader.SetUniform("uBloomIntensity", mBloomIntensity);
+	hdr_.bind();
+	shader_hdr_.use();
+	shader_hdr_.set_uniform("uExposure", exposure);
+	shader_hdr_.set_uniform("uIsBloomActive", isBloomActive);
+	shader_hdr_.set_uniform("uBloomIntensity", gui_bloom_intensity_);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+	glBindTexture(GL_TEXTURE_2D, last_color_map_);
 	if(isBloomActive)
 	{
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, mBloomColorMap);
+		glBindTexture(GL_TEXTURE_2D, bloom_color_map_);
 	}
 
-	glBindVertexArray(mVAO);
+	glBindVertexArray(vao_id_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
-	mLastColorMap = mHDR.GetColorMap();
-	mHDR.Unbind();
+	last_color_map_ = hdr_.get_color_map();
+	hdr_.unbind();
 }
 
-void PostProcess::DoMotionBlur(const glm::mat4 &viewProjMatrix)
+void PostProcess::do_motion_blur(const glm::mat4 &viewProjMatrix)
 {
 	const glm::mat4 invMatrix = glm::inverse(viewProjMatrix);
 
-	mMotionBlur.Bind();
-	mMotionBlurShader.Use();
-	mMotionBlurShader.SetUniform("uInvViewProj", invMatrix);
-	mMotionBlurShader.SetUniform("uPrevViewProj", mPrevViewProjMatrix);
+	motion_blur_.bind();
+	shader_motion_blur_.use();
+	shader_motion_blur_.set_uniform("uInvViewProj", invMatrix);
+	shader_motion_blur_.set_uniform("uPrevViewProj", previous_view_projection_matrix_);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+	glBindTexture(GL_TEXTURE_2D, last_color_map_);
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, mDefault.GetDepthMap());
-	glBindVertexArray(mVAO);
+	glBindTexture(GL_TEXTURE_2D, default_.get_depth_map());
+	glBindVertexArray(vao_id_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
-	mLastColorMap = mMotionBlur.GetColorMap();
-	mMotionBlur.Unbind();
+	last_color_map_ = motion_blur_.get_color_map();
+	motion_blur_.unbind();
 
-	mPrevViewProjMatrix = viewProjMatrix;
+	previous_view_projection_matrix_ = viewProjMatrix;
 }
 
-void PostProcess::DoNegative()
+void PostProcess::do_negative()
 {
-	mNegativeGrayscale.Bind();
-	mNegativeGrayscaleShader.Use();
-	mNegativeGrayscaleShader.SetUniform("uIsGrayScale", 0);
+	negative_.bind();
+	shader_negative_.use();
+	shader_negative_.set_uniform("uIsGrayScale", 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
-	glBindVertexArray(mVAO);
+	glBindTexture(GL_TEXTURE_2D, last_color_map_);
+	glBindVertexArray(vao_id_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
-	mLastColorMap = mNegativeGrayscale.GetColorMap();
-	mNegativeGrayscale.Unbind();
+	last_color_map_ = negative_.get_color_map();
+	negative_.unbind();
 }
 
-void PostProcess::DoGrayScale()
+void PostProcess::do_blur()
 {
-	mNegativeGrayscale.Bind();
-	mNegativeGrayscaleShader.Use();
-	mNegativeGrayscaleShader.SetUniform("uIsGrayScale", 1);
+	blurs_[0].bind();
+	shader_blurs_[0].use();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
-	glBindVertexArray(mVAO);
+	glBindTexture(GL_TEXTURE_2D, last_color_map_);
+	glBindVertexArray(vao_id_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
-	mLastColorMap = mNegativeGrayscale.GetColorMap();
-	mNegativeGrayscale.Unbind();
+	last_color_map_ = blurs_[0].get_color_map();
+	blurs_[0].unbind();
+
+	blurs_[1].bind();
+	shader_blurs_[1].use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, last_color_map_);
+	glBindVertexArray(vao_id_);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	last_color_map_ = blurs_[1].get_color_map();
+	blurs_[1].unbind();
 }
 
-void PostProcess::DoBlur()
+void PostProcess::do_down_filter(int level)
 {
-	mBlur[0].Bind();
-	mBlurShader[0].Use();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
-	glBindVertexArray(mVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
-	mLastColorMap = mBlur[0].GetColorMap();
-	mBlur[0].Unbind();
+	do_blur();
 
-	mBlur[1].Bind();
-	mBlurShader[1].Use();
+	down_filter_.bind();
+	shader_down_filter_.use();
+	shader_down_filter_.set_uniform("uFilterLevel", level);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
-	glBindVertexArray(mVAO);
+	glBindTexture(GL_TEXTURE_2D, last_color_map_);
+	glBindVertexArray(vao_id_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
-	mLastColorMap = mBlur[1].GetColorMap();
-	mBlur[1].Unbind();
+	last_color_map_ = down_filter_.get_color_map();
+	down_filter_.unbind();
+
+	do_blur();
 }
 
-void PostProcess::DoDownFilter(int level)
+void PostProcess::do_bright_pass()
 {
-	DoBlur();
-
-	mDownFilter.Bind();
-	mDownFilterShader.Use();
-	mDownFilterShader.SetUniform("uFilterLevel", level);
+	bright_pass_.bind();
+	shader_bright_pass_.use();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
-	glBindVertexArray(mVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
-	mLastColorMap = mDownFilter.GetColorMap();
-	mDownFilter.Unbind();
-
-	DoBlur();
-}
-
-void PostProcess::DoBrightPass()
-{
-	mBrightPass.Bind();
-	mBrightPassShader.Use();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mLastColorMap);
+	glBindTexture(GL_TEXTURE_2D, last_color_map_);
 	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindVertexArray(mVAO);
+	glBindVertexArray(vao_id_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
-	mLastColorMap = mBrightPass.GetColorMap();
-	mBrightPass.Unbind();
+	last_color_map_ = bright_pass_.get_color_map();
+	bright_pass_.unbind();
 }
 
-void PostProcess::DoBloom(float intensity)
+void PostProcess::do_bloom(float intensity)
 {
-	mBloomIntensity = intensity;
-	GLuint tmpColorMap = mLastColorMap;
-	DoBrightPass();
-	DoBlur();
+	gui_bloom_intensity_ = intensity;
+	GLuint tmpColorMap = last_color_map_;
+	do_bright_pass();
+	do_blur();
 
-	mBloomColorMap = mLastColorMap;
-	mLastColorMap = tmpColorMap;
+	bloom_color_map_ = last_color_map_;
+	last_color_map_ = tmpColorMap;
 }

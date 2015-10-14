@@ -16,34 +16,34 @@ public:
 	Camera(int width, int height);
 	~Camera();
 
-	void CreateLookAt(const glm::vec3 &pos, const glm::vec3 &up = glm::vec3(0.0f, 1.0f, 0.0f));
-	void CreatePerspectiveProj(float fovY, float nearZ, float farZ);
-	void CreateOrthographicProj(float left, float right, float top, float bottom, float nearZ, float farZ);
+	void create_look_at(const glm::vec3 &pos, const glm::vec3 &up = glm::vec3(0.0f, 1.0f, 0.0f));
+	void create_perspective_proj(float fovY, float nearZ, float farZ);
+	void create_orthographic_proj(float left, float right, float top, float bottom, float nearZ, float farZ);
 
-	glm::mat4 GetViewMatrix();
-	glm::mat4 GetProjMatrix();
-	glm::vec3 GetPosition();
+	inline glm::mat4 get_view_matrix() const { return glm::lookAt(position_, position_ + front_, up_); }
+	inline glm::mat4 get_proj_matrix() const { return projection_matrix_; }
+	inline glm::vec3 get_position()    const { return position_; }
 
-	void MoveForward(float dt);
-	void MoveBackward(float dt);
-	void MoveLeft(float dt);
-	void MoveRight(float dt);
-	void Rotate(float x, float y);
+	void move_forward(float dt);
+	void move_backward(float dt);
+	void move_left(float dt);
+	void move_right(float dt);
+	void rotate(float x, float y);
 
-	void SetSensitivity(float s);
-	void SetCameraSpeed(float s);
-
-private:
-	void UpdateCameraVectors();
+	void set_sensitivity(float s);
+	void set_camera_speed(float s);
 
 private:
-	glm::mat4 mProjMatrix;
-	glm::vec3 mPosition, mWorldUp;
-	glm::vec3 mFront, mRight, mUp;
-	int mWidth, mHeight;
-	float mPitch, mYaw;
-	float mSensitivity;
-	float mMovementSpeed;
+	void update_camera_vectors();
+
+private:
+	glm::mat4 projection_matrix_;
+	glm::vec3 position_, world_up_;
+	glm::vec3 front_, right_, up_;
+	int width_, height_;
+	float pitch_, yaw_;
+	float sensitivity_;
+	float movement_speed_;
 };
 
 typedef std::shared_ptr<Camera> CameraPtr;

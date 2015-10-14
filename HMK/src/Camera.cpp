@@ -3,120 +3,105 @@
 using namespace hmk;
 
 Camera::Camera()
-	: mPosition{glm::vec3(0.0f, 0.0f, 3.0f)}
-	, mWorldUp{glm::vec3(0.0f, 1.0f, 0.0f)}
-	, mFront{glm::vec3(0.0f, 0.0f, -1.0f)}
-	, mWidth{800}
-	, mHeight{600}
-	, mPitch{0.0f}
-	, mYaw{-90.0f}
-	, mSensitivity{0.25f}
-	, mMovementSpeed{4.0f}
+	: position_{glm::vec3(0.0f, 0.0f, 3.0f)}
+	, world_up_{glm::vec3(0.0f, 1.0f, 0.0f)}
+	, front_{glm::vec3(0.0f, 0.0f, -1.0f)}
+	, width_{800}
+	, height_{600}
+	, pitch_{0.0f}
+	, yaw_{-90.0f}
+	, sensitivity_{0.25f}
+	, movement_speed_{4.0f}
 {
-	UpdateCameraVectors();
+	update_camera_vectors();
 }
 
 Camera::Camera(int width, int height)
-	: mPosition{glm::vec3(0.0f, 0.0f, 3.0f)}
-	, mWorldUp{glm::vec3(0.0f, 1.0f, 0.0f)}
-	, mFront{glm::vec3(0.0f, 0.0f, -1.0f)}
-	, mWidth{width}
-	, mHeight{height}
-	, mPitch{0.0f}
-	, mYaw{-90.0f}
-	, mSensitivity{0.25f}
-	, mMovementSpeed{4.0f}
+	: position_{glm::vec3(0.0f, 0.0f, 3.0f)}
+	, world_up_{glm::vec3(0.0f, 1.0f, 0.0f)}
+	, front_{glm::vec3(0.0f, 0.0f, -1.0f)}
+	, width_{width}
+	, height_{height}
+	, pitch_{0.0f}
+	, yaw_{-90.0f}
+	, sensitivity_{0.25f}
+	, movement_speed_{4.0f}
 {
-	UpdateCameraVectors();
+	update_camera_vectors();
 }
 
 Camera::~Camera()
 {
 }
 
-void Camera::CreateLookAt(const glm::vec3 &pos, const glm::vec3 &up)
+void Camera::create_look_at(const glm::vec3 &pos, const glm::vec3 &up)
 {
-	mPosition = pos;
-	mWorldUp  = up;
-	mFront    = glm::vec3(0.0f, 0.0f, -1.0f);
-	UpdateCameraVectors();
+	position_ = pos;
+	world_up_  = up;
+	front_    = glm::vec3(0.0f, 0.0f, -1.0f);
+	update_camera_vectors();
 }
 
-void Camera::CreatePerspectiveProj(float fovY, float nearZ, float farZ)
+void Camera::create_perspective_proj(float fovY, float nearZ, float farZ)
 {
-	mProjMatrix = glm::perspective(fovY, ((float)(mWidth) / mHeight), nearZ, farZ);
+	projection_matrix_ = glm::perspective(fovY, ((float)(width_) / height_), nearZ, farZ);
 }
 
-void Camera::CreateOrthographicProj(float left, float right, float top, float bottom, float nearZ, float farZ)
+void Camera::create_orthographic_proj(float left, float right, float top, float bottom, float nearZ, float farZ)
 {
-	mProjMatrix = glm::ortho(left, right, bottom, top, nearZ, farZ);
+	projection_matrix_ = glm::ortho(left, right, bottom, top, nearZ, farZ);
 }
 
-glm::mat4 Camera::GetViewMatrix()
+void Camera::move_forward(float dt)
 {
-	return glm::lookAt(mPosition, mPosition + mFront, mUp);
+	position_ += front_ * dt * movement_speed_;
 }
 
-glm::mat4 Camera::GetProjMatrix()
+void Camera::move_backward(float dt)
 {
-	return mProjMatrix;
+	position_ -= front_ * dt * movement_speed_;
 }
 
-glm::vec3 Camera::GetPosition()
+void Camera::move_left(float dt)
 {
-	return mPosition;
+	position_ -= right_ * dt * movement_speed_;
 }
 
-void Camera::MoveForward(float dt)
+void Camera::move_right(float dt)
 {
-	mPosition += mFront * dt * mMovementSpeed;
+	position_ += right_ * dt * movement_speed_;
 }
 
-void Camera::MoveBackward(float dt)
+void Camera::rotate(float x, float y)
 {
-	mPosition -= mFront * dt * mMovementSpeed;
-}
-
-void Camera::MoveLeft(float dt)
-{
-	mPosition -= mRight * dt * mMovementSpeed;
-}
-
-void Camera::MoveRight(float dt)
-{
-	mPosition += mRight * dt * mMovementSpeed;
-}
-
-void Camera::Rotate(float x, float y)
-{
-	mYaw   += x * mSensitivity;
-	mPitch += y * mSensitivity;
+	yaw_   += x * sensitivity_;
+	pitch_ += y * sensitivity_;
 
 	// Avoid gimbal lock
-	if(mPitch > MAX_PITCH)
-		mPitch = MAX_PITCH;
-	if(mPitch < -MAX_PITCH)
-		mPitch = -MAX_PITCH;
-	UpdateCameraVectors();
+	if(pitch_ > MAX_PITCH)
+		pitch_ = MAX_PITCH;
+	if(pitch_ < -MAX_PITCH)
+		pitch_ = -MAX_PITCH;
+	update_camera_vectors();
 }
 
-void Camera::SetSensitivity(float s)
+void Camera::set_sensitivity(float s)
 {
-	mSensitivity = s;
+	sensitivity_ = s;
 }
 
-void Camera::SetCameraSpeed(float s)
+void Camera::set_camera_speed(float s)
 {
-	mMovementSpeed = s;
+	movement_speed_ = s;
 }
 
-void Camera::UpdateCameraVectors()
+void Camera::update_camera_vectors()
 {
 	glm::vec3 front;
-	front.x = cos(glm::radians(mYaw)) * cos(glm::radians(mPitch));
-	front.y = sin(glm::radians(mPitch));
-	front.z = sin(glm::radians(mYaw)) * cos(glm::radians(mPitch));
-	mFront = glm::normalize(front);
-	mRight = glm::normalize(glm::cross(mFront, mWorldUp));
-	mUp = glm::normalize(glm::cross(mRight, mFront));
+	front.x = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+	front.y = sin(glm::radians(pitch_));
+	front.z = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+	front_ = glm::normalize(front);
+	right_ = glm::normalize(glm::cross(front_, world_up_));
+	up_ = glm::normalize(glm::cross(right_, front_));
 }

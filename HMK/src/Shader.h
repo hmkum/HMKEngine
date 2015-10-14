@@ -8,17 +8,19 @@
 
 namespace hmk
 {
+enum class ShaderType: unsigned int {Vertex = 0x8B31, Fragment = 0x8B30};
+
 class Shader
 {
 public:
     Shader();
 	~Shader();
 
-    bool Init(GLenum shaderType, std::string shaderName);
+    bool initialize(ShaderType shader_type, std::string shaderName);
 
-    GLuint GetID() const;
+	inline GLuint get_id() const { return shader_id_; }
 
 private:
-    GLuint mShaderID;
+    GLuint shader_id_;
 };
 }

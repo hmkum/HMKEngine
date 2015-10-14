@@ -87,6 +87,7 @@
     <ClCompile Include="external\imgui-1.45\imgui\imgui_demo.cpp" />
     <ClCompile Include="external\imgui-1.45\imgui\imgui_draw.cpp" />
     <ClCompile Include="external\imgui-1.45\imgui\imgui_impl_gl3.cpp" />
+    <ClCompile Include="external\pugixml\pugixml.cpp" />
     <ClCompile Include="external\stb\stb_image.c" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\DrawableTexture.cpp" />
@@ -97,7 +98,9 @@
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\PostProcess.cpp" />
     <ClCompile Include="src\Ray.cpp" />
+    <ClCompile Include="src\SceneParser.cpp" />
     <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\ShaderManager.cpp" />
     <ClCompile Include="src\ShaderProgram.cpp" />
     <ClCompile Include="src\ShadowMap.cpp" />
     <ClCompile Include="src\Skybox.cpp" />
@@ -118,7 +121,9 @@
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\PostProcess.h" />
     <ClInclude Include="src\Ray.h" />
+    <ClInclude Include="src\SceneParser.h" />
     <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\ShaderManager.h" />
     <ClInclude Include="src\ShaderProgram.h" />
     <ClInclude Include="src\ShadowMap.h" />
     <ClInclude Include="src\Skybox.h" />
@@ -139,7 +144,7 @@
     <None Include="data\shaders\pp_default.vert" />
     <None Include="data\shaders\pp_monochrome.frag" />
     <None Include="data\shaders\pp_motion_blur.frag" />
-    <None Include="data\shaders\pp_negative_grayscale.frag" />
+    <None Include="data\shaders\pp_negative.frag" />
     <None Include="data\shaders\simple_depth.frag" />
     <None Include="data\shaders\simple_depth.vert" />
     <None Include="data\shaders\skybox.frag" />

@@ -1,0 +1,19 @@
+To-Do
+- Light sistemini ekle(Point, ..).
+- scene.xml dosyasina isik sistemini de ekle.
+- GUI sistemini duzenle.
+
+-------------------------------------
+
+Bugs
+- Picking modelin eklenme sirasina gore calisiyor. Bir modelin arkasindaki model daha once eklenmisse picking arkadaki
+modeli seciyor.
+- Axe uzerinde dusen golgede hata var. Selfshadowing oluyor. Normal offset yontemini gelistir.
+
+- GUI arkasinda model varsa Picking o modeli seciyor. GUI event deaktif oluyor.
+
+--------------------------------------
+
+Done
+- Modellerde degisiklik olunca scene.xml guncellensin.
+- Oyun calisirken model ekleme.

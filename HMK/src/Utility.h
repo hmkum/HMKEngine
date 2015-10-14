@@ -7,11 +7,11 @@
 
 #define SAFE_RELEASE(v) {if(v != nullptr) {delete v; v = nullptr;}}
 
-#define HMK_LOG_WRITE(log, ...)   {hmk::Logger::Inst().Write("<DEBUG>   ", log, " ", ##__VA_ARGS__, "\n");}
-#define HMK_LOG_WARNING(log, ...) {hmk::Logger::Inst().Write("<WARNING> ", log, " ", ##__VA_ARGS__, "\n");}
-#define HMK_LOG_ERROR(log, ...)   {hmk::Logger::Inst().Write("<ERROR>   ", log, " ", ##__VA_ARGS__, "\n");}
+#define HMK_LOG_WRITE(...)   {hmk::Logger::get_instance().write("<DEBUG>   ", "", ##__VA_ARGS__, "\n");}
+#define HMK_LOG_WARNING(...) {hmk::Logger::get_instance().write("<WARNING> ", "", ##__VA_ARGS__, "\n");}
+#define HMK_LOG_ERROR(...)   {hmk::Logger::get_instance().write("<ERROR>   ", "", ##__VA_ARGS__, "\n");}
 
-#define HMK_PRINT(...) {hmk::Debug::Print("", __VA_ARGS__, "\n");}
+#define HMK_PRINT(...) {hmk::Debug::print("", __VA_ARGS__, "\n");}
 
 // C++11 based callback macros
 #define HMK_CALLBACK_1(SELECTOR, TARGET) std::bind(&SELECTOR, TARGET, std::placeholders::_1);
@@ -20,6 +20,7 @@
 #define HMK_CALLBACK_4(SELECTOR, TARGET) std::bind(&SELECTOR, TARGET, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
 
 // Data paths
+const std::string WORKIND_DIR = "E:\\Projeler\\HMK\\HMK\\";
 const std::string SKYBOX_TEXTURE_PATH = "data/textures/Cubemaps/";
 const std::string SHADER_PATH = "data/shaders/";
 const std::string MODEL_PATH = "data/models/";
@@ -57,4 +58,27 @@ const std::string TEXTURE_PATH = "data/textures/";
 		break; \
 	} \
 	if (errStr != "") HMK_LOG_ERROR(errStr) HMK_PRINT(errStr) \
+}
+
+namespace hmk
+{
+	inline void copy_file(std::string from, std::string to, bool is_binary = false)
+	{
+		if(is_binary)
+		{
+			std::ifstream in(from, std::ios::binary);
+			std::ofstream out(to, std::ios::binary);
+			out << in.rdbuf();
+			in.close();
+			out.close();
+		}
+		else
+		{
+			std::ifstream in(from);
+			std::ofstream out(to);
+			out << in.rdbuf();
+			in.close();
+			out.close();
+		}
+	}
 }

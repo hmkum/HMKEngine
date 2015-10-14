@@ -3,31 +3,33 @@
 using namespace hmk;
 
 Skybox::Skybox()
-	: mTextureID{0}
-	, mVAO{0}
-	, mVBO{0}
+	: texture_id_{0}
+	, vao_id_{0}
+	, vbo_id_{0}
 { }
 
 Skybox::~Skybox()
 {
-	glDeleteTextures(1, &mTextureID);
-	glDeleteBuffers(1, &mVBO);
-	glDeleteVertexArrays(1, &mVAO);
+	glDeleteTextures(1, &texture_id_);
+	glDeleteBuffers(1, &vbo_id_);
+	glDeleteVertexArrays(1, &vao_id_);
 }
 
-bool Skybox::Load(std::string texturePath)
+bool Skybox::load(std::string texturePath)
 {
-	glGenTextures(1, &mTextureID);
+	folder_name_ = texturePath;
+
+	glGenTextures(1, &texture_id_);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id_);
 
 	std::vector<std::string> textureNames;
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "posx.jpg");
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "negx.jpg");
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "posy.jpg");
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "negy.jpg");
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "posz.jpg");
-	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "negz.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/posx.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/negx.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/posy.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/negy.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/posz.jpg");
+	textureNames.push_back(SKYBOX_TEXTURE_PATH + texturePath + "/negz.jpg");
 
 	for(size_t i = 0; i < textureNames.size(); ++i)
 	{
@@ -96,11 +98,11 @@ bool Skybox::Load(std::string texturePath)
 		1.0f, -1.0f, 1.0f
 	};
 
-	glGenVertexArrays(1, &mVAO);
-	glBindVertexArray(mVAO);
+	glGenVertexArrays(1, &vao_id_);
+	glBindVertexArray(vao_id_);
 
-	glGenBuffers(1, &mVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+	glGenBuffers(1, &vbo_id_);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_id_);
 
 	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
 
@@ -111,21 +113,16 @@ bool Skybox::Load(std::string texturePath)
 	return true;
 }
 
-void Skybox::Render()
+void Skybox::render()
 {
 	glDepthMask(GL_FALSE);
 	glFrontFace(GL_CCW);
-	glBindVertexArray(mVAO);
+	glBindVertexArray(vao_id_);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id_);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	glBindVertexArray(0);
 	glFrontFace(GL_CW);
 	glDepthMask(GL_TRUE);
-}
-
-GLuint Skybox::GetTextureID() const
-{
-	return mTextureID;
 }

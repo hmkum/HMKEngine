@@ -8,9 +8,11 @@
 std::function<void(int, int, int, int)> keyCallback;
 std::function<void(double, double)> cursorPosCallback;
 std::function<void(int, int, int)> mouseButtonCallback;
+std::function<void(int, const char**)> dropCallback;
 static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 static void CursorPosCallback(GLFWwindow *window, double xPos, double yPos);
 static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods);
+static void DropCallback(GLFWwindow *window, int numberOfFiles, const char** filenames);
 
 void ErrorCallback(int error, const char *description)
 {
@@ -68,11 +70,11 @@ void APIENTRY glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum seve
 
 int main()
 {
-	hmk::Logger::Inst().Initialize("engine.txt");
+	hmk::Logger::get_instance().initialize("engine.txt");
 	if (glfwInit() == GL_FALSE)
 	{
 		HMK_LOG_ERROR("failed glfwInit")
-		hmk::Logger::Inst().Shutdown();
+		hmk::Logger::get_instance().shutdown();
 		return -1;
 	}
 
@@ -84,11 +86,11 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 	glfwWindowHint(GLFW_SAMPLES, 8);
 
-	auto window = glfwCreateWindow(800, 600, "HMK", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(800, 600, "HMK", nullptr, nullptr);
 	if (window == nullptr)
 	{
 		HMK_LOG_ERROR("failed glfwCreateWindow")
-		hmk::Logger::Inst().Shutdown();
+		hmk::Logger::get_instance().shutdown();
 		glfwTerminate();
 		return -1;
 	}
@@ -98,7 +100,7 @@ int main()
 	if (gl3wInit() == -1) // 0 success
 	{
 		HMK_LOG_ERROR("failed gl3wInit")
-		hmk::Logger::Inst().Shutdown();
+		hmk::Logger::get_instance().shutdown();
 		glfwTerminate();
 		return -1;
 	}
@@ -106,7 +108,7 @@ int main()
 	if (!gl3wIsSupported(3, 3))
 	{
 		HMK_LOG_ERROR("Upgrade your graphic card!")
-		hmk::Logger::Inst().Shutdown();
+		hmk::Logger::get_instance().shutdown();
 		glfwTerminate();
 		return -1;
 	}
@@ -124,15 +126,17 @@ int main()
 	ImGui_ImplGlfwGL3_Init(window, false);
 
 	Game *game = new Game();
-	game->Init();
+	game->initialize();
 
 	glfwSetKeyCallback(window, KeyCallback);
 	glfwSetCursorPosCallback(window, CursorPosCallback);
 	glfwSetMouseButtonCallback(window, MouseButtonCallback);
+	glfwSetDropCallback(window, DropCallback);
 
-	keyCallback = HMK_CALLBACK_4(Game::KeyInput, game);
-	cursorPosCallback = HMK_CALLBACK_2(Game::CursorPosInput, game);
-	mouseButtonCallback = HMK_CALLBACK_3(Game::MouseButtonInput, game);
+	keyCallback = HMK_CALLBACK_4(Game::key_input, game);
+	cursorPosCallback = HMK_CALLBACK_2(Game::cursor_pos_input, game);
+	mouseButtonCallback = HMK_CALLBACK_3(Game::mouse_button_input, game);
+	dropCallback = HMK_CALLBACK_2(Game::drop_files_callback, game);
 
 	double lastTime = glfwGetTime();
 
@@ -160,8 +164,8 @@ int main()
 		lastTime = now;
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		game->Update((float)delta);
-		game->Render();
+		game->update((float)delta);
+		game->render();
 
 		fps++;
 		acc += delta;
@@ -176,7 +180,7 @@ int main()
 	}
 
 	delete game;
-	hmk::Logger::Inst().Shutdown();
+	hmk::Logger::get_instance().shutdown();
 	glfwDestroyWindow(window);
 	ImGui_ImplGlfwGL3_Shutdown();
 	glfwTerminate();
@@ -196,4 +200,9 @@ static void CursorPosCallback(GLFWwindow *window, double xPos, double yPos)
 static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
 	mouseButtonCallback(button, action, mods);
+}
+
+static void DropCallback(GLFWwindow *window, int numberOfFiles, const char** filenames)
+{
+	dropCallback(numberOfFiles, filenames);
 }

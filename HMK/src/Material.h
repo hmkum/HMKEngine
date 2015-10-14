@@ -8,36 +8,36 @@ namespace hmk
 struct MaterialUniform
 {
 	MaterialUniform()
-		: mBaseColor{glm::vec4(0.0f)}
-		, mRoughness{0.0f}
-		, mMetallic{0.0f}
+		: base_color_{glm::vec4(0.0f)}
+		, roughness_{0.0f}
+		, metallic_{0.0f}
 	{}
 
-	glm::vec4 mBaseColor;
-	float mRoughness;
-	float mMetallic;
+	glm::vec4 base_color_;
+	float roughness_;
+	float metallic_;
 };
 
 struct Material
 {
 	Material()
-		: mName{"DefaultMat"}
-		, mBaseColor{glm::vec3(1.0f)}
-		, mRoughness{0.04f}
-		, mMetallic{0.0f}
-		, mHasTextures{glm::ivec4(0)}
+		: name_{"DefaultMat"}
+		, base_color_{glm::vec3(1.0f)}
+		, roughness_{0.04f}
+		, metallic_{0.0f}
+		, has_textures_{glm::ivec4(0)}
 	{}
-	std::string mName;
+	std::string name_;
 	
-	glm::vec3 mBaseColor;
-	float mRoughness;
-	float mMetallic;
+	glm::vec3 base_color_;
+	float roughness_;
+	float metallic_;
 	
-	std::string mAlbedoTexName;
-	std::string mNormalTexName;
-	std::string mRoughnessTexName;
-	std::string mMetallicTexName;	
+	std::string albedo_texture_name_;
+	std::string normal_texture_name_;
+	std::string roughness_texture_name_;
+	std::string metallic_texture_name_;	
 	
-	glm::ivec4 mHasTextures; // x: HasAlbedo?, y: HasNormal, z: HasRoughness, w: HasMetallic;
+	glm::ivec4 has_textures_; // x: HasAlbedo?, y: HasNormal, z: HasRoughness, w: HasMetallic;
 };
 }
