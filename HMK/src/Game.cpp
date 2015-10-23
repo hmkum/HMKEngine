@@ -57,6 +57,7 @@ bool Game::initialize()
 	hmk::SceneData scene_data = hmk::SceneParser::get_data();
 	for(const auto& model : scene_data.model_)
 	{
+		HMK_PRINT("Loading model: " + model.file_);
 		hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
 		if(!temp_model->load(model.file_))
 		{
@@ -71,6 +72,7 @@ bool Game::initialize()
 		temp_model->set_rotation(model.transform_.rot_x_, model.transform_.rot_y_, model.transform_.rot_z_);
 		temp_model->set_scale(glm::vec3(model.transform_.scale_x_, model.transform_.scale_y_, model.transform_.scale_z_));
 		scene_models.emplace_back(std::move(temp_model));
+		HMK_PRINT("Done: " + model.file_);
 	}
 	
 	skybox_ = std::make_shared<hmk::Skybox>();
@@ -324,32 +326,43 @@ void Game::mouse_button_input(int button, int action, int mods)
 
 void Game::drop_files_callback(int number_of_files, const char** filenames)
 {
+	std::vector<std::string> model_names;
+	std::string filename;
+	std::string file_proper_name;
 	for(int i = 0; i < number_of_files; ++i)
 	{
 		std::string file_path(filenames[i]);
 		auto last_slash = file_path.rfind("\\");
-		std::string filename = file_path;
+		filename = file_path;
 		file_path.erase(file_path.begin() + last_slash + 1, file_path.end());
 		filename.erase(filename.begin(), filename.begin() + last_slash + 1);
 		std::string file_extension = filename.substr(filename.rfind("."));
-		std::string file_proper_name = filename;
+		file_proper_name = filename;
 		file_proper_name.erase(filename.find(file_extension));
 
 		HMK_PRINT("Copying " + filename);
 		if(file_extension.compare(".obj") == 0 || file_extension.compare(".mtl") == 0)
+		{
+			if(file_extension.compare(".obj") == 0)
+				model_names.push_back(filename);
 			hmk::copy_file(file_path + filename, WORKIND_DIR + "data\\models\\" + filename);
-		if(file_extension.compare(".jpg") == 0)
+		}
+		if(file_extension.compare(".jpg") == 0 || file_extension.compare(".JPG") == 0 || file_extension.compare(".tga") == 0
+		   || file_extension.compare(".png") == 0)
 			hmk::copy_file(file_path + filename, WORKIND_DIR + "data\\textures\\" + filename, true);
 
+		HMK_PRINT("Done " + filename);
+	}
+
+	for(int i = 0; i < model_names.size(); ++i)
+	{
+		filename = model_names[i];
 		HMK_PRINT("Loading " + filename);
-		if(file_extension.compare(".obj") == 0)
-		{
-			hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
-			temp_model->load(filename);
-			temp_model->set_name(file_proper_name);
-			temp_model->set_position(glm::vec3(0.0f));
-			scene_models.emplace_back(std::move(temp_model));
-		}
+		hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
+		temp_model->load(filename);
+		temp_model->set_name(file_proper_name);
+		temp_model->set_position(glm::vec3(0.0f));
+		scene_models.emplace_back(std::move(temp_model));
 		HMK_PRINT("Done " + filename);
 	}
 }
