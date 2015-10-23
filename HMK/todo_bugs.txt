@@ -2,9 +2,21 @@ To-Do
 - Fog ekle.
 - Light sistemini ekle(Point, ..).
 - scene.xml dosyasina isik sistemini de ekle.
-- GUI sistemini duzenle. Gui için sýnýf. ImGui devam mý?, yoksa Qt mi?
+- GUI sistemini duzenle. In-game gui: ImGui, Editor için Qt.
 - Parent-child sistemini ekle(Base class: Entity, GameObject, Node. Hangisi?).
 - Scene sistemini ekle. Scene'e model ekleme. Scene deðiþimi.
+- Bump map ekle.
+- Fizik sistemini ekle.
+- Ses sistemini ekle.
+- PBR gözden geçir.
+- Cascaded Shadow Map'e geç.
+- SSAO ekle.
+- DoF ekle.
+- Eye adaptaion ekle.
+- GI ekle.
+- PBR olmayan modeller için specular map okumayý ve Blinn-Phong'u ekle.
+- Shader sistemini tekrar yaz.
+- Shader sistemine preprocessor(#include,#define) sistemini ekle.
 
 -------------------------------------
 
@@ -12,6 +24,7 @@ Bugs
 - Picking modelin eklenme sirasina gore calisiyor. Bir modelin arkasindaki model daha once eklenmisse picking arkadaki
 modeli seciyor.
 - Axe uzerinde dusen golgede hata var. Selfshadowing oluyor. Normal offset yontemini gelistir.
+- Sphere'lerin altýnda olmamasý gereken shadow var.
 
 --------------------------------------
 

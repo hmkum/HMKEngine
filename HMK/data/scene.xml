@@ -59,4 +59,15 @@
 			<scale x="1" y="1" z="1" />
 		</transform>
 	</model>
+	<model file="mitsuba-sphere.obj" name="default">
+		<material>
+			<roughness value="0" />
+			<metalness value="0" />
+		</material>
+		<transform>
+			<position x="4.10000038" y="0" z="0" />
+			<rotation x="0" y="0" z="0" />
+			<scale x="1" y="1" z="1" />
+		</transform>
+	</model>
 </scene>
