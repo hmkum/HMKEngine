@@ -30,6 +30,7 @@ public:
 	void move_right(float dt);
 	void rotate(float x, float y);
 
+	void set_position(const glm::vec3& pos);
 	void set_sensitivity(float s);
 	void set_camera_speed(float s);
 

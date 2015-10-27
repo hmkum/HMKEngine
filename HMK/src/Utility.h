@@ -1,5 +1,7 @@
 #pragma once
 #include <GL/gl3w.h>
+#include <stb/stb_image.h>
+#include <stb/stb_image_write.h>
 #include <functional>
 #include <string>
 #include "Logger.h"
@@ -80,5 +82,21 @@ namespace hmk
 			in.close();
 			out.close();
 		}
+	}
+
+	inline void take_screenshot()
+	{
+		BYTE* pixels = new BYTE[3 * 800 * 600];
+		glReadPixels(0, 0, 800, 600, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+		stbi_write_png("hmk_screenshot.png", 800, 600, 3, pixels, 0);
+
+		int x = 800, y = 600, comp = 3;
+		stbi_set_flip_vertically_on_load(1);
+		stbi_uc* data = stbi_load("hmk_screenshot.png", &x, &y, &comp, 3);
+
+		stbi_write_png("hmk_screenshot.png", 800, 600, 3, data, 0);
+		HMK_PRINT("Screenshot taken.");
+		delete[] pixels;
 	}
 }

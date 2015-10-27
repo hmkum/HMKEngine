@@ -85,6 +85,11 @@ void Camera::rotate(float x, float y)
 	update_camera_vectors();
 }
 
+void Camera::set_position(const glm::vec3& pos)
+{
+	position_ = pos;
+}
+
 void Camera::set_sensitivity(float s)
 {
 	sensitivity_ = s;

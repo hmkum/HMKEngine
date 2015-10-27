@@ -89,8 +89,10 @@
     <ClCompile Include="external\imgui-1.45\imgui\imgui_impl_gl3.cpp" />
     <ClCompile Include="external\pugixml\pugixml.cpp" />
     <ClCompile Include="external\stb\stb_image.c" />
+    <ClCompile Include="external\stb\stb_image_write.c" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\DrawableTexture.cpp" />
+    <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\KeyManager.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -112,6 +114,7 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Debug.h" />
     <ClInclude Include="src\DrawableTexture.h" />
+    <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\KeyManager.h" />
     <ClInclude Include="src\Keys.h" />

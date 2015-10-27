@@ -189,6 +189,8 @@ int main()
 
 static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+	if(key == GLFW_KEY_INSERT && mods == GLFW_MOD_CONTROL)
+		hmk::take_screenshot();
 	keyCallback(key, scancode, action, mods);
 }
 

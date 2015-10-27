@@ -1,4 +1,6 @@
 To-Do
+- Sahneden model silmeyi ekle.
+- scene.xml'e postprocessing efektlerini ekle.
 - Fog ekle.
 - Light sistemini ekle(Point, ..).
 - scene.xml dosyasina isik sistemini de ekle.
@@ -32,3 +34,4 @@ Done
 - [Added]Modellerde degisiklik olunca scene.xml guncellensin.
 - [Added]Oyun calisirken model ekleme.
 - [Fixed]GUI arkasinda model varsa Picking o modeli seciyor. GUI event deaktif oluyor.
+- [Added]Screenshot almayý ekle.
