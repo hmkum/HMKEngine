@@ -1,5 +1,15 @@
 <?xml version="1.0"?>
 <scene name="default">
+	<camera name="Main Camera" projection="perspective">
+		<properties>
+			<position x="-5.96822596" y="2.02096629" z="11.3087769" />
+			<target x="0.525808215" y="-0.0392598175" z="-0.849696636" />
+			<right x="0.850384176" y="0.00159696862" z="0.526159942" />
+			<up x="0.0193000045" y="0.999227762" z="-0.0342256278" />
+		</properties>
+		<perspective fov="120" nearZ="0.100000001" farZ="100" />
+		<orthographic left="0" right="1" top="0" bottom="1" nearZ="0.100000001" farZ="100" />
+	</camera>
 	<atmosphere>
 		<skybox folder="Bridge" />
 		<fog method="linear" density="0.2" start="5" end="100" />

@@ -1,4 +1,6 @@
 #pragma once
+#include "glm/glm.hpp"
+#include <pugixml/pugixml.hpp>
 #include "Utility.h"
 #include <fstream>
 #include <streambuf>
@@ -7,6 +9,15 @@
 
 namespace hmk
 {
+struct CameraData
+{
+	std::string name_;
+	std::string projection_;
+	glm::vec3 position_, target_, right_, up_;
+	float fov_, near_z_, far_z_;
+	glm::vec4 ortho_params_;
+};
+
 struct FogData
 {
 	// TODO_HMK: Implement this
@@ -41,16 +52,21 @@ struct ModelData
 struct SceneData
 {
 	std::string name_;
+	CameraData camera_;
 	AtmosphereData atmosphere_;
-	std::vector<ModelData> model_;
+	std::vector<ModelData> models_;
 };
 
 class SceneParser
 {
 public:
-	static bool parse(const std::string& name);
+	static std::string parse(const std::string& name);
 	static SceneData get_data() { return scene_data_; }
 
+private:
+	static bool parse_camera(const pugi::xml_node& scene_node);
+	static bool parse_atmosphere(const pugi::xml_node& scene_node);
+	static bool parse_models(const pugi::xml_node& scene_node);
 private:
 	static SceneData scene_data_;
 };

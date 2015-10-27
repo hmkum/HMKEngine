@@ -3,6 +3,7 @@ To-Do
 - scene.xml'e postprocessing efektlerini ekle.
 - Fog ekle.
 - Light sistemini ekle(Point, ..).
+- scene.xml dosyasina çoklu kamera sistemini ekle.
 - scene.xml dosyasina isik sistemini de ekle.
 - GUI sistemini duzenle. In-game gui: ImGui, Editor için Qt.
 - Parent-child sistemini ekle(Base class: Entity, GameObject, Node. Hangisi?).
@@ -27,6 +28,7 @@ Bugs
 modeli seciyor.
 - Axe uzerinde dusen golgede hata var. Selfshadowing oluyor. Normal offset yontemini gelistir.
 - Sphere'lerin altýnda olmamasý gereken shadow var.
+- Scene.xml'den kamera okunduktan sonra camera kaydedildiði yöne doðru bakmýyor.
 
 --------------------------------------
 

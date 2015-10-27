@@ -25,10 +25,6 @@ Game::~Game()
 
 bool Game::initialize()
 {
-    camera_ = std::make_shared<hmk::Camera>();
-    camera_->create_look_at(glm::vec3(0.0f, 2.0f, 0.0f));
-	camera_->create_perspective_proj(120.0f, 0.1f, 100.0f);
-
 	//compile_and_link_all_shaders();
 
     shadow_map_ = std::make_shared<hmk::ShadowMap>();
@@ -53,9 +49,23 @@ bool Game::initialize()
 	light_projection_ = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 50.0f);
 	light_space_matrix_ = light_projection_ * lightView;
 
-	hmk::SceneParser::parse("data/scene.xml");
+	std::string scene_parse_result = hmk::SceneParser::parse("data/scene.xml");
+	if(scene_parse_result != "")
+	{
+		HMK_LOG_ERROR("Could not parse scene.xml. Error: ", scene_parse_result)
+		return false;
+	}
 	hmk::SceneData scene_data = hmk::SceneParser::get_data();
-	for(const auto& model : scene_data.model_)
+
+	camera_ = std::make_shared<hmk::Camera>();
+	camera_->create_look_at(scene_data.camera_.position_, scene_data.camera_.target_, scene_data.camera_.up_);
+	camera_->set_right_vector(scene_data.camera_.right_);
+	if(scene_data.camera_.projection_ == "perspective")
+		camera_->create_perspective_proj(scene_data.camera_.fov_, scene_data.camera_.near_z_, scene_data.camera_.far_z_);
+	else
+		camera_->create_orthographic_proj(scene_data.camera_.ortho_params_, scene_data.camera_.near_z_, scene_data.camera_.far_z_);
+
+	for(const auto& model : scene_data.models_)
 	{
 		HMK_PRINT("Loading model: " + model.file_);
 		hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
@@ -236,18 +246,60 @@ void Game::key_input(int key, int scancode, int action, int mods)
 		pugi::xml_document doc;
 		doc.load_string(xml_text.c_str());
 		pugi::xml_node scene_node = doc.first_child();
-		pugi::xml_node atmosphere_node = scene_node.append_child("atmosphere");
 
+		// Add camera
+		pugi::xml_node camera_node = scene_node.append_child("camera");
+		camera_node.append_attribute("name").set_value("Main Camera");
+		camera_node.append_attribute("projection").set_value("perspective");
+		pugi::xml_node camera_prop_node = camera_node.append_child("properties");
+		pugi::xml_node camera_prop_pos_node = camera_prop_node.append_child("position");
+		const glm::vec3 camera_pos = camera_->get_position();
+		camera_prop_pos_node.append_attribute("x").set_value(camera_pos.x);
+		camera_prop_pos_node.append_attribute("y").set_value(camera_pos.y);
+		camera_prop_pos_node.append_attribute("z").set_value(camera_pos.z);
+		pugi::xml_node camera_prop_target_node = camera_prop_node.append_child("target");
+		const glm::vec3 camera_target = camera_->get_target();
+		camera_prop_target_node.append_attribute("x").set_value(camera_target.x);
+		camera_prop_target_node.append_attribute("y").set_value(camera_target.y);
+		camera_prop_target_node.append_attribute("z").set_value(camera_target.z);
+		pugi::xml_node camera_prop_right_node = camera_prop_node.append_child("right");
+		const glm::vec3 camera_right = camera_->get_right_vector();
+		camera_prop_right_node.append_attribute("x").set_value(camera_right.x);
+		camera_prop_right_node.append_attribute("y").set_value(camera_right.y);
+		camera_prop_right_node.append_attribute("z").set_value(camera_right.z);
+		pugi::xml_node camera_prop_up_node = camera_prop_node.append_child("up");
+		const glm::vec3 camera_up = camera_->get_up_vector();
+		camera_prop_up_node.append_attribute("x").set_value(camera_up.x);
+		camera_prop_up_node.append_attribute("y").set_value(camera_up.y);
+		camera_prop_up_node.append_attribute("z").set_value(camera_up.z);
+		pugi::xml_node camera_persp_node = camera_node.append_child("perspective");
+		camera_persp_node.append_attribute("fov").set_value(camera_->get_fov());
+		camera_persp_node.append_attribute("nearZ").set_value(camera_->get_near_z());
+		camera_persp_node.append_attribute("farZ").set_value(camera_->get_far_z());
+		pugi::xml_node camera_ortho_node = camera_node.append_child("orthographic");
+		const glm::vec4 ortho_params = camera_->get_ortho_params();
+		camera_ortho_node.append_attribute("left").set_value(ortho_params.x);
+		camera_ortho_node.append_attribute("right").set_value(ortho_params.y);
+		camera_ortho_node.append_attribute("top").set_value(ortho_params.z);
+		camera_ortho_node.append_attribute("bottom").set_value(ortho_params.w);
+		camera_ortho_node.append_attribute("nearZ").set_value(camera_->get_near_z());
+		camera_ortho_node.append_attribute("farZ").set_value(camera_->get_far_z());
+
+		// Atmosphere things
+		pugi::xml_node atmosphere_node = scene_node.append_child("atmosphere");
+		
+		// Add skybox
 		pugi::xml_node skybox_node = atmosphere_node.append_child("skybox");
 		skybox_node.append_attribute("folder").set_value(skybox_->get_folder_name().c_str());
 
+		// Add fog
 		pugi::xml_node fog_node = atmosphere_node.append_child("fog");
 		fog_node.append_attribute("method").set_value("linear");
 		fog_node.append_attribute("density").set_value("0.2");
 		fog_node.append_attribute("start").set_value("5");
 		fog_node.append_attribute("end").set_value("100");
 
-#pragma region Save Models
+		// Add models
 		for(const auto& model : scene_models)
 		{
 			pugi::xml_node model_node = scene_node.append_child("model");
@@ -273,8 +325,6 @@ void Game::key_input(int key, int scancode, int action, int mods)
 			scale_node.append_attribute("y").set_value(scale.y);
 			scale_node.append_attribute("z").set_value(scale.z);
 		}
-#pragma endregion
-
 
 		doc.save_file("data/scene.xml");
 		HMK_PRINT("Scene saved.");
@@ -354,7 +404,7 @@ void Game::drop_files_callback(int number_of_files, const char** filenames)
 		HMK_PRINT("Done " + filename);
 	}
 
-	for(int i = 0; i < model_names.size(); ++i)
+	for(unsigned int i = 0; i < model_names.size(); ++i)
 	{
 		filename = model_names[i];
 		HMK_PRINT("Loading " + filename);

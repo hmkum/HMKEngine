@@ -8,6 +8,10 @@ Camera::Camera()
 	, front_{glm::vec3(0.0f, 0.0f, -1.0f)}
 	, width_{800}
 	, height_{600}
+	, fov_{120.f}
+	, near_z_{0.1f}
+	, far_z_{100.f}
+	, ortho_params_{0.f, 1.f, 0.f, 1.f}
 	, pitch_{0.0f}
 	, yaw_{-90.0f}
 	, sensitivity_{0.25f}
@@ -22,6 +26,10 @@ Camera::Camera(int width, int height)
 	, front_{glm::vec3(0.0f, 0.0f, -1.0f)}
 	, width_{width}
 	, height_{height}
+	, fov_{120.f}
+	, near_z_{0.1f}
+	, far_z_{100.f}
+	, ortho_params_{0.f, 1.f, 0.f, 1.f}
 	, pitch_{0.0f}
 	, yaw_{-90.0f}
 	, sensitivity_{0.25f}
@@ -34,22 +42,33 @@ Camera::~Camera()
 {
 }
 
-void Camera::create_look_at(const glm::vec3 &pos, const glm::vec3 &up)
+void Camera::create_look_at(const glm::vec3 &pos,const glm::vec3& target, const glm::vec3 &up)
 {
 	position_ = pos;
-	world_up_  = up;
-	front_    = glm::vec3(0.0f, 0.0f, -1.0f);
+	world_up_ = up;
+	front_ = target;
 	update_camera_vectors();
 }
 
 void Camera::create_perspective_proj(float fovY, float nearZ, float farZ)
 {
+	fov_    = fovY;
+	near_z_ = nearZ;
+	far_z_  = farZ;
 	projection_matrix_ = glm::perspective(fovY, ((float)(width_) / height_), nearZ, farZ);
 }
 
 void Camera::create_orthographic_proj(float left, float right, float top, float bottom, float nearZ, float farZ)
 {
+	ortho_params_ = glm::vec4(left, right, top, bottom);
+	near_z_ = nearZ;
+	far_z_  = farZ;
 	projection_matrix_ = glm::ortho(left, right, bottom, top, nearZ, farZ);
+}
+
+void Camera::create_orthographic_proj(const glm::vec4& ortho_params, float nearZ, float farZ)
+{
+	create_orthographic_proj(ortho_params.x, ortho_params.y, ortho_params.z, ortho_params.w, nearZ, farZ);
 }
 
 void Camera::move_forward(float dt)
@@ -99,6 +118,17 @@ void Camera::set_camera_speed(float s)
 {
 	movement_speed_ = s;
 }
+
+void Camera::set_fov(float fov)
+{
+	fov_ = fov;
+}
+
+void Camera::set_right_vector(const glm::vec3& right)
+{
+	right_ = right;
+}
+
 
 void Camera::update_camera_vectors()
 {
