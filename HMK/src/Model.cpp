@@ -10,13 +10,10 @@
 using namespace hmk;
 
 Model::Model()
-	: name_{""}
-	, filename_{""}
-	, draw_bounding_box_{false}
-	, translation_matrix_{1.0f}
-	, rotation_matrix_{1.0f}
-	, scale_matrix_{1.0f}
+	: draw_bounding_box_{false}
+	, position_vec_{0}
 	, rotation_vec_{0}
+	, scale_vec_{0}
 { }
 
 Model::~Model()
@@ -31,7 +28,7 @@ bool Model::load(std::string modelName)
 
 	if (!scene)
 	{
-		HMK_LOG_ERROR("Could not load model: ", modelName);
+		HMK_LOG_ERROR("Could not load model: ", modelName, ". Error: ", importer.GetErrorString());
 		return false;
 	}
 	filename_ = modelName;
@@ -184,43 +181,22 @@ void Model::render(ShaderProgram &shader)
 	}
 }
 
-void Model::set_name(const std::string& name)
-{
-	name_ = name;
-}
-
 void Model::set_position(glm::vec3 pos)
 {
-	translation_matrix_ = glm::translate(pos);
+	position_vec_ = pos;
+	update_model_matrix();
 }
 
 void Model::offset_position(glm::vec3 offset)
 {
-	translation_matrix_ = glm::translate(translation_matrix_, offset);
+	position_vec_ += offset;
+	update_model_matrix();
 }
 
 void Model::set_rotation(float _x, float _y, float _z)
 {
 	rotation_vec_ = glm::vec3(_x, _y, _z);
-	float x = glm::radians(rotation_vec_.x);
-	float y = glm::radians(rotation_vec_.y);
-	float z = glm::radians(rotation_vec_.z);
-
-	glm::mat4 xRot = glm::rotate(x, glm::vec3(1, 0, 0));
-	glm::mat4 yRot = glm::rotate(y, glm::vec3(0, 1, 0));
-	glm::mat4 zRot = glm::rotate(z, glm::vec3(0, 0, 1));
-	rotation_matrix_ = zRot * yRot * xRot;
-}
-
-void Model::offset_rotation(glm::vec3 rot)
-{
-	offset_rotation(rot.x, rot.y, rot.z);
-}
-
-void Model::offset_rotation(float _x, float _y, float _z)
-{
-	rotation_vec_ += glm::vec3(_x, _y, _z);
-	set_rotation(rotation_vec_);
+	update_model_matrix();
 }
 
 void Model::set_rotation(glm::vec3 rot)
@@ -228,14 +204,27 @@ void Model::set_rotation(glm::vec3 rot)
 	set_rotation(rot.x, rot.y, rot.z);
 }
 
+void Model::offset_rotation(float _x, float _y, float _z)
+{
+	rotation_vec_ += glm::vec3(_x, _y, _z);
+	update_model_matrix();
+}
+
+void Model::offset_rotation(glm::vec3 rot)
+{
+	offset_rotation(rot.x, rot.y, rot.z);
+}
+
 void Model::set_scale(glm::vec3 scale)
 {
-	scale_matrix_ = glm::scale(scale);
+	scale_vec_ = scale;
+	update_model_matrix();
 }
 
 void Model::offset_scale(glm::vec3 offset)
 {
-	scale_matrix_ = glm::scale(scale_matrix_, offset);
+	scale_vec_ += offset;
+	update_model_matrix();
 }
 
 void Model::set_roughness(float r)
@@ -269,6 +258,22 @@ BoundingBox Model::get_bounding_box() const
 	box.min_corner_ = glm::vec3(get_model_matrix() * glm::vec4(bounding_box_.min_corner_, 1.0f));
 	box.max_corner_ = glm::vec3(get_model_matrix() * glm::vec4(bounding_box_.max_corner_, 1.0f));
 	return box;
+}
+
+void Model::update_model_matrix()
+{
+	glm::mat4 t = glm::translate(position_vec_);
+	float x = glm::radians(rotation_vec_.x);
+	float y = glm::radians(rotation_vec_.y);
+	float z = glm::radians(rotation_vec_.z);
+
+	glm::mat4 xRot = glm::rotate(x, glm::vec3(1, 0, 0));
+	glm::mat4 yRot = glm::rotate(y, glm::vec3(0, 1, 0));
+	glm::mat4 zRot = glm::rotate(z, glm::vec3(0, 0, 1));
+	glm::mat4 r = zRot * yRot * xRot;
+	glm::mat4 s = glm::scale(scale_vec_);
+
+	model_matrix_ = t * r * s;
 }
 
 std::string Model::handle_texture_name(const char *filename)

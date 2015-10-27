@@ -26,7 +26,7 @@ Game::~Game()
 bool Game::initialize()
 {
     camera_ = std::make_shared<hmk::Camera>();
-    camera_->create_look_at(glm::vec3(0.0f, 2.0f, 10.0f));
+    camera_->create_look_at(glm::vec3(0.0f, 2.0f, 0.0f));
 	camera_->create_perspective_proj(120.0f, 0.1f, 100.0f);
 
 	//compile_and_link_all_shaders();
@@ -74,7 +74,7 @@ bool Game::initialize()
 		scene_models.emplace_back(std::move(temp_model));
 		HMK_PRINT("Done: " + model.file_);
 	}
-	
+
 	skybox_ = std::make_shared<hmk::Skybox>();
 	skybox_->load(scene_data.atmosphere_.skybox_folder_);
 
@@ -110,30 +110,30 @@ void Game::update(float dt)
 	static float r = 0.0f, m = 0.0f;
 	if(selected_model_index != -1)
 	{
-		r = scene_models[selected_model_index]->get_roughness();
-		m = scene_models[selected_model_index]->get_metallic();
-		selected_model_position_ = scene_models[selected_model_index]->get_position();
-		selected_model_rotation_ = scene_models[selected_model_index]->get_rotation();
-		selected_model_scale_	 = scene_models[selected_model_index]->get_scale();
-
 		if(ImGui::CollapsingHeader("Entity Properties"))
 		{
+			r = scene_models[selected_model_index]->get_roughness();
+			m = scene_models[selected_model_index]->get_metallic();
+			selected_model_position_ = scene_models[selected_model_index]->get_position();
+			selected_model_rotation_ = scene_models[selected_model_index]->get_rotation();
+			selected_model_scale_ = scene_models[selected_model_index]->get_scale();
+
 			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), scene_models[selected_model_index]->get_name().c_str());
-			ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f);
-			ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f);
-			scene_models[selected_model_index]->set_roughness(r);
-			scene_models[selected_model_index]->set_metallic(m);
+			if(ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f))
+				scene_models[selected_model_index]->set_roughness(r);
+			if(ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f))
+				scene_models[selected_model_index]->set_metallic(m);
 
 			ImGui::Separator();
 
-			ImGui::DragFloat3("Position", (float*)&selected_model_position_.x, 0.1f);
-			scene_models[selected_model_index]->set_position(selected_model_position_);
+			if(ImGui::DragFloat3("Position", (float*)&selected_model_position_.x, 0.1f))
+				scene_models[selected_model_index]->set_position(selected_model_position_);
 
-			ImGui::DragFloat3("Rotation", (float*)&selected_model_rotation_.x, 0.1f);
-			scene_models[selected_model_index]->set_rotation(selected_model_rotation_);
+			if(ImGui::DragFloat3("Rotation", (float*)&selected_model_rotation_.x, 0.1f))
+				scene_models[selected_model_index]->set_rotation(selected_model_rotation_);
 
-			ImGui::DragFloat3("Scale", (float*)&selected_model_scale_.x, 0.1f);
-			scene_models[selected_model_index]->set_scale(selected_model_scale_);
+			if(ImGui::DragFloat3("Scale", (float*)&selected_model_scale_.x, 0.1f))
+				scene_models[selected_model_index]->set_scale(selected_model_scale_);
 		}
 	}
 	ImGui::End();

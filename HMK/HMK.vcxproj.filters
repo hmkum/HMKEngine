@@ -86,6 +86,12 @@
     <ClCompile Include="external\pugixml\pugixml.cpp">
       <Filter>external</Filter>
     </ClCompile>
+    <ClCompile Include="src\Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="external\stb\stb_image_write.c">
+      <Filter>external</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -153,6 +159,9 @@
     </ClInclude>
     <ClInclude Include="src\SceneParser.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Entity.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
