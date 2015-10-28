@@ -9,7 +9,9 @@ namespace hmk
 
 const float MAX_PITCH = 89.0f;
 
-class Camera : AlignedAllocation<16>
+enum class CameraProjection { Perspective, Orthographic };
+
+class Camera : public AlignedAllocation<16>
 {
 public:
 	Camera();
@@ -26,11 +28,13 @@ public:
 	inline glm::vec3 get_position()     const { return position_; }
 	inline glm::vec3 get_target()       const { return front_; };
 	inline glm::vec3 get_up_vector()    const { return up_; }
-	inline glm::vec3 get_right_vector() const { return right_; }
 	inline float get_fov()			    const { return fov_; }
 	inline float get_near_z()		    const { return near_z_; }
 	inline float get_far_z()		    const { return far_z_; }
 	inline glm::vec4 get_ortho_params() const { return ortho_params_; }
+	inline CameraProjection get_projection() const { return camera_projection_; }
+	inline float get_pitch()			const { return pitch_ / sensitivity_; }
+	inline float get_yaw()				const { return yaw_ / sensitivity_; }
 
 	void move_forward(float dt);
 	void move_backward(float dt);
@@ -42,7 +46,6 @@ public:
 	void set_sensitivity(float s);
 	void set_camera_speed(float s);
 	void set_fov(float fov);
-	void set_right_vector(const glm::vec3& right);
 
 private:
 	void update_camera_vectors();
@@ -51,6 +54,7 @@ private:
 	glm::mat4 projection_matrix_;
 	glm::vec3 position_, world_up_;
 	glm::vec3 front_, right_, up_;
+	CameraProjection camera_projection_;
 	int width_, height_;
 	float fov_, near_z_, far_z_;
 	glm::vec4 ortho_params_;

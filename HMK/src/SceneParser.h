@@ -13,7 +13,8 @@ struct CameraData
 {
 	std::string name_;
 	std::string projection_;
-	glm::vec3 position_, target_, right_, up_;
+	glm::vec3 position_, target_, up_;
+	float yaw_, pitch_;
 	float fov_, near_z_, far_z_;
 	glm::vec4 ortho_params_;
 };

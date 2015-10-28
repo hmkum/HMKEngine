@@ -57,14 +57,16 @@ bool Game::initialize()
 	}
 	hmk::SceneData scene_data = hmk::SceneParser::get_data();
 
+	
 	camera_ = std::make_shared<hmk::Camera>();
-	camera_->create_look_at(scene_data.camera_.position_, scene_data.camera_.target_, scene_data.camera_.up_);
-	camera_->set_right_vector(scene_data.camera_.right_);
+	camera_->create_look_at(scene_data.camera_.position_);
 	if(scene_data.camera_.projection_ == "perspective")
 		camera_->create_perspective_proj(scene_data.camera_.fov_, scene_data.camera_.near_z_, scene_data.camera_.far_z_);
 	else
 		camera_->create_orthographic_proj(scene_data.camera_.ortho_params_, scene_data.camera_.near_z_, scene_data.camera_.far_z_);
-
+	
+	camera_->rotate(scene_data.camera_.yaw_ + 90.f * 4, scene_data.camera_.pitch_);
+	
 	for(const auto& model : scene_data.models_)
 	{
 		HMK_PRINT("Loading model: " + model.file_);
@@ -262,29 +264,32 @@ void Game::key_input(int key, int scancode, int action, int mods)
 		camera_prop_target_node.append_attribute("x").set_value(camera_target.x);
 		camera_prop_target_node.append_attribute("y").set_value(camera_target.y);
 		camera_prop_target_node.append_attribute("z").set_value(camera_target.z);
-		pugi::xml_node camera_prop_right_node = camera_prop_node.append_child("right");
-		const glm::vec3 camera_right = camera_->get_right_vector();
-		camera_prop_right_node.append_attribute("x").set_value(camera_right.x);
-		camera_prop_right_node.append_attribute("y").set_value(camera_right.y);
-		camera_prop_right_node.append_attribute("z").set_value(camera_right.z);
 		pugi::xml_node camera_prop_up_node = camera_prop_node.append_child("up");
 		const glm::vec3 camera_up = camera_->get_up_vector();
 		camera_prop_up_node.append_attribute("x").set_value(camera_up.x);
 		camera_prop_up_node.append_attribute("y").set_value(camera_up.y);
 		camera_prop_up_node.append_attribute("z").set_value(camera_up.z);
-		pugi::xml_node camera_persp_node = camera_node.append_child("perspective");
-		camera_persp_node.append_attribute("fov").set_value(camera_->get_fov());
-		camera_persp_node.append_attribute("nearZ").set_value(camera_->get_near_z());
-		camera_persp_node.append_attribute("farZ").set_value(camera_->get_far_z());
-		pugi::xml_node camera_ortho_node = camera_node.append_child("orthographic");
-		const glm::vec4 ortho_params = camera_->get_ortho_params();
-		camera_ortho_node.append_attribute("left").set_value(ortho_params.x);
-		camera_ortho_node.append_attribute("right").set_value(ortho_params.y);
-		camera_ortho_node.append_attribute("top").set_value(ortho_params.z);
-		camera_ortho_node.append_attribute("bottom").set_value(ortho_params.w);
-		camera_ortho_node.append_attribute("nearZ").set_value(camera_->get_near_z());
-		camera_ortho_node.append_attribute("farZ").set_value(camera_->get_far_z());
-
+		pugi::xml_node camera_rotation_node = camera_prop_node.append_child("rotation");
+		camera_rotation_node.append_attribute("yaw").set_value(camera_->get_yaw());
+		camera_rotation_node.append_attribute("pitch").set_value(camera_->get_pitch());
+		if(camera_->get_projection() == hmk::CameraProjection::Perspective)
+		{
+			pugi::xml_node camera_persp_node = camera_node.append_child("perspective");
+			camera_persp_node.append_attribute("fov").set_value(camera_->get_fov());
+			camera_persp_node.append_attribute("nearZ").set_value(camera_->get_near_z());
+			camera_persp_node.append_attribute("farZ").set_value(camera_->get_far_z());
+		}
+		else
+		{
+			pugi::xml_node camera_ortho_node = camera_node.append_child("orthographic");
+			const glm::vec4 ortho_params = camera_->get_ortho_params();
+			camera_ortho_node.append_attribute("left").set_value(ortho_params.x);
+			camera_ortho_node.append_attribute("right").set_value(ortho_params.y);
+			camera_ortho_node.append_attribute("top").set_value(ortho_params.z);
+			camera_ortho_node.append_attribute("bottom").set_value(ortho_params.w);
+			camera_ortho_node.append_attribute("nearZ").set_value(camera_->get_near_z());
+			camera_ortho_node.append_attribute("farZ").set_value(camera_->get_far_z());
+		}
 		// Atmosphere things
 		pugi::xml_node atmosphere_node = scene_node.append_child("atmosphere");
 		

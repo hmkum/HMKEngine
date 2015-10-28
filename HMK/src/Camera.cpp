@@ -6,6 +6,7 @@ Camera::Camera()
 	: position_{glm::vec3(0.0f, 0.0f, 3.0f)}
 	, world_up_{glm::vec3(0.0f, 1.0f, 0.0f)}
 	, front_{glm::vec3(0.0f, 0.0f, -1.0f)}
+	, camera_projection_{CameraProjection::Perspective}
 	, width_{800}
 	, height_{600}
 	, fov_{120.f}
@@ -24,6 +25,7 @@ Camera::Camera(int width, int height)
 	: position_{glm::vec3(0.0f, 0.0f, 3.0f)}
 	, world_up_{glm::vec3(0.0f, 1.0f, 0.0f)}
 	, front_{glm::vec3(0.0f, 0.0f, -1.0f)}
+	, camera_projection_{CameraProjection::Perspective}
 	, width_{width}
 	, height_{height}
 	, fov_{120.f}
@@ -52,6 +54,7 @@ void Camera::create_look_at(const glm::vec3 &pos,const glm::vec3& target, const 
 
 void Camera::create_perspective_proj(float fovY, float nearZ, float farZ)
 {
+	camera_projection_ = CameraProjection::Perspective;
 	fov_    = fovY;
 	near_z_ = nearZ;
 	far_z_  = farZ;
@@ -60,6 +63,7 @@ void Camera::create_perspective_proj(float fovY, float nearZ, float farZ)
 
 void Camera::create_orthographic_proj(float left, float right, float top, float bottom, float nearZ, float farZ)
 {
+	camera_projection_ = CameraProjection::Orthographic;
 	ortho_params_ = glm::vec4(left, right, top, bottom);
 	near_z_ = nearZ;
 	far_z_  = farZ;
@@ -123,12 +127,6 @@ void Camera::set_fov(float fov)
 {
 	fov_ = fov;
 }
-
-void Camera::set_right_vector(const glm::vec3& right)
-{
-	right_ = right;
-}
-
 
 void Camera::update_camera_vectors()
 {

@@ -13,6 +13,10 @@ std::string SceneParser::parse(const std::string& name)
 		return result.description();
 	}
 	pugi::xml_node scene_node = doc.first_child();
+	if(scene_node.empty())
+	{
+		return "Scene is empty!";
+	}
 	scene_data_.name_ = scene_node.name();
 
 	if(parse_camera(scene_node) == false)
@@ -38,47 +42,68 @@ bool SceneParser::parse_camera(const pugi::xml_node& scene_node)
 	// TODO_HMK: Check nodes for nullptr.
 	CameraData camera_data;
 	const pugi::xml_node camera_node = scene_node.child("camera");
+	if(camera_node.empty())
+		return false;
 	camera_data.name_ = camera_node.attribute("name").as_string();
 	camera_data.projection_ = camera_node.attribute("projection").as_string();
 	const pugi::xml_node prop_node = camera_node.child("properties");
+	if(prop_node.empty())
+		return false;
 	const pugi::xml_node pos_node = prop_node.child("position");
+	if(pos_node.empty())
+		return false;
 	camera_data.position_.x = pos_node.attribute("x").as_float();
 	camera_data.position_.y = pos_node.attribute("y").as_float();
 	camera_data.position_.z = pos_node.attribute("z").as_float();
 	const pugi::xml_node target_node = prop_node.child("target");
+	if(target_node.empty())
+		return false;
 	camera_data.target_.x = target_node.attribute("x").as_float();
 	camera_data.target_.y = target_node.attribute("y").as_float();
 	camera_data.target_.z = target_node.attribute("z").as_float();
-	const pugi::xml_node right_node = prop_node.child("right");
-	camera_data.right_.x = right_node.attribute("x").as_float();
-	camera_data.right_.y = right_node.attribute("y").as_float();
-	camera_data.right_.z = right_node.attribute("z").as_float();
 	const pugi::xml_node up_node = prop_node.child("up");
+	if(up_node.empty())
+		return false;
 	camera_data.up_.x = up_node.attribute("x").as_float();
 	camera_data.up_.y = up_node.attribute("y").as_float();
 	camera_data.up_.z = up_node.attribute("z").as_float();
+	const pugi::xml_node rotation_node = prop_node.child("rotation");
+	if(rotation_node.empty())
+		return false;
+	camera_data.yaw_ = rotation_node.attribute("yaw").as_float();
+	camera_data.pitch_ = rotation_node.attribute("pitch").as_float();
+	bool proj_persp_result = true;
 	const pugi::xml_node persp_node = camera_node.child("perspective");
-	camera_data.fov_ = persp_node.attribute("fov").as_float();
+	if(persp_node.empty())
+		proj_persp_result = false;
+	else
+		camera_data.fov_ = persp_node.attribute("fov").as_float();
+	bool proj_ortho_result = true;
 	const pugi::xml_node ortho_node = camera_node.child("orthographic");
-	camera_data.ortho_params_.x = ortho_node.attribute("left").as_float();
-	camera_data.ortho_params_.y = ortho_node.attribute("right").as_float();
-	camera_data.ortho_params_.z = ortho_node.attribute("top").as_float();
-	camera_data.ortho_params_.w = ortho_node.attribute("bottom").as_float();
-	if(camera_data.projection_ == "perspective")
+	if(ortho_node.empty())
+		proj_ortho_result = false;
+	else
 	{
-		camera_data.near_z_ = ortho_node.attribute("nearZ").as_float();
-		camera_data.far_z_ = ortho_node.attribute("farZ").as_float();
+		camera_data.ortho_params_.x = ortho_node.attribute("left").as_float();
+		camera_data.ortho_params_.y = ortho_node.attribute("right").as_float();
+		camera_data.ortho_params_.z = ortho_node.attribute("top").as_float();
+		camera_data.ortho_params_.w = ortho_node.attribute("bottom").as_float();
 	}
-	else if(camera_data.projection_ == "orthographic")
+
+	if(proj_persp_result)
 	{
 		camera_data.near_z_ = persp_node.attribute("nearZ").as_float();
 		camera_data.far_z_ = persp_node.attribute("farZ").as_float();
 	}
+	else if(proj_ortho_result)
+	{
+		camera_data.near_z_ = ortho_node.attribute("nearZ").as_float();
+		camera_data.far_z_ = ortho_node.attribute("farZ").as_float();
+	}
 	else
 	{
-		return "Camera projection type is wrong!";
+		return false;
 	}
-
 	scene_data_.camera_ = camera_data;
 	return true;
 }
