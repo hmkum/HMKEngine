@@ -3,10 +3,10 @@
 	<cameras>
 		<camera name="Main Camera" projection="perspective">
 			<properties>
-				<position x="-14.247282" y="12.6809702" z="17.9987125" />
-				<target x="0.590972543" y="-0.414693236" z="-0.69194001" />
-				<up x="0.26932171" y="0.909961343" z="-0.315335244" />
-				<rotation yaw="-198" pitch="-98" />
+				<position x="-7.51831675" y="6.30508471" z="9.55539227" />
+				<target x="0.549266279" y="-0.267238408" z="-0.791764081" />
+				<up x="0.152325019" y="0.963630438" z="-0.219575584" />
+				<rotation yaw="-221" pitch="-62" />
 			</properties>
 			<perspective fov="120" nearZ="0.100000001" farZ="100" />
 		</camera>
@@ -48,17 +48,6 @@
 			<scale x="1" y="1" z="1" />
 		</transform>
 	</model>
-	<model file="axe.obj" name="Axe">
-		<material>
-			<roughness value="0" />
-			<metalness value="0" />
-		</material>
-		<transform>
-			<position x="2" y="2.80000019" z="0" />
-			<rotation x="90" y="0" z="0" />
-			<scale x="0.100000001" y="0.100000001" z="0.100000001" />
-		</transform>
-	</model>
 	<model file="Guardian.obj" name="Guardian">
 		<material>
 			<roughness value="1" />
@@ -66,17 +55,6 @@
 		</material>
 		<transform>
 			<position x="-1.60000002" y="2.80000019" z="-3.30000019" />
-			<rotation x="0" y="0" z="0" />
-			<scale x="1" y="1" z="1" />
-		</transform>
-	</model>
-	<model file="mitsuba-sphere.obj" name="default">
-		<material>
-			<roughness value="0" />
-			<metalness value="0" />
-		</material>
-		<transform>
-			<position x="4.10000038" y="0" z="0" />
 			<rotation x="0" y="0" z="0" />
 			<scale x="1" y="1" z="1" />
 		</transform>

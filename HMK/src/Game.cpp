@@ -242,6 +242,8 @@ void Game::process_selection(int x, int y)
 
 void Game::key_input(int key, int scancode, int action, int mods)
 {
+	hmk::KeyManager::set_key(key, (action == HMK_RELEASE) ? false : true);
+
 	if(key == HMK_KEY_S && mods == HMK_MOD_CONTROL)
 	{
 		std::string xml_text = "<?xml version=\"1.0\" encoding=\"UTF - 8\"?>";
@@ -341,7 +343,13 @@ void Game::key_input(int key, int scancode, int action, int mods)
 		HMK_PRINT("Scene saved.");
 		return;
 	}
-	hmk::KeyManager::set_key(key, (action == HMK_RELEASE) ? false : true);
+
+	if(key == HMK_KEY_DELETE && selected_model_index != -1)
+	{
+		scene_models.erase(std::begin(scene_models) + selected_model_index, std::begin(scene_models) + selected_model_index + 1);
+		selected_model_index = -1;
+	}
+
 	if(key == HMK_KEY_ESCAPE)
 	{
 		exit(1);

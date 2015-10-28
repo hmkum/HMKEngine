@@ -1,5 +1,4 @@
 To-Do
-- Sahneden model silmeyi ekle.
 - scene.xml'e postprocessing efektlerini ekle.
 - Fog ekle.
 - Light sistemini ekle(Point, ..).
@@ -37,3 +36,4 @@ Done
 - [Added]Screenshot almayý ekle.
 - [Fixed]Scene.xml'den kamera okunduktan sonra camera kaydedildiði yöne doðru bakmýyor.
 - [Added]scene.xml dosyasina çoklu kamera sistemini ekle.
+- [Added]Sahneden model silmeyi ekle.
