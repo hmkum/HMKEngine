@@ -57,16 +57,18 @@ bool Game::initialize()
 	}
 	hmk::SceneData scene_data = hmk::SceneParser::get_data();
 
-	
-	camera_ = std::make_shared<hmk::Camera>();
-	camera_->create_look_at(scene_data.camera_.position_);
-	if(scene_data.camera_.projection_ == "perspective")
-		camera_->create_perspective_proj(scene_data.camera_.fov_, scene_data.camera_.near_z_, scene_data.camera_.far_z_);
-	else
-		camera_->create_orthographic_proj(scene_data.camera_.ortho_params_, scene_data.camera_.near_z_, scene_data.camera_.far_z_);
-	
-	camera_->rotate(scene_data.camera_.yaw_ + 90.f * 4, scene_data.camera_.pitch_);
-	
+	for(const auto camera_data : scene_data.cameras_)
+	{
+		auto camera = std::make_shared<hmk::Camera>();
+		camera->create_look_at(camera_data.position_);
+		if(camera_data.projection_ == "perspective")
+			camera->create_perspective_proj(camera_data.fov_, camera_data.near_z_, camera_data.far_z_);
+		else
+			camera->create_orthographic_proj(camera_data.ortho_params_, camera_data.near_z_, camera_data.far_z_);
+
+		camera->rotate(camera_data.yaw_ + 90.f * 4, camera_data.pitch_);
+		cameras_.push_back(camera);
+	}
 	for(const auto& model : scene_data.models_)
 	{
 		HMK_PRINT("Loading model: " + model.file_);
@@ -96,13 +98,13 @@ bool Game::initialize()
 void Game::update(float dt)
 {
 	if (hmk::KeyManager::get_key(HMK_KEY_W))
-		camera_->move_forward(dt);
+		cameras_[0]->move_forward(dt);
 	if (hmk::KeyManager::get_key(HMK_KEY_S))
-		camera_->move_backward(dt);
+		cameras_[0]->move_backward(dt);
 	if (hmk::KeyManager::get_key(HMK_KEY_A))
-		camera_->move_left(dt);
+		cameras_[0]->move_left(dt);
 	if (hmk::KeyManager::get_key(HMK_KEY_D))
-		camera_->move_right(dt);
+		cameras_[0]->move_right(dt);
 
 	ImGui::Begin("Properties");
 	if(ImGui::CollapsingHeader("World Properties"))
@@ -179,8 +181,8 @@ void Game::render()
 		shader_skybox_.use();
 		glm::mat4 skyboxModelMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(40.0f));
 		shader_skybox_.set_uniform("uModel", skyboxModelMatrix);
-		shader_skybox_.set_uniform("uViewMatrix", camera_->get_view_matrix());
-		shader_skybox_.set_uniform("uProjMatrix", camera_->get_proj_matrix());
+		shader_skybox_.set_uniform("uViewMatrix", cameras_[0]->get_view_matrix());
+		shader_skybox_.set_uniform("uProjMatrix", cameras_[0]->get_proj_matrix());
 		skybox_->render();
 
 		shader_basic_.use();
@@ -196,9 +198,9 @@ void Game::render()
 			glBindTexture(GL_TEXTURE_2D, shadow_map_->get_depth_map());
 		}
 		
-		shader_basic_.set_uniform("uViewMatrix", camera_->get_view_matrix());
-		shader_basic_.set_uniform("uProjMatrix", camera_->get_proj_matrix());
-		shader_basic_.set_uniform("uCameraPosition", camera_->get_position());
+		shader_basic_.set_uniform("uViewMatrix", cameras_[0]->get_view_matrix());
+		shader_basic_.set_uniform("uProjMatrix", cameras_[0]->get_proj_matrix());
+		shader_basic_.set_uniform("uCameraPosition", cameras_[0]->get_position());
 		shader_basic_.set_uniform("uLightPosition", light_position_);
 		shader_basic_.set_uniform("uLightSpaceMatrix", light_space_matrix_);
 
@@ -210,7 +212,7 @@ void Game::render()
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	post_process_system_->end();
-	const glm::mat4 viewProjMatrix = camera_->get_proj_matrix() * camera_->get_view_matrix();
+	const glm::mat4 viewProjMatrix = cameras_[0]->get_proj_matrix() * cameras_[0]->get_view_matrix();
 
 	if(gui_is_bloom_active_) post_process_system_->do_bloom(gui_bloom_intensity_);
 	if(gui_is_motionblur_active_) post_process_system_->do_motion_blur(viewProjMatrix);
@@ -222,10 +224,10 @@ void Game::render()
 
 void Game::process_selection(int x, int y)
 {
-	glm::vec3 rayNear = glm::unProject(glm::vec3(x, 600 - y, 0.0f), camera_->get_view_matrix(), camera_->get_proj_matrix(), glm::vec4(0, 0, 800, 600));
-	glm::vec3 rayFar = glm::unProject(glm::vec3(x, 600 - y, 1.0f), camera_->get_view_matrix(), camera_->get_proj_matrix(), glm::vec4(0, 0, 800, 600));
+	glm::vec3 rayNear = glm::unProject(glm::vec3(x, 600 - y, 0.0f), cameras_[0]->get_view_matrix(), cameras_[0]->get_proj_matrix(), glm::vec4(0, 0, 800, 600));
+	glm::vec3 rayFar = glm::unProject(glm::vec3(x, 600 - y, 1.0f), cameras_[0]->get_view_matrix(), cameras_[0]->get_proj_matrix(), glm::vec4(0, 0, 800, 600));
 	
-	hmk::Ray ray(camera_->get_position(), normalize(rayFar - rayNear));
+	hmk::Ray ray(cameras_[0]->get_position(), normalize(rayFar - rayNear));
 	int i = 0;
 	for(const auto& model : scene_models)
 	{
@@ -249,46 +251,50 @@ void Game::key_input(int key, int scancode, int action, int mods)
 		doc.load_string(xml_text.c_str());
 		pugi::xml_node scene_node = doc.first_child();
 
-		// Add camera
-		pugi::xml_node camera_node = scene_node.append_child("camera");
-		camera_node.append_attribute("name").set_value("Main Camera");
-		camera_node.append_attribute("projection").set_value("perspective");
-		pugi::xml_node camera_prop_node = camera_node.append_child("properties");
-		pugi::xml_node camera_prop_pos_node = camera_prop_node.append_child("position");
-		const glm::vec3 camera_pos = camera_->get_position();
-		camera_prop_pos_node.append_attribute("x").set_value(camera_pos.x);
-		camera_prop_pos_node.append_attribute("y").set_value(camera_pos.y);
-		camera_prop_pos_node.append_attribute("z").set_value(camera_pos.z);
-		pugi::xml_node camera_prop_target_node = camera_prop_node.append_child("target");
-		const glm::vec3 camera_target = camera_->get_target();
-		camera_prop_target_node.append_attribute("x").set_value(camera_target.x);
-		camera_prop_target_node.append_attribute("y").set_value(camera_target.y);
-		camera_prop_target_node.append_attribute("z").set_value(camera_target.z);
-		pugi::xml_node camera_prop_up_node = camera_prop_node.append_child("up");
-		const glm::vec3 camera_up = camera_->get_up_vector();
-		camera_prop_up_node.append_attribute("x").set_value(camera_up.x);
-		camera_prop_up_node.append_attribute("y").set_value(camera_up.y);
-		camera_prop_up_node.append_attribute("z").set_value(camera_up.z);
-		pugi::xml_node camera_rotation_node = camera_prop_node.append_child("rotation");
-		camera_rotation_node.append_attribute("yaw").set_value(camera_->get_yaw());
-		camera_rotation_node.append_attribute("pitch").set_value(camera_->get_pitch());
-		if(camera_->get_projection() == hmk::CameraProjection::Perspective)
+		pugi::xml_node cameras_node = scene_node.append_child("cameras");
+		for(const auto& camera_ : cameras_)
 		{
-			pugi::xml_node camera_persp_node = camera_node.append_child("perspective");
-			camera_persp_node.append_attribute("fov").set_value(camera_->get_fov());
-			camera_persp_node.append_attribute("nearZ").set_value(camera_->get_near_z());
-			camera_persp_node.append_attribute("farZ").set_value(camera_->get_far_z());
-		}
-		else
-		{
-			pugi::xml_node camera_ortho_node = camera_node.append_child("orthographic");
-			const glm::vec4 ortho_params = camera_->get_ortho_params();
-			camera_ortho_node.append_attribute("left").set_value(ortho_params.x);
-			camera_ortho_node.append_attribute("right").set_value(ortho_params.y);
-			camera_ortho_node.append_attribute("top").set_value(ortho_params.z);
-			camera_ortho_node.append_attribute("bottom").set_value(ortho_params.w);
-			camera_ortho_node.append_attribute("nearZ").set_value(camera_->get_near_z());
-			camera_ortho_node.append_attribute("farZ").set_value(camera_->get_far_z());
+			// Add cameras
+			pugi::xml_node camera_node = cameras_node.append_child("camera");
+			camera_node.append_attribute("name").set_value("Main Camera");
+			camera_node.append_attribute("projection").set_value("perspective");
+			pugi::xml_node camera_prop_node = camera_node.append_child("properties");
+			pugi::xml_node camera_prop_pos_node = camera_prop_node.append_child("position");
+			const glm::vec3 camera_pos = camera_->get_position();
+			camera_prop_pos_node.append_attribute("x").set_value(camera_pos.x);
+			camera_prop_pos_node.append_attribute("y").set_value(camera_pos.y);
+			camera_prop_pos_node.append_attribute("z").set_value(camera_pos.z);
+			pugi::xml_node camera_prop_target_node = camera_prop_node.append_child("target");
+			const glm::vec3 camera_target = camera_->get_target();
+			camera_prop_target_node.append_attribute("x").set_value(camera_target.x);
+			camera_prop_target_node.append_attribute("y").set_value(camera_target.y);
+			camera_prop_target_node.append_attribute("z").set_value(camera_target.z);
+			pugi::xml_node camera_prop_up_node = camera_prop_node.append_child("up");
+			const glm::vec3 camera_up = camera_->get_up_vector();
+			camera_prop_up_node.append_attribute("x").set_value(camera_up.x);
+			camera_prop_up_node.append_attribute("y").set_value(camera_up.y);
+			camera_prop_up_node.append_attribute("z").set_value(camera_up.z);
+			pugi::xml_node camera_rotation_node = camera_prop_node.append_child("rotation");
+			camera_rotation_node.append_attribute("yaw").set_value(camera_->get_yaw());
+			camera_rotation_node.append_attribute("pitch").set_value(camera_->get_pitch());
+			if(camera_->get_projection() == hmk::CameraProjection::Perspective)
+			{
+				pugi::xml_node camera_persp_node = camera_node.append_child("perspective");
+				camera_persp_node.append_attribute("fov").set_value(camera_->get_fov());
+				camera_persp_node.append_attribute("nearZ").set_value(camera_->get_near_z());
+				camera_persp_node.append_attribute("farZ").set_value(camera_->get_far_z());
+			}
+			else
+			{
+				pugi::xml_node camera_ortho_node = camera_node.append_child("orthographic");
+				const glm::vec4 ortho_params = camera_->get_ortho_params();
+				camera_ortho_node.append_attribute("left").set_value(ortho_params.x);
+				camera_ortho_node.append_attribute("right").set_value(ortho_params.y);
+				camera_ortho_node.append_attribute("top").set_value(ortho_params.z);
+				camera_ortho_node.append_attribute("bottom").set_value(ortho_params.w);
+				camera_ortho_node.append_attribute("nearZ").set_value(camera_->get_near_z());
+				camera_ortho_node.append_attribute("farZ").set_value(camera_->get_far_z());
+			}
 		}
 		// Atmosphere things
 		pugi::xml_node atmosphere_node = scene_node.append_child("atmosphere");
@@ -355,7 +361,7 @@ void Game::cursor_pos_input(double xPos, double yPos)
 	cursor_state_.last_position_ = glm::vec2(xPos, yPos);
 
 	if(mouse_right_pressed_)
-		camera_->rotate((float)xOffset, (float)yOffset);
+		cameras_[0]->rotate((float)xOffset, (float)yOffset);
 
 	if(mouse_left_pressed_)
 	{

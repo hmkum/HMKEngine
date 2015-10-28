@@ -36,7 +36,7 @@ private:
 	int selected_model_index;
 	hmk::SkyboxPtr skybox_;
 	hmk::ShaderProgram shader_basic_, shader_skybox_, shader_simple_depth_, shader_picking_with_mouse_, shader_post_process_;
-	hmk::CameraPtr camera_;
+	std::vector<hmk::CameraPtr> cameras_;
     hmk::ShadowMapPtr shadow_map_;
     hmk::PostProcessPtr post_process_system_;
 	glm::vec3 light_position_;

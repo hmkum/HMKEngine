@@ -1,14 +1,16 @@
 <?xml version="1.0"?>
 <scene name="default">
-	<camera name="Main Camera" projection="perspective">
-		<properties>
-			<position x="-14.247282" y="12.6809702" z="17.9987125" />
-			<target x="0.590972543" y="-0.414693236" z="-0.69194001" />
-			<up x="0.26932171" y="0.909961343" z="-0.315335244" />
-			<rotation yaw="-198" pitch="-98" />
-		</properties>
-		<perspective fov="120" nearZ="0.100000001" farZ="100" />
-	</camera>
+	<cameras>
+		<camera name="Main Camera" projection="perspective">
+			<properties>
+				<position x="-14.247282" y="12.6809702" z="17.9987125" />
+				<target x="0.590972543" y="-0.414693236" z="-0.69194001" />
+				<up x="0.26932171" y="0.909961343" z="-0.315335244" />
+				<rotation yaw="-198" pitch="-98" />
+			</properties>
+			<perspective fov="120" nearZ="0.100000001" farZ="100" />
+		</camera>
+	</cameras>
 	<atmosphere>
 		<skybox folder="Bridge" />
 		<fog method="linear" density="0.2" start="5" end="100" />

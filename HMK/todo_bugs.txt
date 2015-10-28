@@ -3,7 +3,6 @@ To-Do
 - scene.xml'e postprocessing efektlerini ekle.
 - Fog ekle.
 - Light sistemini ekle(Point, ..).
-- scene.xml dosyasina çoklu kamera sistemini ekle.
 - scene.xml dosyasina isik sistemini de ekle.
 - GUI sistemini duzenle. In-game gui: ImGui, Editor için Qt.
 - Parent-child sistemini ekle(Base class: Entity, GameObject, Node. Hangisi?).
@@ -37,3 +36,4 @@ Done
 - [Fixed]GUI arkasinda model varsa Picking o modeli seciyor. GUI event deaktif oluyor.
 - [Added]Screenshot almayý ekle.
 - [Fixed]Scene.xml'den kamera okunduktan sonra camera kaydedildiði yöne doðru bakmýyor.
+- [Added]scene.xml dosyasina çoklu kamera sistemini ekle.

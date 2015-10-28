@@ -53,7 +53,7 @@ struct ModelData
 struct SceneData
 {
 	std::string name_;
-	CameraData camera_;
+	std::vector<CameraData> cameras_;
 	AtmosphereData atmosphere_;
 	std::vector<ModelData> models_;
 };
