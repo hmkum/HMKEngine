@@ -72,7 +72,7 @@ bool Game::initialize()
 	for(const auto& model : scene_data.models_)
 	{
 		HMK_PRINT("Loading model: " + model.file_);
-		hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
+		hmk::ModelSPtr temp_model = std::make_shared<hmk::Model>();
 		if(!temp_model->load(model.file_))
 		{
 			HMK_LOG_WARNING("Could not load " + model.file_);

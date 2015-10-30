@@ -1,4 +1,5 @@
 To-Do
+- Hieararchy penceresi oluþtur ve scene.xml parse edildikten sonra bu pencerede Entity'leri göster. 
 - scene.xml'e postprocessing efektlerini ekle.
 - Fog ekle.
 - Light sistemini ekle(Point, ..).

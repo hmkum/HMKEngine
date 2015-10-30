@@ -183,47 +183,89 @@ void Model::render(ShaderProgram &shader)
 
 void Model::set_position(glm::vec3 pos)
 {
+	glm::vec3 diff = position_vec_ - pos;
 	position_vec_ = pos;
+	for(unsigned int i = 0; i < children_.size(); ++i)
+	{
+		std::shared_ptr<Model>& child = std::dynamic_pointer_cast<Model>(children_[i]);
+		child->set_position(child->get_position() - diff);
+	}
 	update_model_matrix();
 }
 
 void Model::offset_position(glm::vec3 offset)
 {
+	// TODO_HMK: Child offset position test et
+	glm::vec3 diff = position_vec_ - offset;
 	position_vec_ += offset;
+	for(unsigned int i = 0; i < children_.size(); ++i)
+	{
+		std::shared_ptr<Model>& child = std::dynamic_pointer_cast<Model>(children_[i]);
+		child->offset_position(-diff);
+	}
 	update_model_matrix();
 }
 
 void Model::set_rotation(float _x, float _y, float _z)
 {
-	rotation_vec_ = glm::vec3(_x, _y, _z);
-	update_model_matrix();
+	set_rotation(glm::vec3(_x, _y, _z));
 }
 
 void Model::set_rotation(glm::vec3 rot)
 {
-	set_rotation(rot.x, rot.y, rot.z);
+	rotation_vec_ = rot;
+	for(unsigned int i = 0; i < children_.size(); ++i)
+	{
+		std::shared_ptr<Model>& child = std::dynamic_pointer_cast<Model>(children_[i]);
+		glm::vec3 diff_pos = position_vec_ - child->get_position();
+		child->offset_position(-diff_pos);
+		child->set_rotation(rot);
+		child->offset_position(diff_pos);
+	}
+	update_model_matrix();
 }
 
 void Model::offset_rotation(float _x, float _y, float _z)
 {
-	rotation_vec_ += glm::vec3(_x, _y, _z);
-	update_model_matrix();
+	offset_rotation(glm::vec3(_x, _y, _z));
 }
 
 void Model::offset_rotation(glm::vec3 rot)
 {
-	offset_rotation(rot.x, rot.y, rot.z);
+	glm::vec3 diff = rotation_vec_ - rot;
+	rotation_vec_ += rot;
+	for(unsigned int i = 0; i < children_.size(); ++i)
+	{
+		std::shared_ptr<Model>& child = std::dynamic_pointer_cast<Model>(children_[i]);
+		child->set_position(position_vec_);
+		child->offset_rotation(rot);
+		child->set_position(-position_vec_);
+	}
+	update_model_matrix();
 }
 
 void Model::set_scale(glm::vec3 scale)
 {
+	glm::vec3 diff = scale_vec_ - scale;
 	scale_vec_ = scale;
+	for(unsigned int i = 0; i < children_.size(); ++i)
+	{
+		std::shared_ptr<Model>& child = std::dynamic_pointer_cast<Model>(children_[i]);
+		child->set_scale(child->get_scale() - diff);
+	}
 	update_model_matrix();
 }
 
 void Model::offset_scale(glm::vec3 offset)
 {
+	// TODO_HMK: Child offset scale test et
+	glm::vec3 diff = scale_vec_ - offset;
 	scale_vec_ += offset;
+	for(unsigned int i = 0; i < children_.size(); ++i)
+	{
+		std::shared_ptr<Model>& child = std::dynamic_pointer_cast<Model>(children_[i]);
+		child->offset_scale(-diff);
+	}
 	update_model_matrix();
 }
 

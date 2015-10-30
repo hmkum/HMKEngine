@@ -17,15 +17,15 @@ public:
 	virtual void set_parent(const std::shared_ptr<Entity> p);
 	virtual std::shared_ptr<Entity> get_parent() const;
 
-	virtual bool add_child(Entity* c);
-	virtual Entity* get_child(std::string name) const;
-	virtual std::vector<Entity*> get_children() const;
+	virtual bool add_child(std::shared_ptr<Entity> c);
+	virtual std::shared_ptr<Entity> get_child(std::string name) const;
+	virtual std::vector<std::shared_ptr<Entity>> get_children() const;
 
 	virtual bool has_child() const;
 
-private:
+protected:
 	std::string name_;
 	std::shared_ptr<Entity> parent_;
-	std::vector<Entity*> children_;
+	std::vector<std::shared_ptr<Entity>> children_;
 };
 }
