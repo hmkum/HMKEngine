@@ -5,7 +5,7 @@ To-Do
 - Light sistemini ekle(Point, ..).
 - scene.xml dosyasina isik sistemini de ekle.
 - GUI sistemini duzenle. In-game gui: ImGui, Editor için Qt.
-- Parent-child sistemini ekle(Base class: Entity, GameObject, Node. Hangisi?).
+- Parent-child sistemini ekle(Base class: Entity, GameObject, Node. Hangisi?). Bu sistem scene.xml'e de eklenecek.
 - Scene sistemini ekle. Scene'e model ekleme. Scene deðiþimi.
 - Bump map ekle.
 - Fizik sistemini ekle.
