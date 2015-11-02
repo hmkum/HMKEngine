@@ -127,10 +127,10 @@ void PostProcess::end()
 	last_color_map_ = default_.get_color_map();
 }
 
-void PostProcess::render(ShaderProgram &shader)
+void PostProcess::render(ShaderProgramSPtr shader)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	shader.use();
+	shader->use();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, last_color_map_);
 	glBindVertexArray(vao_id_);

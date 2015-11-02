@@ -26,5 +26,7 @@ private:
 	GLuint vao_id_, vbo_id_;
 };
 
-typedef std::shared_ptr<Skybox> SkyboxPtr;
+using SkyboxPtr = std::shared_ptr<Skybox>; // TODO_HMK: Delete this
+using SkyboxSPtr = std::shared_ptr<Skybox>;
+using SkyboxUPtr = std::unique_ptr<Skybox>;
 }

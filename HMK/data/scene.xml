@@ -3,7 +3,7 @@
 	<cameras>
 		<camera name="Main Camera" projection="perspective">
 			<properties>
-				<position x="-7.51831675" y="6.30508471" z="9.55539227" />
+				<position x="-7.77510738" y="6.43002272" z="9.92555332" />
 				<target x="0.549266279" y="-0.267238408" z="-0.791764081" />
 				<up x="0.152325019" y="0.963630438" z="-0.219575584" />
 				<rotation yaw="-221" pitch="-62" />
@@ -54,7 +54,7 @@
 			<metalness value="0" />
 		</material>
 		<transform>
-			<position x="-1.60000002" y="2.80000019" z="-3.30000019" />
+			<position x="-0.300000012" y="2.80000019" z="-3.30000019" />
 			<rotation x="0" y="0" z="0" />
 			<scale x="1" y="1" z="1" />
 		</transform>

@@ -85,7 +85,7 @@ void Mesh::render()
 	glBindVertexArray(0);
 }
 
-void Mesh::render(ShaderProgram &shader)
+void Mesh::render(ShaderProgramSPtr shader)
 {
 	glBindVertexArray(vao_id_);
 	
@@ -94,8 +94,8 @@ void Mesh::render(ShaderProgram &shader)
 		texture->bind((unsigned int)texture->get_texture_type());
 	}
 	
-	shader.set_uniform("uHasTextures", material_.has_textures_);
-	shader.set_uniform("uMaterial", material_uniform_);
+	shader->set_uniform("uHasTextures", material_.has_textures_);
+	shader->set_uniform("uMaterial", material_uniform_);
 	glDrawElements(GL_TRIANGLES, indices_size_, GL_UNSIGNED_INT, 0);
 
 	for(const auto& texture : textures_)

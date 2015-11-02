@@ -63,5 +63,7 @@ private:
 	float movement_speed_;
 };
 
-typedef std::shared_ptr<Camera> CameraPtr;
+using CameraPtr = std::shared_ptr<Camera>; // TODO_HMK: Delete this.
+using CameraSPtr = std::shared_ptr<Camera>;
+using CameraUPtr = std::unique_ptr<Camera>;
 }

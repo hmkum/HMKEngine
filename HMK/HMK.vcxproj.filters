@@ -88,6 +88,9 @@
     <ClCompile Include="external\stb\stb_image_write.c">
       <Filter>external</Filter>
     </ClCompile>
+    <ClCompile Include="src\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -159,6 +162,7 @@
     <ClInclude Include="src\Entity.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\default.frag">

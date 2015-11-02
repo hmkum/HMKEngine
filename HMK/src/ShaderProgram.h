@@ -1,12 +1,15 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <memory>
 #include <vector>
 #include "Shader.h"
 #include "Material.h"
 
 namespace hmk
 {
+enum class Shaders {Default, Skybox, SimpleDepth, PostProcess};
+
 class ShaderProgram
 {
 public:
@@ -33,4 +36,7 @@ private:
     std::vector<Shader> shaders_;
 	std::string shader_names_[2];
 };
+
+using ShaderProgramSPtr = std::shared_ptr<ShaderProgram>;
+using ShaderProgramUPtr = std::unique_ptr<ShaderProgram>;
 }

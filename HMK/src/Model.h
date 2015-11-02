@@ -25,7 +25,7 @@ public:
 
 	bool load(std::string modelName);
 	void render();
-	void render(ShaderProgram &shader);
+	void render(ShaderProgramSPtr shader);
 
 	void draw_bounding_box(bool draw);
 

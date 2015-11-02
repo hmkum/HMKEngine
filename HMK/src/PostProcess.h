@@ -1,13 +1,14 @@
 #pragma once
 #include <GL/gl3w.h>
 #include <memory>
+#include "AlignedAllocation.h"
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "DrawableTexture.h"
 
 namespace hmk
 {
-class PostProcess
+class PostProcess : public AlignedAllocation<16>
 {
 public:
 	PostProcess();
@@ -16,7 +17,7 @@ public:
 	bool initialize();
 	void begin();
 	void end();
-	void render(ShaderProgram &shader);
+	void render(ShaderProgramSPtr shader);
 
 	void do_monochrome();
 	void do_hdr(float exposure = 1.0f, bool isBloomActive = true);
@@ -43,5 +44,7 @@ private:
 	float gui_bloom_intensity_;
 };
 
-typedef std::shared_ptr<PostProcess> PostProcessPtr;
+using PostProcessPtr = std::shared_ptr<PostProcess>;
+using PostProcessSPtr = std::shared_ptr<PostProcess>;
+using PostProcessUPtr = std::unique_ptr<PostProcess>;
 }

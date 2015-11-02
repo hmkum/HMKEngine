@@ -28,4 +28,7 @@ protected:
 	std::shared_ptr<Entity> parent_;
 	std::vector<std::shared_ptr<Entity>> children_;
 };
+
+using EntitySPtr = std::shared_ptr<Entity>;
+using EntityUPtr = std::unique_ptr<Entity>;
 }

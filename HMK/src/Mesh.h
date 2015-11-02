@@ -26,7 +26,7 @@ public:
 	~Mesh();
 
 	void render();
-	void render(ShaderProgram &shader);
+	void render(ShaderProgramSPtr shader);
 
 	void set_roughness(float r);
 	void set_metallic(float m);

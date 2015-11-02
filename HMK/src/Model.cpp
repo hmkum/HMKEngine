@@ -167,7 +167,7 @@ void Model::render()
 	}
 }
 
-void Model::render(ShaderProgram &shader)
+void Model::render(ShaderProgramSPtr shader)
 {
 	if(draw_bounding_box_)
 	{
