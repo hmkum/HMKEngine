@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<scene name="default2">
+	<cameras>
+		<camera name="Main Camera" projection="perspective">
+			<properties>
+				<position x="7.77510738" y="6.43002272" z="9.92555332" />
+				<target x="0.549266279" y="-0.267238408" z="-0.791764081" />
+				<up x="0.152325019" y="0.963630438" z="-0.219575584" />
+				<rotation yaw="-131" pitch="-62" />
+			</properties>
+			<perspective fov="120" nearZ="0.100000001" farZ="100" />
+		</camera>
+	</cameras>
+	<atmosphere>
+		<skybox folder="Bridge" />
+		<fog method="linear" density="0.2" start="5" end="100" />
+	</atmosphere>
+	<model file="plane.obj" name="Plane">
+		<material>
+			<roughness value="0" />
+			<metalness value="0" />
+		</material>
+		<transform>
+			<position x="0" y="0" z="0" />
+			<rotation x="0" y="-0" z="0" />
+			<scale x="10" y="10" z="10" />
+		</transform>
+	</model>
+	<model file="sphere.obj" name="Sphere">
+		<material>
+			<roughness value="0" />
+			<metalness value="1" />
+		</material>
+		<transform>
+			<position x="0" y="1.10000002" z="0" />
+			<rotation x="0" y="0" z="0" />
+			<scale x="1" y="1" z="1" />
+		</transform>
+	</model>
+	<model file="sphere.obj" name="Sphere2">
+		<material>
+			<roughness value="0" />
+			<metalness value="0" />
+		</material>
+		<transform>
+			<position x="-3" y="1.11000001" z="0" />
+			<rotation x="0" y="0" z="0" />
+			<scale x="1" y="1" z="1" />
+		</transform>
+	</model>
+</scene>

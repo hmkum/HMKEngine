@@ -44,7 +44,6 @@ private:
 	float gui_bloom_intensity_;
 };
 
-using PostProcessPtr = std::shared_ptr<PostProcess>;
 using PostProcessSPtr = std::shared_ptr<PostProcess>;
 using PostProcessUPtr = std::unique_ptr<PostProcess>;
 }

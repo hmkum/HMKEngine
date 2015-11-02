@@ -1,15 +1,14 @@
-#include "Game.h"
-#include <imgui/imgui.h>
-#include <pugixml/pugixml.hpp>
 #include <filesystem> // C++17
 #include <set>
+#include "Game.h"
+#include "Keys.h"
 #include "KeyManager.h"
-#include "SceneParser.h"
 #include "ShaderManager.h"
 #include "Utility.h"
 
 Game::Game()
 {
+	current_scene_index_ = -1;
 }
 
 Game::~Game()
@@ -21,64 +20,37 @@ bool Game::initialize()
 	//compile_and_link_all_shaders();
 
 	std::unique_ptr<hmk::Scene> scene = std::make_unique<hmk::Scene>();
-	scene->initialize();
-
-	std::string scene_parse_result = hmk::SceneParser::parse("data/scene.xml");
-	if(scene_parse_result != "")
+	std::string result = scene->initialize("data/scene.xml");
+	if(result != "")
 	{
-		HMK_LOG_ERROR("Could not parse scene.xml. Error: ", scene_parse_result)
+		HMK_PRINT("Scene parse error: ", result);
+		HMK_LOG_ERROR("Scene parse error: ", result);
 		return false;
 	}
-	hmk::SceneData scene_data = hmk::SceneParser::get_data();
-	for(const auto camera_data : scene_data.cameras_)
-	{
-		auto camera = std::make_shared<hmk::Camera>();
-		camera->create_look_at(camera_data.position_);
-		if(camera_data.projection_ == "perspective")
-			camera->create_perspective_proj(camera_data.fov_, camera_data.near_z_, camera_data.far_z_);
-		else
-			camera->create_orthographic_proj(camera_data.ortho_params_, camera_data.near_z_, camera_data.far_z_);
-
-		camera->rotate(camera_data.yaw_ + 90.f * 4, camera_data.pitch_);
-		scene->add_camera(camera);
-	}
-
-	for(const auto& model : scene_data.models_)
-	{
-		HMK_PRINT("Loading model: " + model.file_);
-		hmk::ModelSPtr temp_model = std::make_shared<hmk::Model>();
-		if(!temp_model->load(model.file_))
-		{
-			HMK_LOG_WARNING("Could not load " + model.file_);
-			HMK_PRINT("Could not load " + model.file_);
-			continue;
-		}
-		temp_model->set_name(model.name_);
-		temp_model->set_roughness(model.material_.roughness_value_);
-		temp_model->set_metallic(model.material_.metalness_value_);
-		temp_model->set_position(glm::vec3(model.transform_.pos_x_, model.transform_.pos_y_, model.transform_.pos_z_));
-		temp_model->set_rotation(model.transform_.rot_x_, model.transform_.rot_y_, model.transform_.rot_z_);
-		temp_model->set_scale(glm::vec3(model.transform_.scale_x_, model.transform_.scale_y_, model.transform_.scale_z_));
-		scene->add_entity(temp_model);
-		HMK_PRINT("Done: " + model.file_);
-	}
-
-	std::unique_ptr<hmk::Skybox> skybox_ = std::make_unique<hmk::Skybox>();
-	skybox_->load(scene_data.atmosphere_.skybox_folder_);
-	scene->set_skybox(std::move(skybox_));
-
+	current_scene_index_ = 0;
 	scenes_.emplace_back(std::move(scene));
+
+	scene = std::make_unique<hmk::Scene>();
+	result = scene->initialize("data/scene2.xml");
+	if(result != "")
+	{
+		HMK_PRINT("Scene parse error: ", result);
+		HMK_LOG_ERROR("Scene parse error: ", result);
+		return false;
+	}
+	scenes_.emplace_back(std::move(scene));
+
 	return true;
 }
 
 void Game::update(float dt)
 {
-	scenes_[0]->update(dt);
+	scenes_[current_scene_index_]->update(dt);
 }
 
 void Game::render()
 {	
-	scenes_[0]->render();
+	scenes_[current_scene_index_]->render();
 }
 
 void Game::key_input(int key, int scancode, int action, int mods)
@@ -89,7 +61,18 @@ void Game::key_input(int key, int scancode, int action, int mods)
 		exit(1);
 	}
 
-	scenes_[0]->key_input(key, scancode, action, mods);
+	if(key == HMK_KEY_KP_ADD && mods == HMK_MOD_CONTROL)
+	{
+		HMK_PRINT("Index: 1");
+		current_scene_index_ = 1;
+	}
+	if(key == HMK_KEY_KP_SUBTRACT && mods == HMK_MOD_CONTROL)
+	{
+		HMK_PRINT("Index: 0");
+		current_scene_index_ = 0;
+	}
+
+	scenes_[current_scene_index_]->key_input(key, scancode, action, mods);
 }
 
 void Game::cursor_pos_input(double xPos, double yPos)
@@ -104,12 +87,12 @@ void Game::cursor_pos_input(double xPos, double yPos)
 	double yOffset = cursor_state_.last_position_.y - yPos;
 	cursor_state_.last_position_ = glm::vec2(xPos, yPos);
 	
-	scenes_[0]->cursor_pos_input(xPos, yPos, (float)xOffset, (float)yOffset);
+	scenes_[current_scene_index_]->cursor_pos_input(xPos, yPos, (float)xOffset, (float)yOffset);
 }
 
 void Game::mouse_button_input(int button, int action, int mods)
 {
-	scenes_[0]->mouse_button_input(button, action, mods);
+	scenes_[current_scene_index_]->mouse_button_input(button, action, mods);
 }
 
 void Game::drop_files_callback(int number_of_files, const char** filenames)
@@ -142,17 +125,17 @@ void Game::drop_files_callback(int number_of_files, const char** filenames)
 		HMK_PRINT("Done " + filename);
 	}
 
-	/*for(unsigned int i = 0; i < model_names.size(); ++i)
+	for(unsigned int i = 0; i < model_names.size(); ++i)
 	{
 		filename = model_names[i];
 		HMK_PRINT("Loading " + filename);
-		hmk::ModelUPtr temp_model = std::make_unique<hmk::Model>();
+		hmk::ModelSPtr temp_model = std::make_shared<hmk::Model>();
 		temp_model->load(filename);
 		temp_model->set_name(file_proper_name);
 		temp_model->set_position(glm::vec3(0.0f));
-		scene_models.emplace_back(std::move(temp_model));
+		scenes_[current_scene_index_]->add_entity(temp_model);
 		HMK_PRINT("Done " + filename);
-	}*/
+	}
 }
 
 bool Game::compile_and_link_all_shaders()
@@ -185,7 +168,6 @@ bool Game::compile_and_link_all_shaders()
 	shader_names.assign(std::begin(shader_names_set), std::cend(shader_names_set));
 	post_process_shader_names.assign(std::begin(post_process_shader_names_set), std::cend(post_process_shader_names_set));
 	
-	bool result = true;
 	for(unsigned int i = 0; i < shader_names.size(); ++i)
 	{
 		std::string shader_name = shader_names[i];

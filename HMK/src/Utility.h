@@ -7,6 +7,9 @@
 #include "Logger.h"
 #include "Debug.h"
 
+// Smart pointerlarý parenttan childa cast etmek için gerekli makro
+#define DYN_PTR_CAST(type, object) std::dynamic_pointer_cast<Model>(object)
+
 #define SAFE_RELEASE(v) {if(v != nullptr) {delete v; v = nullptr;}}
 
 #define HMK_LOG_WRITE(...)   {hmk::Logger::get_instance().write("<DEBUG>   ", "", ##__VA_ARGS__, "\n");}

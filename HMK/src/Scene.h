@@ -11,6 +11,7 @@
 #include "ShaderProgram.h"
 #include "ShadowMap.h"
 #include "Skybox.h"
+
 namespace hmk
 {
 class Scene : public AlignedAllocation<16>
@@ -19,7 +20,7 @@ public:
 	Scene();
 	~Scene();
 
-	std::string initialize();
+	std::string initialize(std::string scene_file);
 
 	void add_entity(EntitySPtr entity);
 	void add_camera(CameraSPtr camera);
@@ -35,6 +36,7 @@ private:
 	void process_selection(int x, int y);
 
 private:
+	std::string name_;
 	std::vector<EntitySPtr> entities_;
 	std::vector<CameraSPtr> cameras_;
 	SkyboxUPtr skybox_;

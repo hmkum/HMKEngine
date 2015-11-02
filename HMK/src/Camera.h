@@ -35,6 +35,7 @@ public:
 	inline CameraProjection get_projection() const { return camera_projection_; }
 	inline float get_pitch()			const { return pitch_ / sensitivity_; }
 	inline float get_yaw()				const { return yaw_ / sensitivity_; }
+	inline float get_sensitivity()		const { return sensitivity_; }
 
 	void move_forward(float dt);
 	void move_backward(float dt);
@@ -63,7 +64,6 @@ private:
 	float movement_speed_;
 };
 
-using CameraPtr = std::shared_ptr<Camera>; // TODO_HMK: Delete this.
 using CameraSPtr = std::shared_ptr<Camera>;
 using CameraUPtr = std::unique_ptr<Camera>;
 }

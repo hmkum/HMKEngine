@@ -4,10 +4,14 @@
 #include "Keys.h"
 #include "Ray.h"
 #include "Scene.h"
+#include "SceneParser.h"
+#include "Utility.h"
+
 using namespace hmk;
 
 Scene::Scene()
 {
+	name_ = "";
 	current_camera_index_ = 0;
 	selected_model_index_ = -1;
 	gui_is_shadow_active_ = true;
@@ -26,8 +30,53 @@ Scene::~Scene()
 {
 }
 
-std::string Scene::initialize()
+std::string Scene::initialize(std::string scene_file)
 {
+	std::string scene_parse_result = SceneParser::parse(scene_file);
+	if(scene_parse_result != "")
+	{
+		HMK_LOG_ERROR("Could not parse scene.xml. Error: ", scene_parse_result)
+		return scene_parse_result;
+	}
+	hmk::SceneData scene_data = hmk::SceneParser::get_data();
+	name_ = scene_data.name_;
+
+	for(const auto camera_data : scene_data.cameras_)
+	{
+		auto camera = std::make_shared<hmk::Camera>();
+		camera->create_look_at(camera_data.position_);
+		if(camera_data.projection_ == "perspective")
+			camera->create_perspective_proj(camera_data.fov_, camera_data.near_z_, camera_data.far_z_);
+		else
+			camera->create_orthographic_proj(camera_data.ortho_params_, camera_data.near_z_, camera_data.far_z_);
+
+		camera->rotate(camera_data.yaw_ + 90.f * 4, camera_data.pitch_);
+		add_camera(camera);
+	}
+
+	for(const auto& model : scene_data.models_)
+	{
+		HMK_PRINT("Loading model: " + model.file_);
+		hmk::ModelSPtr temp_model = std::make_shared<hmk::Model>();
+		if(!temp_model->load(model.file_))
+		{
+			HMK_LOG_WARNING("Could not load " + model.file_);
+			HMK_PRINT("Could not load " + model.file_);
+			continue;
+		}
+		temp_model->set_name(model.name_);
+		temp_model->set_roughness(model.material_.roughness_value_);
+		temp_model->set_metallic(model.material_.metalness_value_);
+		temp_model->set_position(glm::vec3(model.transform_.pos_x_, model.transform_.pos_y_, model.transform_.pos_z_));
+		temp_model->set_rotation(model.transform_.rot_x_, model.transform_.rot_y_, model.transform_.rot_z_);
+		temp_model->set_scale(glm::vec3(model.transform_.scale_x_, model.transform_.scale_y_, model.transform_.scale_z_));
+		add_entity(temp_model);
+		HMK_PRINT("Done: " + model.file_);
+	}
+
+	skybox_ = std::make_unique<hmk::Skybox>();
+	skybox_->load(scene_data.atmosphere_.skybox_folder_);
+
 	shadow_map_ = std::make_unique<ShadowMap>();
 	if(shadow_map_->initialize(2048, 2048) == false)
 	{
@@ -99,29 +148,30 @@ void Scene::update(float dt)
 	{
 		if(ImGui::CollapsingHeader("Entity Properties"))
 		{
-			r = std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->get_roughness();
-			m = std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->get_metallic();
-			selected_model_position_ = std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->get_position();
-			selected_model_rotation_ = std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->get_rotation();
-			selected_model_scale_    = std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->get_scale();
+			auto entity = entities_[selected_model_index_];
+			r = DYN_PTR_CAST(Model, entity)->get_roughness();
+			m = DYN_PTR_CAST(Model, entity)->get_metallic();
+			selected_model_position_ = DYN_PTR_CAST(Model, entity)->get_position();
+			selected_model_rotation_ = DYN_PTR_CAST(Model, entity)->get_rotation();
+			selected_model_scale_	 = DYN_PTR_CAST(Model, entity)->get_scale();
 
-			std::string name = std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->get_name();
+			std::string name = DYN_PTR_CAST(Model, entity)->get_name();
 			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), name.c_str());
 			if(ImGui::SliderFloat("Roughness", &r, 0.0f, 1.0f))
-				std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->set_roughness(r);
+				DYN_PTR_CAST(Model, entity)->set_roughness(r);
 			if(ImGui::SliderFloat("Metallic", &m, 0.0f, 1.0f))
-				std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->set_metallic(m);
+				DYN_PTR_CAST(Model, entity)->set_metallic(m);
 
 			ImGui::Separator();
 
 			if(ImGui::DragFloat3("Position", (float*)&selected_model_position_.x, 0.1f))
-				std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->set_position(selected_model_position_);
+				DYN_PTR_CAST(Model, entity)->set_position(selected_model_position_);
 
 			if(ImGui::DragFloat3("Rotation", (float*)&selected_model_rotation_.x, 0.1f))
-				std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->set_rotation(selected_model_rotation_);
+				DYN_PTR_CAST(Model, entity)->set_rotation(selected_model_rotation_);
 
 			if(ImGui::DragFloat3("Scale", (float*)&selected_model_scale_.x, 0.1f))
-				std::dynamic_pointer_cast<Model>(entities_[selected_model_index_])->set_scale(selected_model_scale_);
+				DYN_PTR_CAST(Model, entity)->set_scale(selected_model_scale_);
 		}
 	}
 	ImGui::End();
@@ -143,7 +193,7 @@ void Scene::render()
 
 		for(size_t i = 0; i < entities_.size(); ++i)
 		{
-			const std::shared_ptr<Model> model = std::dynamic_pointer_cast<Model>(entities_[i]);
+			const auto model = DYN_PTR_CAST(Model, entities_[i]);
 			shaders_[(int)Shaders::SimpleDepth]->set_uniform("uModel", model->get_model_matrix());
 			model->render();
 		}
@@ -278,7 +328,7 @@ void Scene::key_input(int key, int scancode, int action, int mods)
 		// Add models
 		for(size_t i = 0; i < entities_.size(); ++i)
 		{
-			ModelSPtr model = std::dynamic_pointer_cast<Model>(entities_[i]);
+			ModelSPtr model = DYN_PTR_CAST(Model, entities_[i]);
 			pugi::xml_node model_node = scene_node.append_child("model");
 			model_node.append_attribute("file").set_value(model->get_filename().c_str());
 			model_node.append_attribute("name").set_value(model->get_name().c_str());

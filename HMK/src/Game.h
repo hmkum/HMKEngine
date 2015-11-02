@@ -3,15 +3,8 @@
 #include <memory>
 #include <vector>
 #include "AlignedAllocation.h"
-#include "BoundingBox.h"
 #include "Camera.h"
-#include "Keys.h"
-#include "Model.h"
 #include "Scene.h"
-#include "Skybox.h"
-#include "ShadowMap.h"
-#include "PostProcess.h"
-#include "Ray.h"
 
 class Game : public AlignedAllocation<16>
 {
@@ -33,6 +26,7 @@ private:
 
 private:
 	std::vector<std::unique_ptr<hmk::Scene>> scenes_;
+	int current_scene_index_;
 
 private:
 	struct CursorState_t

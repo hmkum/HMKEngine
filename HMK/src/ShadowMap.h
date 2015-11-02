@@ -23,7 +23,6 @@ private:
 
 };
 
-using ShadowMapPtr = std::shared_ptr<ShadowMap>; // TODO_HMK: Delete this
 using ShadowMapSPtr = std::shared_ptr<ShadowMap>;
 using ShadowMapUPtr = std::unique_ptr<ShadowMap>;
 }
