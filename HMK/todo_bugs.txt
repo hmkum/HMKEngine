@@ -6,7 +6,6 @@ To-Do
 - scene.xml dosyasina isik sistemini de ekle.
 - GUI sistemini duzenle. In-game gui: ImGui, Editor için Qt.
 - Parent-child sistemini ekle(Base class: Entity, GameObject, Node. Hangisi?). Bu sistem scene.xml'e de eklenecek.
-- Scene sistemini ekle. Scene'e model ekleme. Scene deðiþimi.
 - Bump map ekle.
 - Fizik sistemini ekle.
 - Ses sistemini ekle.
@@ -38,3 +37,4 @@ Done
 - [Fixed]Scene.xml'den kamera okunduktan sonra camera kaydedildiði yöne doðru bakmýyor.
 - [Added]scene.xml dosyasina çoklu kamera sistemini ekle.
 - [Added]Sahneden model silmeyi ekle.
+- [Added - Partly]Scene sistemini ekle. Scene'e model ekleme. Scene deðiþimi.

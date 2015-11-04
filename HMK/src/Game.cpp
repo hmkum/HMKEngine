@@ -9,6 +9,7 @@
 Game::Game()
 {
 	current_scene_index_ = -1;
+	scene_rendered_		 = false;
 }
 
 Game::~Game()
@@ -45,12 +46,14 @@ bool Game::initialize()
 
 void Game::update(float dt)
 {
+	scene_rendered_ = false;
 	scenes_[current_scene_index_]->update(dt);
 }
 
 void Game::render()
 {	
 	scenes_[current_scene_index_]->render();
+	scene_rendered_ = true;
 }
 
 void Game::key_input(int key, int scancode, int action, int mods)
@@ -63,13 +66,19 @@ void Game::key_input(int key, int scancode, int action, int mods)
 
 	if(key == HMK_KEY_KP_ADD && mods == HMK_MOD_CONTROL)
 	{
-		HMK_PRINT("Index: 1");
-		current_scene_index_ = 1;
+		if(scene_rendered_)
+		{
+			HMK_PRINT("Index: 1");
+			current_scene_index_ = 1;
+		}
 	}
 	if(key == HMK_KEY_KP_SUBTRACT && mods == HMK_MOD_CONTROL)
 	{
-		HMK_PRINT("Index: 0");
-		current_scene_index_ = 0;
+		if(scene_rendered_)
+		{
+			HMK_PRINT("Index: 0");
+			current_scene_index_ = 0;
+		}
 	}
 
 	scenes_[current_scene_index_]->key_input(key, scancode, action, mods);

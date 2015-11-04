@@ -26,6 +26,7 @@ private:
 
 private:
 	std::vector<std::unique_ptr<hmk::Scene>> scenes_;
+	bool scene_rendered_;
 	int current_scene_index_;
 
 private:
