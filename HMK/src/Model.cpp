@@ -14,7 +14,7 @@ Model::Model()
 	: draw_bounding_box_{false}
 	, position_vec_{0}
 	, rotation_vec_{0}
-	, scale_vec_{0}
+	, scale_vec_{1}
 { }
 
 Model::~Model()

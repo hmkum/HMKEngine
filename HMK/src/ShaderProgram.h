@@ -3,8 +3,9 @@
 #include <glm/glm.hpp>
 #include <memory>
 #include <vector>
-#include "Shader.h"
+#include "Light.h"
 #include "Material.h"
+#include "Shader.h"
 
 namespace hmk
 {
@@ -30,6 +31,7 @@ public:
 	bool set_uniform(std::string name, const glm::mat4 &m);
 
 	bool set_uniform(std::string name, const MaterialUniform &mat);
+	bool set_uniform(std::string name, const LightUniform light[8], int active_light_count);
 
 private:
     GLuint program_id_;
