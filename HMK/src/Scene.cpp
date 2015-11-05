@@ -109,10 +109,10 @@ std::string Scene::initialize(std::string scene_file)
 	shader4->link_shaders();
 	shaders_.push_back(shader4);
 
-	light_position_ = glm::vec3(0, 4, 4);
-	glm::mat4 lightView = glm::lookAt(light_position_, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	light_projection_ = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, -10.0f, 50.0f);
-	light_space_matrix_ = light_projection_ * lightView;
+	sun_ = std::make_shared<DirectionalLight>();
+	sun_->set_position(glm::vec3(0, 4, 4));
+	sun_->set_target(glm::vec3(0, 1, -5));
+	sun_->set_color(glm::vec3(1.f, 0.9762f, 0.86f));
 	
 	return "";
 }
@@ -128,10 +128,12 @@ void Scene::update(float dt)
 	if(hmk::KeyManager::get_key(HMK_KEY_D))
 		cameras_[current_camera_index_]->move_right(dt);
 
+	light_position_ = sun_->get_target();
 	ImGui::Begin("Properties");
 	if(ImGui::CollapsingHeader("World Properties"))
 	{
 		ImGui::DragFloat3("Light Position", (float*)&light_position_.x, 0.1f);
+		sun_->set_target(light_position_);
 		ImGui::Checkbox("Shadows", &gui_is_shadow_active_);
 	}
 	if(ImGui::CollapsingHeader("Post Process Effects"))
@@ -177,9 +179,6 @@ void Scene::update(float dt)
 	ImGui::End();
 
 	is_mouse_on_gui_ = ImGui::IsMouseHoveringAnyWindow();
-
-	glm::mat4 lightView = glm::lookAt(light_position_, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-	light_space_matrix_ = light_projection_ * lightView;
 }
 
 void Scene::render()
@@ -189,7 +188,7 @@ void Scene::render()
 		shadow_map_->bind();
 
 		shaders_[(int)Shaders::SimpleDepth]->use();
-		shaders_[(int)Shaders::SimpleDepth]->set_uniform("uLightSpaceMatrix", light_space_matrix_);
+		shaders_[(int)Shaders::SimpleDepth]->set_uniform("uLightSpaceMatrix", sun_->get_vp_matrix());
 
 		for(size_t i = 0; i < entities_.size(); ++i)
 		{
@@ -231,8 +230,10 @@ void Scene::render()
 		shaders_[(int)Shaders::Default]->set_uniform("uViewMatrix", cameras_[0]->get_view_matrix());
 		shaders_[(int)Shaders::Default]->set_uniform("uProjMatrix", cameras_[0]->get_proj_matrix());
 		shaders_[(int)Shaders::Default]->set_uniform("uCameraPosition", cameras_[0]->get_position());
-		shaders_[(int)Shaders::Default]->set_uniform("uLightPosition", light_position_);
-		shaders_[(int)Shaders::Default]->set_uniform("uLightSpaceMatrix", light_space_matrix_);
+		shaders_[(int)Shaders::Default]->set_uniform("uLightPosition", sun_->get_position());
+		shaders_[(int)Shaders::Default]->set_uniform("uLightTarget", sun_->get_target());
+		shaders_[(int)Shaders::Default]->set_uniform("uLightColor", sun_->get_color());
+		shaders_[(int)Shaders::Default]->set_uniform("uLightSpaceMatrix", sun_->get_vp_matrix());
 
 		for(size_t i = 0; i < entities_.size(); ++i)
 		{

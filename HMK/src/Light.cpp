@@ -54,7 +54,7 @@ void DirectionalLight::set_target(const glm::vec3& target)
 glm::mat4 DirectionalLight::get_vp_matrix() const
 {
 	glm::mat4 view = glm::lookAt(-get_direction(), glm::vec3(0.f), glm::vec3(0, 1, 0));
-	glm::mat4 proj = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, -10.0f, 50.0f); // TODO_HMK: fix for scene size
+	glm::mat4 proj = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, -10.0f, 30.0f); // TODO_HMK: fix for scene size
 	return proj * view;
 }
 

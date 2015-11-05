@@ -43,10 +43,10 @@ private:
 	ShadowMapUPtr shadow_map_;
 	PostProcessUPtr post_process_system_;
 	std::vector<ShaderProgramSPtr> shaders_;
+	std::shared_ptr<DirectionalLight> sun_;
 
 private:
 	glm::vec3 light_position_;
-	glm::mat4 light_projection_, light_space_matrix_;
 
 	int current_camera_index_;
 	int selected_model_index_;

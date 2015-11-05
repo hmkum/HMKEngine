@@ -17,6 +17,8 @@ struct Material
 
 uniform vec3 uCameraPosition;
 uniform vec3 uLightPosition;
+uniform vec3 uLightTarget;
+uniform vec3 uLightColor;
 uniform ivec4 uHasTextures;
 uniform Material uMaterial;
 uniform int uIsShadowMapActive;
@@ -113,7 +115,7 @@ void main()
 	if(uHasTextures.y > 0)
 	{
 		normal = texture(NormalTexture, TexCoord0).rgb;
-		normal = 2.0f * normal - 1.0f;
+		normal = 2.0f * normal - 1.0f; // [0, 1] to [-1, 1]
 		normal = normalize(normal);
 		vec3 T = normalize(Tangent - dot(Tangent, normal) * normal);
 		vec3 B = cross(T, normal);
@@ -121,8 +123,8 @@ void main()
 		normal = normalize(TBN * normal);
 	}
 	
-	vec4 LightColor = vec4(1.0f, 0.9762f, 0.86f, 1.0f);
-	vec3 LightDirection = normalize(uLightPosition - Position);
+	vec4 LightColor = vec4(uLightColor, 1.0f);
+	vec3 LightDirection = -normalize(uLightTarget - uLightPosition);
 	vec3 ViewDirection = normalize((uCameraPosition - Position));
 	vec3 HalfVector = normalize(ViewDirection + LightDirection);	
 
